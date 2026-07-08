@@ -1,0 +1,42 @@
+﻿@model List<RealEstatePortal.Application.Listings.Queries.GetListings.ListingBriefDto>
+@{
+    ViewData["Title"] = "Listings";
+}
+
+<h1>Listings</h1>
+<p><a class="btn btn-primary" asp-action="Create">Create New Listing</a></p>
+
+@if (!Model.Any())
+{
+    <p>No listings yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Property</th>
+                <th>Price</th>
+                <th>Beds</th>
+                <th>Area (m²)</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var listing in Model)
+            {
+                <tr>
+                    <td>@listing.Title</td>
+                    <td>@listing.ListingType</td>
+                    <td>@listing.PropertyType</td>
+                    <td>@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</td>
+                    <td>@listing.Bedrooms</td>
+                    <td>@listing.AreaSqMeters.ToString("N0")</td>
+                    <td>@listing.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
