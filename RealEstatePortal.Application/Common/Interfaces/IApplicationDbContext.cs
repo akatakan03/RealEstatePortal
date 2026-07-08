@@ -1,9 +1,11 @@
-﻿namespace RealEstatePortal.Application.Common.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using RealEstatePortal.Domain.Entities;
+
+namespace RealEstatePortal.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    DbSet<Listing> Listings { get; }
 
-    // DbSet<T> properties will be added here as entities are created, e.g.:
-    // DbSet<Listing> Listings { get; }
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Interfaces;
+using RealEstatePortal.Domain.Entities;
 
 namespace RealEstatePortal.Infrastructure.Data;
 
@@ -12,6 +13,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     }
 
     // DbSet<T> properties will be added here as entities are created.
+    public DbSet<Listing> Listings => Set<Listing>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
