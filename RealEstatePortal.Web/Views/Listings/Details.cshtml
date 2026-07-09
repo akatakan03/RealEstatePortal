@@ -1,21 +1,28 @@
-﻿@model RealEstatePortal.Application.Listings.Queries.GetListingDetail.ListingDetailDto
+﻿@model RealEstatePortal.Web.Models.Listings.ListingDetailViewModel
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model.Listing.Title;
+    var listing = Model.Listing;
 }
 
 <a asp-action="Index" class="btn btn-link px-0">← Back to listings</a>
 
-<h1>@Model.Title</h1>
-<h3 class="text-muted">@Model.PriceAmount.ToString("N0") @Model.PriceCurrency</h3>
-@if (Model.ImageUrls.Any())
+@if (TempData["InquirySuccess"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<h1>@listing.Title</h1>
+<h3 class="text-muted">@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</h3>
+
+@if (listing.ImageUrls.Any())
 {
     <div class="mb-4">
-        <img id="mainImage" src="@Model.ImageUrls.First()" alt="@Model.Title"
+        <img id="mainImage" src="@listing.ImageUrls.First()" alt="@listing.Title"
              class="img-fluid rounded mb-2" style="width:100%; max-height:440px; object-fit:cover;" />
-        @if (Model.ImageUrls.Count > 1)
+        @if (listing.ImageUrls.Count > 1)
         {
             <div class="d-flex flex-wrap gap-2">
-                @foreach (var url in Model.ImageUrls)
+                @foreach (var url in listing.ImageUrls)
                 {
                     <img src="@url" class="img-thumbnail" style="height:72px; cursor:pointer;"
                          onclick="document.getElementById('mainImage').src='@url'" alt="thumbnail" />
@@ -25,20 +32,62 @@
     </div>
 }
 
-<dl class="row mt-3">
-    <dt class="col-sm-2">Type</dt>
-    <dd class="col-sm-10">@Model.ListingType</dd>
-    <dt class="col-sm-2">Property</dt>
-    <dd class="col-sm-10">@Model.PropertyType</dd>
-    <dt class="col-sm-2">Bedrooms</dt>
-    <dd class="col-sm-10">@Model.Bedrooms</dd>
-    <dt class="col-sm-2">Bathrooms</dt>
-    <dd class="col-sm-10">@Model.Bathrooms</dd>
-    <dt class="col-sm-2">Area</dt>
-    <dd class="col-sm-10">@Model.AreaSqMeters.ToString("N0") m²</dd>
-    <dt class="col-sm-2">Address</dt>
-    <dd class="col-sm-10">@Model.Address</dd>
-</dl>
+<div class="row">
+    <div class="col-md-7">
+        <dl class="row">
+            <dt class="col-sm-3">Type</dt>
+            <dd class="col-sm-9">@listing.ListingType</dd>
+            <dt class="col-sm-3">Property</dt>
+            <dd class="col-sm-9">@listing.PropertyType</dd>
+            <dt class="col-sm-3">Bedrooms</dt>
+            <dd class="col-sm-9">@listing.Bedrooms</dd>
+            <dt class="col-sm-3">Bathrooms</dt>
+            <dd class="col-sm-9">@listing.Bathrooms</dd>
+            <dt class="col-sm-3">Area</dt>
+            <dd class="col-sm-9">@listing.AreaSqMeters.ToString("N0") m²</dd>
+            <dt class="col-sm-3">Address</dt>
+            <dd class="col-sm-9">@listing.Address</dd>
+        </dl>
 
-<h4>Description</h4>
-<p>@Model.Description</p>
+        <h4>Description</h4>
+        <p>@listing.Description</p>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Contact the agent</h5>
+                <form asp-action="Inquire" method="post">
+                    <input type="hidden" asp-for="Inquiry.ListingId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-2">
+                        <label asp-for="Inquiry.Name" class="form-label">Name</label>
+                        <input asp-for="Inquiry.Name" class="form-control" />
+                        <span asp-validation-for="Inquiry.Name" class="text-danger"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Inquiry.Email" class="form-label">Email</label>
+                        <input asp-for="Inquiry.Email" class="form-control" />
+                        <span asp-validation-for="Inquiry.Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Inquiry.Phone" class="form-label">Phone (optional)</label>
+                        <input asp-for="Inquiry.Phone" class="form-control" />
+                        <span asp-validation-for="Inquiry.Phone" class="text-danger"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Inquiry.Message" class="form-label">Message</label>
+                        <textarea asp-for="Inquiry.Message" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Inquiry.Message" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

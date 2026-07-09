@@ -9,6 +9,7 @@ using RealEstatePortal.Infrastructure.Data.Interceptors;
 using RealEstatePortal.Infrastructure.Identity;
 using RealEstatePortal.Infrastructure.Imaging;
 using RealEstatePortal.Infrastructure.Storage;
+using RealEstatePortal.Infrastructure.Email;
 
 namespace RealEstatePortal.Infrastructure;
 
@@ -65,6 +66,10 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, R2FileStorageService>();
 
         services.AddScoped<IImageProcessor, ImageSharpProcessor>();
+
+        services.Configure<EmailSettings>(configuration.GetSection("Email"));
+        services.AddScoped<IEmailService, SmtpEmailService>();
+        services.AddScoped<IIdentityService, IdentityService>();
 
         return services;
     }

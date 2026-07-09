@@ -18,6 +18,7 @@ using RealEstatePortal.Application.Listings.Commands.AddListingImages;
 using RealEstatePortal.Application.Listings.Queries.GetListingImages;
 using RealEstatePortal.Application.Listings.Commands.DeleteListingImage;
 using RealEstatePortal.Application.Listings.Commands.SetCoverImage;
+using RealEstatePortal.Application.Inquiries.Commands.CreateInquiry;
 
 namespace RealEstatePortal.Web.Controllers;
 
@@ -156,7 +157,36 @@ public class ListingsController : Controller
     {
         var dto = await _sender.Send(new GetListingDetailQuery(id));
         if (dto is null) return NotFound();
-        return View(dto);
+
+        return View(new ListingDetailViewModel
+        {
+            Listing = dto,
+            Inquiry = new CreateInquiryCommand { ListingId = id }
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Inquire([Bind(Prefix = "Inquiry")] CreateInquiryCommand command)
+    {
+        try
+        {
+            await _sender.Send(command);
+            TempData["InquirySuccess"] = "Your message has been sent to the agent.";
+            return RedirectToAction(nameof(Details), new { id = command.ListingId });
+        }
+        catch (ValidationException ex)
+        {
+            foreach (var (property, errors) in ex.Errors)
+                foreach (var error in errors)
+                    ModelState.AddModelError($"Inquiry.{property}", error);
+
+            var dto = await _sender.Send(new GetListingDetailQuery(command.ListingId));
+            if (dto is null) return NotFound();
+
+            return View(nameof(Details), new ListingDetailViewModel { Listing = dto, Inquiry = command });
+        }
+        catch (RealEstatePortal.Application.Common.Exceptions.NotFoundException) { return NotFound(); }
     }
 
     [HttpPost]
