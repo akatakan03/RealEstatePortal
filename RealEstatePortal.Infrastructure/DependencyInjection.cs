@@ -6,10 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Infrastructure.Data;
 using RealEstatePortal.Infrastructure.Data.Interceptors;
+using RealEstatePortal.Infrastructure.Email;
+using RealEstatePortal.Infrastructure.Geocoding;
 using RealEstatePortal.Infrastructure.Identity;
 using RealEstatePortal.Infrastructure.Imaging;
 using RealEstatePortal.Infrastructure.Storage;
-using RealEstatePortal.Infrastructure.Email;
 
 namespace RealEstatePortal.Infrastructure;
 
@@ -70,6 +71,14 @@ public static class DependencyInjection
         services.Configure<EmailSettings>(configuration.GetSection("Email"));
         services.AddScoped<IEmailService, SmtpEmailService>();
         services.AddScoped<IIdentityService, IdentityService>();
+
+        services.AddHttpClient<IGeocodingService, NominatimGeocodingService>(client =>
+        {
+            client.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");
+            // REQUIRED by Nominatim's policy — a stock User-Agent gets a 403.
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("RealEstatePortal/1.0 (internship project)");
+            client.Timeout = TimeSpan.FromSeconds(8);
+        });
 
         return services;
     }

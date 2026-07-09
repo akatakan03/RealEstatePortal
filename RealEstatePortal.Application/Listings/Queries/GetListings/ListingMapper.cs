@@ -14,5 +14,7 @@ public static partial class ListingMapper
     public static partial List<ListingBriefDto> ToBriefList(List<Listing> listings);
 
     [MapperIgnoreTarget(nameof(ListingDetailDto.ImageUrls))]
+    [MapperIgnoreTarget(nameof(ListingDetailDto.Latitude))]
+    [MapperIgnoreTarget(nameof(ListingDetailDto.Longitude))]
     public static partial ListingDetailDto ToDetail(Listing listing);
 }

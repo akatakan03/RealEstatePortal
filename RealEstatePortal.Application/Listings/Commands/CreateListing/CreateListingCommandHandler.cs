@@ -11,11 +11,14 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
 {
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
+    private readonly IGeocodingService _geocoding;
 
-    public CreateListingCommandHandler(IApplicationDbContext context, IUser user)
+    public CreateListingCommandHandler(
+        IApplicationDbContext context, IUser user, IGeocodingService geocoding)
     {
         _context = context;
         _user = user;
+        _geocoding = geocoding;
     }
 
     public async Task<int> Handle(CreateListingCommand request, CancellationToken cancellationToken)
@@ -38,8 +41,12 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
             Bathrooms = request.Bathrooms,
             AreaSqMeters = request.AreaSqMeters,
             Address = request.Address,
-            OwnerId = _user.Id          // ← the logged-in agent
+            OwnerId = _user.Id
         };
+
+        var coord = await _geocoding.GeocodeAsync(request.Address, cancellationToken);
+        if (coord is not null)
+            entity.Location = new GeoLocation(coord.Latitude, coord.Longitude);
 
         _context.Listings.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);

@@ -32,6 +32,11 @@ public class GetListingDetailQueryHandler
         if (entity is null) return null;
 
         var dto = ListingMapper.ToDetail(entity);
+        if (entity.Location is not null)
+        {
+            dto.Latitude = entity.Location.Latitude;
+            dto.Longitude = entity.Location.Longitude;
+        }
         dto.ImageUrls = entity.Media
             .OrderByDescending(m => m.IsCover)   // cover first
             .ThenBy(m => m.Order)

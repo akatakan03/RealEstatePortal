@@ -17,4 +17,6 @@ public class ListingDetailDto
     public decimal AreaSqMeters { get; init; }
     public string Address { get; init; } = string.Empty;
     public List<string> ImageUrls { get; set; } = new();
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 }

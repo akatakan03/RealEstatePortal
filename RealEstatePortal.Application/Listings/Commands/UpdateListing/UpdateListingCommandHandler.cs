@@ -11,11 +11,13 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
 {
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
+    private readonly IGeocodingService _geocoding;
 
-    public UpdateListingCommandHandler(IApplicationDbContext context, IUser user)
+    public UpdateListingCommandHandler(IApplicationDbContext context, IUser user, IGeocodingService geocoding)
     {
         _context = context;
         _user = user;
+        _geocoding = geocoding;
     }
 
     public async Task Handle(UpdateListingCommand request, CancellationToken cancellationToken)
@@ -29,6 +31,8 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
         if (entity.OwnerId != _user.Id)
             throw new ForbiddenAccessException();
 
+        var addressChanged = !string.Equals(entity.Address, request.Address, StringComparison.Ordinal);
+
         entity.Title = request.Title;
         entity.Description = request.Description;
         entity.Price = new Money(request.Price, request.Currency);
@@ -39,6 +43,13 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
         entity.AreaSqMeters = request.AreaSqMeters;
         entity.Address = request.Address;
         // Slug intentionally left unchanged — stable URLs are better for SEO.
+
+        if (addressChanged)
+        {
+            var coord = await _geocoding.GeocodeAsync(request.Address, cancellationToken);
+            if (coord is not null)
+                entity.Location = new GeoLocation(coord.Latitude, coord.Longitude);
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
     }

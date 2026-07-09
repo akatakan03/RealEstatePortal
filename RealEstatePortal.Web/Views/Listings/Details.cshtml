@@ -31,7 +31,12 @@
         }
     </div>
 }
-
+@if (listing.Latitude is not null && listing.Longitude is not null)
+{
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <h4>Location</h4>
+    <div id="map" style="height: 320px;" class="mb-4 rounded border"></div>
+}
 <div class="row">
     <div class="col-md-7">
         <dl class="row">
@@ -90,4 +95,21 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    @if (listing.Latitude is not null && listing.Longitude is not null)
+    {
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            (function () {
+            var lat = @listing.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var lng = @listing.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var map = L.map('map').setView([lat, lng], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            L.marker([lat, lng]).addTo(map);
+            })();
+        </script>
+    }
 }
