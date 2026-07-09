@@ -10,6 +10,10 @@ using RealEstatePortal.Application.Listings.Commands.UpdateListing;
 using RealEstatePortal.Application.Listings.Queries.GetListingForEdit;
 using RealEstatePortal.Application.Listings.Queries.GetMyListings;
 using RealEstatePortal.Application.Common.Exceptions;
+using RealEstatePortal.Application.Listings.Commands.PublishListing;
+using RealEstatePortal.Application.Listings.Queries.GetListingDetail;
+using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
+using RealEstatePortal.Web.Models.Listings;
 
 namespace RealEstatePortal.Web.Controllers;
 
@@ -22,10 +26,11 @@ public class ListingsController : Controller
         _sender = sender;
     }
 
-    public async Task<IActionResult> Index()
+    [HttpGet]
+    public async Task<IActionResult> Index([FromQuery] GetPublicListingsQuery filter)
     {
-        var listings = await _sender.Send(new GetListingsQuery());
-        return View(listings);
+        var listings = await _sender.Send(filter);
+        return View(new ListingBrowseViewModel { Listings = listings, Filter = filter });
     }
 
     [HttpGet]
@@ -107,6 +112,28 @@ public class ListingsController : Controller
         try
         {
             await _sender.Send(new DeleteListingCommand(id));
+            return RedirectToAction(nameof(Mine));
+        }
+        catch (NotFoundException) { return NotFound(); }
+        catch (ForbiddenAccessException) { return Forbid(); }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        var dto = await _sender.Send(new GetListingDetailQuery(id));
+        if (dto is null) return NotFound();
+        return View(dto);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Agent)]
+    public async Task<IActionResult> Publish(int id)
+    {
+        try
+        {
+            await _sender.Send(new PublishListingCommand(id));
             return RedirectToAction(nameof(Mine));
         }
         catch (NotFoundException) { return NotFound(); }

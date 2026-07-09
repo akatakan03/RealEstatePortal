@@ -1,0 +1,27 @@
+﻿@model RealEstatePortal.Application.Listings.Queries.GetListingDetail.ListingDetailDto
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<a asp-action="Index" class="btn btn-link px-0">← Back to listings</a>
+
+<h1>@Model.Title</h1>
+<h3 class="text-muted">@Model.PriceAmount.ToString("N0") @Model.PriceCurrency</h3>
+
+<dl class="row mt-3">
+    <dt class="col-sm-2">Type</dt>
+    <dd class="col-sm-10">@Model.ListingType</dd>
+    <dt class="col-sm-2">Property</dt>
+    <dd class="col-sm-10">@Model.PropertyType</dd>
+    <dt class="col-sm-2">Bedrooms</dt>
+    <dd class="col-sm-10">@Model.Bedrooms</dd>
+    <dt class="col-sm-2">Bathrooms</dt>
+    <dd class="col-sm-10">@Model.Bathrooms</dd>
+    <dt class="col-sm-2">Area</dt>
+    <dd class="col-sm-10">@Model.AreaSqMeters.ToString("N0") m²</dd>
+    <dt class="col-sm-2">Address</dt>
+    <dd class="col-sm-10">@Model.Address</dd>
+</dl>
+
+<h4>Description</h4>
+<p>@Model.Description</p>

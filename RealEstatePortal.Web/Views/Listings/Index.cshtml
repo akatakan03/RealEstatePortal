@@ -1,42 +1,87 @@
-﻿@model List<RealEstatePortal.Application.Listings.Queries.GetListings.ListingBriefDto>
+﻿@using RealEstatePortal.Domain.Enums
+@model RealEstatePortal.Web.Models.Listings.ListingBrowseViewModel
 @{
-    ViewData["Title"] = "Listings";
+    ViewData["Title"] = "Browse Listings";
+    var routeData = Model.CurrentFilter();
 }
 
-<h1>Listings</h1>
-<p><a class="btn btn-primary" asp-action="Create">Create New Listing</a></p>
+<h1>Browse Listings</h1>
 
-@if (!Model.Any())
+<form asp-action="Index" method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <input name="Keyword" value="@Model.Filter.Keyword" class="form-control" placeholder="Search title or address" />
+    </div>
+    <div class="col-md-2">
+        <select name="ListingType" class="form-select">
+            <option value="">Any type</option>
+            @foreach (var t in Enum.GetValues<ListingType>())
+            {
+                <option value="@t" selected="@(Model.Filter.ListingType == t)">@t</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="PropertyType" class="form-select">
+            <option value="">Any property</option>
+            @foreach (var p in Enum.GetValues<PropertyType>())
+            {
+                <option value="@p" selected="@(Model.Filter.PropertyType == p)">@p</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-1">
+        <input name="MinPrice" value="@Model.Filter.MinPrice" class="form-control" placeholder="Min €" />
+    </div>
+    <div class="col-md-1">
+        <input name="MaxPrice" value="@Model.Filter.MaxPrice" class="form-control" placeholder="Max €" />
+    </div>
+    <div class="col-md-1">
+        <input name="MinBedrooms" value="@Model.Filter.MinBedrooms" class="form-control" placeholder="Beds" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+    </div>
+</form>
+
+@if (!Model.Listings.Items.Any())
 {
-    <p>No listings yet.</p>
+    <p>No listings match your search.</p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Property</th>
-                <th>Price</th>
-                <th>Beds</th>
-                <th>Area (m²)</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var listing in Model)
-            {
-                <tr>
-                    <td>@listing.Title</td>
-                    <td>@listing.ListingType</td>
-                    <td>@listing.PropertyType</td>
-                    <td>@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</td>
-                    <td>@listing.Bedrooms</td>
-                    <td>@listing.AreaSqMeters.ToString("N0")</td>
-                    <td>@listing.Status</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="row">
+        @foreach (var listing in Model.Listings.Items)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@listing.Title</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            @listing.PriceAmount.ToString("N0") @listing.PriceCurrency
+                        </h6>
+                        <p class="card-text">
+                            @listing.PropertyType · @listing.ListingType · @listing.Bedrooms bd · @listing.AreaSqMeters.ToString("N0") m²
+                        </p>
+                        <a asp-action="Details" asp-route-id="@listing.Id" class="btn btn-sm btn-outline-primary">View details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <nav>
+        <ul class="pagination">
+            <li class="page-item @(Model.Listings.HasPreviousPage ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-all-route-data="routeData"
+                   asp-route-pageNumber="@(Model.Listings.PageNumber - 1)">Previous</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">Page @Model.Listings.PageNumber of @Model.Listings.TotalPages</span>
+            </li>
+            <li class="page-item @(Model.Listings.HasNextPage ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-all-route-data="routeData"
+                   asp-route-pageNumber="@(Model.Listings.PageNumber + 1)">Next</a>
+            </li>
+        </ul>
+    </nav>
 }

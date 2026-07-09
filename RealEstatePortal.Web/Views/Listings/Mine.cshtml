@@ -31,6 +31,12 @@ else
                     <td>@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</td>
                     <td>@listing.Status</td>
                     <td>
+                        @if (listing.Status == RealEstatePortal.Domain.Enums.ListingStatus.Draft)
+                        {
+                            <form asp-action="Publish" asp-route-id="@listing.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">Publish</button>
+                            </form>
+                        }
                         <a asp-action="Edit" asp-route-id="@listing.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
                         <a asp-action="Delete" asp-route-id="@listing.Id" class="btn btn-sm btn-outline-danger">Delete</a>
                     </td>
