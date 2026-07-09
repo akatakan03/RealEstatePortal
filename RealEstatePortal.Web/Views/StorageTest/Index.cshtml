@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Storage Test";
+}
+
+<h1>R2 Storage Test</h1>
+
+<form asp-action="Upload" method="post" enctype="multipart/form-data" class="mb-3">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="mb-3">
+        <input type="file" name="file" class="form-control" accept="image/*" />
+    </div>
+    <button type="submit" class="btn btn-primary">Upload to R2</button>
+</form>
+
+@if (ViewBag.Url is string url)
+{
+    <div class="alert alert-success">
+        Uploaded! Public URL:
+        <a href="@url" target="_blank">@url</a>
+    </div>
+    <img src="@url" alt="uploaded" style="max-width: 400px;" class="img-thumbnail" />
+}

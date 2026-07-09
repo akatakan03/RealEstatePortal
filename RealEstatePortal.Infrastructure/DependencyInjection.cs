@@ -6,6 +6,8 @@ using RealEstatePortal.Infrastructure.Data;
 using RealEstatePortal.Infrastructure.Data.Interceptors;
 using Microsoft.AspNetCore.Identity;
 using RealEstatePortal.Infrastructure.Identity;
+using Amazon.S3;
+using RealEstatePortal.Infrastructure.Storage;
 
 namespace RealEstatePortal.Infrastructure;
 
@@ -43,6 +45,23 @@ public static class DependencyInjection
         services.AddScoped<ApplicationDbContextInitialiser>();
 
         services.AddSingleton(TimeProvider.System);
+
+        var r2Settings = configuration.GetSection("R2").Get<R2Settings>()
+    ?? throw new InvalidOperationException("R2 configuration section is missing.");
+        services.Configure<R2Settings>(configuration.GetSection("R2"));
+
+        services.AddSingleton<IAmazonS3>(_ =>
+        {
+            var config = new AmazonS3Config
+            {
+                ServiceURL = r2Settings.ServiceUrl,
+                ForcePathStyle = true,
+                AuthenticationRegion = "auto"   // R2 uses the "auto" region
+            };
+            return new AmazonS3Client(r2Settings.AccessKey, r2Settings.SecretKey, config);
+        });
+
+        services.AddScoped<IFileStorageService, R2FileStorageService>();
 
         return services;
     }
