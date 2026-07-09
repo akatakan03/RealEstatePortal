@@ -1,0 +1,47 @@
+﻿@using RealEstatePortal.Domain.Enums
+@model List<RealEstatePortal.Application.Inquiries.Queries.InquiryDto>
+@{
+    ViewData["Title"] = "Inquiries";
+}
+
+<h1>Inquiries</h1>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No inquiries yet.</p>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr><th>Status</th><th>Listing</th><th>From</th><th>Received</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var inq in Model)
+            {
+                <tr class="@(inq.Status == InquiryStatus.New ? "fw-bold" : "")">
+                    <td>
+                        @switch (inq.Status)
+                        {
+                            case InquiryStatus.New:
+                                <span class="badge bg-danger">New</span>
+                                break;
+                            case InquiryStatus.Read:
+
+                                <span class="badge bg-secondary">Read</span>
+                                break;
+                            case InquiryStatus.Handled:
+
+                                <span class="badge bg-success">Handled</span>
+                                break;
+                        }
+                    </td>
+                    <td>@inq.ListingTitle</td>
+                    <td>@inq.Name</td>
+                    <td>@inq.Created.ToLocalTime().ToString("g")</td>
+                    <td><a asp-action="Details" asp-route-id="@inq.Id" class="btn btn-sm btn-outline-primary">View</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
