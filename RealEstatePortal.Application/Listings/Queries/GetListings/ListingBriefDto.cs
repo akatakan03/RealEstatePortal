@@ -14,4 +14,7 @@ public class ListingBriefDto
     public ListingStatus Status { get; init; }
     public int Bedrooms { get; init; }
     public decimal AreaSqMeters { get; init; }
+
+    public string? CoverThumbnailKey { get; init; }   // from the projection
+    public string? CoverThumbnailUrl { get; set; }     // filled after materialization
 }

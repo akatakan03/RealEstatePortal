@@ -7,12 +7,12 @@ namespace RealEstatePortal.Application.Listings.Queries.GetListings;
 [Mapper]
 public static partial class ListingMapper
 {
+    [MapperIgnoreTarget(nameof(ListingBriefDto.CoverThumbnailKey))]
+    [MapperIgnoreTarget(nameof(ListingBriefDto.CoverThumbnailUrl))]
     public static partial ListingBriefDto ToBrief(Listing listing);
 
     public static partial List<ListingBriefDto> ToBriefList(List<Listing> listings);
 
-    // Expression-based projection — translates to SQL SELECT, no in-memory mapping
-    public static partial IQueryable<ListingBriefDto> ProjectToBrief(this IQueryable<Listing> source);
-
+    [MapperIgnoreTarget(nameof(ListingDetailDto.ImageUrls))]
     public static partial ListingDetailDto ToDetail(Listing listing);
 }

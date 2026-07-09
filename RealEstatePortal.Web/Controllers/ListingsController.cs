@@ -16,6 +16,8 @@ using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
 using RealEstatePortal.Web.Models.Listings;
 using RealEstatePortal.Application.Listings.Commands.AddListingImages;
 using RealEstatePortal.Application.Listings.Queries.GetListingImages;
+using RealEstatePortal.Application.Listings.Commands.DeleteListingImage;
+using RealEstatePortal.Application.Listings.Commands.SetCoverImage;
 
 namespace RealEstatePortal.Web.Controllers;
 
@@ -174,5 +176,35 @@ public class ListingsController : Controller
     private async Task LoadPhotosAsync(int listingId)
     {
         ViewBag.Photos = await _sender.Send(new GetListingImagesQuery(listingId));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Agent)]
+    public async Task<IActionResult> DeletePhoto(int listingId, int imageId)
+    {
+        try
+        {
+            await _sender.Send(new DeleteListingImageCommand(listingId, imageId));
+        }
+        catch (RealEstatePortal.Application.Common.Exceptions.NotFoundException) { return NotFound(); }
+        catch (RealEstatePortal.Application.Common.Exceptions.ForbiddenAccessException) { return Forbid(); }
+
+        return RedirectToAction(nameof(Edit), new { id = listingId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Agent)]
+    public async Task<IActionResult> SetCover(int listingId, int imageId)
+    {
+        try
+        {
+            await _sender.Send(new SetCoverImageCommand(listingId, imageId));
+        }
+        catch (RealEstatePortal.Application.Common.Exceptions.NotFoundException) { return NotFound(); }
+        catch (RealEstatePortal.Application.Common.Exceptions.ForbiddenAccessException) { return Forbid(); }
+
+        return RedirectToAction(nameof(Edit), new { id = listingId });
     }
 }

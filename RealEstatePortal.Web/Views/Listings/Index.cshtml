@@ -54,6 +54,18 @@ else
         {
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(listing.CoverThumbnailUrl))
+                    {
+                        <img src="@listing.CoverThumbnailUrl" class="card-img-top" alt="@listing.Title"
+                             style="height:180px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-muted"
+                             style="height:180px;">
+                            No photo
+                        </div>
+                    }
                     <div class="card-body">
                         <h5 class="card-title">@listing.Title</h5>
                         <h6 class="card-subtitle mb-2 text-muted">

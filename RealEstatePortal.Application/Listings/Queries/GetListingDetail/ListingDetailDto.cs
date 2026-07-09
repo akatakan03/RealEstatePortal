@@ -16,4 +16,5 @@ public class ListingDetailDto
     public int Bathrooms { get; init; }
     public decimal AreaSqMeters { get; init; }
     public string Address { get; init; } = string.Empty;
+    public List<string> ImageUrls { get; set; } = new();
 }

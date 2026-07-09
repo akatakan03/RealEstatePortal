@@ -2,11 +2,14 @@
 @model RealEstatePortal.Application.Listings.Commands.UpdateListing.UpdateListingCommand
 @{
     ViewData["Title"] = "Edit Listing";
+    var photos = ViewBag.Photos as List<RealEstatePortal.Application.Listings.Queries.GetListingImages.ListingImageDto>
+                 ?? new List<RealEstatePortal.Application.Listings.Queries.GetListingImages.ListingImageDto>();
 }
 
 <h1>Edit Listing</h1>
+
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-8">
         <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <input type="hidden" asp-for="Id" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -64,35 +67,9 @@
             </div>
 
             <hr />
-            <h4>Photos</h4>
-
-            @{
-                var photos = ViewBag.Photos as List<RealEstatePortal.Application.Listings.Queries.GetListingImages.ListingImageDto>
-                             ?? new List<RealEstatePortal.Application.Listings.Queries.GetListingImages.ListingImageDto>();
-            }
-
-            @if (photos.Any())
-            {
-                <div class="row mb-3">
-                    @foreach (var photo in photos)
-                    {
-                        <div class="col-auto mb-2 text-center">
-                            <img src="@photo.ThumbnailUrl" alt="listing photo" class="img-thumbnail" style="height:110px;" />
-                            @if (photo.IsCover)
-                            {
-                                <div><span class="badge bg-primary">Cover</span></div>
-                            }
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <p class="text-muted">No photos yet.</p>
-            }
-
+            <h4>Add photos</h4>
             <div class="mb-3">
-                <label class="form-label">Add photos (uploaded when you click Save)</label>
+                <label class="form-label">Select images (uploaded when you click Save)</label>
                 <input type="file" name="newPhotos" multiple accept="image/*" class="form-control" id="newPhotos" />
                 <div id="previewArea" class="row mt-2"></div>
             </div>
@@ -100,6 +77,44 @@
             <button type="submit" class="btn btn-primary">Save</button>
             <a asp-action="Mine" class="btn btn-secondary">Cancel</a>
         </form>
+
+        <hr />
+        <h4>Current photos</h4>
+        @if (photos.Any())
+        {
+            <div class="row">
+                @foreach (var photo in photos)
+                {
+                    <div class="col-auto mb-3 text-center">
+                        <img src="@photo.ThumbnailUrl" alt="listing photo" class="img-thumbnail" style="height:120px;" />
+                        <div class="mt-1">
+                            @if (photo.IsCover)
+                            {
+                                <span class="badge bg-primary">Cover</span>
+                            }
+                            else
+                            {
+                                <form asp-action="SetCover" method="post" class="d-inline">
+                                    <input type="hidden" name="listingId" value="@Model.Id" />
+                                    <input type="hidden" name="imageId" value="@photo.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Set cover</button>
+                                </form>
+                            }
+                            <form asp-action="DeletePhoto" method="post" class="d-inline"
+                                  onsubmit="return confirm('Delete this photo? This cannot be undone.');">
+                                <input type="hidden" name="listingId" value="@Model.Id" />
+                                <input type="hidden" name="imageId" value="@photo.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">✕</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No photos yet.</p>
+        }
     </div>
 </div>
 

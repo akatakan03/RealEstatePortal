@@ -22,10 +22,12 @@ public class GetPublicListingsQueryHandler
     : IRequestHandler<GetPublicListingsQuery, PaginatedList<ListingBriefDto>>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IFileStorageService _storage;
 
-    public GetPublicListingsQueryHandler(IApplicationDbContext context)
+    public GetPublicListingsQueryHandler(IApplicationDbContext context, IFileStorageService storage)
     {
         _context = context;
+        _storage = storage;
     }
 
     public async Task<PaginatedList<ListingBriefDto>> Handle(
@@ -53,11 +55,36 @@ public class GetPublicListingsQueryHandler
         var pageSize = Math.Clamp(request.PageSize, 1, 50);
         var pageNumber = Math.Max(request.PageNumber, 1);
 
+        // Explicit projection: pull the cover thumbnail key via a correlated subquery.
         var projected = query
             .OrderByDescending(l => l.Created)
-            .ProjectToBrief();
+            .Select(l => new ListingBriefDto
+            {
+                Id = l.Id,
+                Title = l.Title,
+                Slug = l.Slug,
+                PriceAmount = l.Price.Amount,
+                PriceCurrency = l.Price.Currency,
+                ListingType = l.ListingType,
+                PropertyType = l.PropertyType,
+                Status = l.Status,
+                Bedrooms = l.Bedrooms,
+                AreaSqMeters = l.AreaSqMeters,
+                CoverThumbnailKey = l.Media
+                    .Where(m => m.IsCover)
+                    .Select(m => m.ThumbnailKey)
+                    .FirstOrDefault()
+            });
 
-        return await PaginatedList<ListingBriefDto>
+        var page = await PaginatedList<ListingBriefDto>
             .CreateAsync(projected, pageNumber, pageSize, cancellationToken);
+
+        // Turn keys into public URLs after the DB round-trip.
+        foreach (var item in page.Items)
+            item.CoverThumbnailUrl = item.CoverThumbnailKey is null
+                ? null
+                : _storage.GetPublicUrl(item.CoverThumbnailKey);
+
+        return page;
     }
 }
