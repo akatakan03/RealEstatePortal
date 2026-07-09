@@ -14,6 +14,8 @@ using RealEstatePortal.Application.Listings.Commands.PublishListing;
 using RealEstatePortal.Application.Listings.Queries.GetListingDetail;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
 using RealEstatePortal.Web.Models.Listings;
+using RealEstatePortal.Application.Listings.Commands.AddListingImages;
+using RealEstatePortal.Application.Listings.Queries.GetListingImages;
 
 namespace RealEstatePortal.Web.Controllers;
 
@@ -71,28 +73,57 @@ public class ListingsController : Controller
     {
         var command = await _sender.Send(new GetListingForEditQuery(id));
         if (command is null) return NotFound();
+
+        await LoadPhotosAsync(id);
         return View(command);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = Roles.Agent)]
-    public async Task<IActionResult> Edit(UpdateListingCommand command)
+    [RequestSizeLimit(52_428_800)] // 50 MB for the whole submission
+    public async Task<IActionResult> Edit(UpdateListingCommand command, List<IFormFile>? newPhotos)
     {
         try
         {
             await _sender.Send(command);
-            return RedirectToAction(nameof(Mine));
+
+            if (newPhotos is { Count: > 0 })
+            {
+                var images = new List<ImageUploadDto>();
+                foreach (var file in newPhotos)
+                {
+                    if (file.Length == 0) continue;
+
+                    if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ModelState.AddModelError(string.Empty, $"\"{file.FileName}\" is not an image.");
+                        await LoadPhotosAsync(command.Id);
+                        return View(command);
+                    }
+
+                    using var ms = new MemoryStream();
+                    await file.CopyToAsync(ms);
+                    images.Add(new ImageUploadDto(ms.ToArray(), file.FileName, file.ContentType));
+                }
+
+                if (images.Count > 0)
+                    await _sender.Send(new AddListingImagesCommand(command.Id, images));
+            }
+
+            return RedirectToAction(nameof(Edit), new { id = command.Id });
         }
         catch (ValidationException ex)
         {
             foreach (var (property, errors) in ex.Errors)
                 foreach (var error in errors)
                     ModelState.AddModelError(property, error);
+
+            await LoadPhotosAsync(command.Id);
             return View(command);
         }
-        catch (NotFoundException) { return NotFound(); }
-        catch (ForbiddenAccessException) { return Forbid(); }
+        catch (RealEstatePortal.Application.Common.Exceptions.NotFoundException) { return NotFound(); }
+        catch (RealEstatePortal.Application.Common.Exceptions.ForbiddenAccessException) { return Forbid(); }
     }
 
     [HttpGet]
@@ -138,5 +169,10 @@ public class ListingsController : Controller
         }
         catch (NotFoundException) { return NotFound(); }
         catch (ForbiddenAccessException) { return Forbid(); }
+    }
+
+    private async Task LoadPhotosAsync(int listingId)
+    {
+        ViewBag.Photos = await _sender.Send(new GetListingImagesQuery(listingId));
     }
 }

@@ -1,12 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Amazon.S3;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Infrastructure.Data;
 using RealEstatePortal.Infrastructure.Data.Interceptors;
-using Microsoft.AspNetCore.Identity;
 using RealEstatePortal.Infrastructure.Identity;
-using Amazon.S3;
+using RealEstatePortal.Infrastructure.Imaging;
 using RealEstatePortal.Infrastructure.Storage;
 
 namespace RealEstatePortal.Infrastructure;
@@ -62,6 +63,8 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IFileStorageService, R2FileStorageService>();
+
+        services.AddScoped<IImageProcessor, ImageSharpProcessor>();
 
         return services;
     }

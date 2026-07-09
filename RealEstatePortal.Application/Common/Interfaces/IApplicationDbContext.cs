@@ -6,6 +6,7 @@ namespace RealEstatePortal.Application.Common.Interfaces;
 public interface IApplicationDbContext
 {
     DbSet<Listing> Listings { get; }
+    DbSet<ListingMedia> ListingMedia { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -23,6 +23,7 @@ public class Listing : BaseAuditableEntity
 
     public string Address { get; set; } = string.Empty;
     public GeoLocation? Location { get; set; }
+    public List<ListingMedia> Media { get; private set; } = new();
 
     // Points to the Identity user (agent) once auth exists. Null until then.
     public string? OwnerId { get; set; }

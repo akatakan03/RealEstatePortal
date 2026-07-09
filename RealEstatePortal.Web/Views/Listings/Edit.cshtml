@@ -7,7 +7,7 @@
 <h1>Edit Listing</h1>
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Edit" method="post">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <input type="hidden" asp-for="Id" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -63,6 +63,40 @@
                 <input asp-for="Address" class="form-control" />
             </div>
 
+            <hr />
+            <h4>Photos</h4>
+
+            @{
+                var photos = ViewBag.Photos as List<RealEstatePortal.Application.Listings.Queries.GetListingImages.ListingImageDto>
+                             ?? new List<RealEstatePortal.Application.Listings.Queries.GetListingImages.ListingImageDto>();
+            }
+
+            @if (photos.Any())
+            {
+                <div class="row mb-3">
+                    @foreach (var photo in photos)
+                    {
+                        <div class="col-auto mb-2 text-center">
+                            <img src="@photo.ThumbnailUrl" alt="listing photo" class="img-thumbnail" style="height:110px;" />
+                            @if (photo.IsCover)
+                            {
+                                <div><span class="badge bg-primary">Cover</span></div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">No photos yet.</p>
+            }
+
+            <div class="mb-3">
+                <label class="form-label">Add photos (uploaded when you click Save)</label>
+                <input type="file" name="newPhotos" multiple accept="image/*" class="form-control" id="newPhotos" />
+                <div id="previewArea" class="row mt-2"></div>
+            </div>
+
             <button type="submit" class="btn btn-primary">Save</button>
             <a asp-action="Mine" class="btn btn-secondary">Cancel</a>
         </form>
@@ -71,4 +105,22 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('newPhotos').addEventListener('change', function (e) {
+            const area = document.getElementById('previewArea');
+            area.innerHTML = '';
+            for (const file of e.target.files) {
+                if (!file.type.startsWith('image/')) continue;
+                const col = document.createElement('div');
+                col.className = 'col-auto mb-2';
+                const img = document.createElement('img');
+                img.className = 'img-thumbnail';
+                img.style.height = '90px';
+                img.style.opacity = '0.7';
+                img.src = URL.createObjectURL(file);
+                col.appendChild(img);
+                area.appendChild(col);
+            }
+        });
+    </script>
 }

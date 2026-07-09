@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
 
     // DbSet<T> properties will be added here as entities are created.
     public DbSet<Listing> Listings => Set<Listing>();
+    public DbSet<ListingMedia> ListingMedia => Set<ListingMedia>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
