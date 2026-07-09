@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstatePortal.Application.Listings.Commands.CreateListing;
 using RealEstatePortal.Application.Listings.Queries.GetListings;
 using ValidationException = RealEstatePortal.Application.Common.Exceptions.ValidationException;
+using Microsoft.AspNetCore.Authorization;
+using RealEstatePortal.Domain.Constants;
 
 namespace RealEstatePortal.Web.Controllers;
 
@@ -22,10 +24,12 @@ public class ListingsController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = Roles.Agent)]
     public IActionResult Create() => View(new CreateListingCommand());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Agent)]
     public async Task<IActionResult> Create(CreateListingCommand command)
     {
         try

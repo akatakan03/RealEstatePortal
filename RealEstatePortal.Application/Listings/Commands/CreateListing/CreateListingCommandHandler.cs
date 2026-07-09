@@ -10,15 +10,16 @@ namespace RealEstatePortal.Application.Listings.Commands.CreateListing;
 public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand, int>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUser _user;
 
-    public CreateListingCommandHandler(IApplicationDbContext context)
+    public CreateListingCommandHandler(IApplicationDbContext context, IUser user)
     {
         _context = context;
+        _user = user;
     }
 
     public async Task<int> Handle(CreateListingCommand request, CancellationToken cancellationToken)
     {
-        // Ensure the slug is unique (we have a unique index on Slug)
         var baseSlug = SlugGenerator.Generate(request.Title);
         var slug = baseSlug;
         var suffix = 2;
@@ -36,7 +37,8 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
             Bedrooms = request.Bedrooms,
             Bathrooms = request.Bathrooms,
             AreaSqMeters = request.AreaSqMeters,
-            Address = request.Address
+            Address = request.Address,
+            OwnerId = _user.Id          // ← the logged-in agent
         };
 
         _context.Listings.Add(entity);
