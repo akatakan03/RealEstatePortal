@@ -1,0 +1,87 @@
+﻿@using RealEstatePortal.Domain.Enums
+@model List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
+@{
+    ViewData["Title"] = "Moderation";
+    var current = ViewBag.StatusFilter as ListingStatus?;
+}
+
+<h1>Listing Moderation</h1>
+
+<form asp-action="Listings" method="get" class="mb-3 d-flex align-items-center gap-2">
+    <label class="mb-0">Filter by status:</label>
+    <select name="status" class="form-select" style="width:auto;" onchange="this.form.submit()">
+        <option value="">All</option>
+        @foreach (var s in Enum.GetValues<ListingStatus>())
+        {
+            <option value="@s" selected="@(current == s)">@s</option>
+        }
+    </select>
+</form>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No listings@(current is null ? "" : $" with status {current}").</p>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr><th>Title</th><th>Owner</th><th>Status</th><th>Price</th><th>Created</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var l in Model)
+            {
+                <tr>
+                    <td><a asp-controller="Listings" asp-action="Details" asp-route-id="@l.Id">@l.Title</a></td>
+                    <td>@(l.OwnerEmail ?? "—")</td>
+                    <td>
+                        @switch (l.Status)
+                        {
+                            case ListingStatus.Active:
+                                <span class="badge bg-success">Active</span>
+                                break;
+                            case ListingStatus.Archived:
+
+                                <span class="badge bg-dark">Archived</span>
+                                break;
+                            case ListingStatus.Draft:
+
+                                <span class="badge bg-secondary">Draft</span>
+                                break;
+                            default:
+
+                                <span class="badge bg-info">@l.Status</span>
+                                break;
+                        }
+                    </td>
+                    <td>@l.PriceAmount.ToString("N0") @l.PriceCurrency</td>
+                    <td>@l.Created.ToLocalTime().ToString("g")</td>
+                    <td class="text-nowrap">
+                        @if (l.Status != ListingStatus.Archived)
+                        {
+                            <form asp-action="Archive" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@l.Id" />
+                                <input type="hidden" name="status" value="@current" />
+                                <button type="submit" class="btn btn-sm btn-outline-dark">Archive</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="Restore" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@l.Id" />
+                                <input type="hidden" name="status" value="@current" />
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Restore</button>
+                            </form>
+                        }
+                        <form asp-action="Delete" method="post" class="d-inline"
+                              onsubmit="return confirm('Permanently delete this listing and its photos?');">
+                            <input type="hidden" name="id" value="@l.Id" />
+                            <input type="hidden" name="status" value="@current" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -38,4 +38,5 @@ public class Listing : BaseAuditableEntity
     }
 
     public void Archive() => Status = ListingStatus.Archived;
+    public void ReturnToDraft() => Status = ListingStatus.Draft;
 }
