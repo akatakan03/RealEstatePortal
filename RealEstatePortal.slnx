@@ -5,4 +5,5 @@
   <Project Path="RealEstatePortal.Web/RealEstatePortal.Web.csproj" />
   <Project Path="tests/RealEstatePortal.Application.UnitTests/RealEstatePortal.Application.UnitTests.csproj" Id="389c8a23-3197-49fc-92b0-1666bf68f77f" />
   <Project Path="tests/RealEstatePortal.Domain.UnitTests/RealEstatePortal.Domain.UnitTests.csproj" Id="2fa7d74a-3211-4f56-a971-f09c22d31e51" />
+  <Project Path="tests/RealEstatePortal.IntegrationTests/RealEstatePortal.IntegrationTests.csproj" Id="b1ccae39-b577-49dc-b8cb-f1725635dd32" />
 </Solution>
