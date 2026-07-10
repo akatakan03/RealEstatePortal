@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Application.Common.Models;
 using RealEstatePortal.Application.Listings.Queries.GetListings;
@@ -100,6 +101,24 @@ public class GetPublicListingsQueryHandler
             item.CoverThumbnailUrl = item.CoverThumbnailKey is null
                 ? null
                 : _storage.GetPublicUrl(item.CoverThumbnailKey);
+
+        var pageIds = page.Items.Select(i => i.Id).ToList();
+        if (pageIds.Count > 0)
+        {
+            var located = await _context.Listings
+                .Where(l => pageIds.Contains(l.Id))
+                .ToListAsync(cancellationToken);
+
+            var byId = located.ToDictionary(l => l.Id);
+            foreach (var item in page.Items)
+            {
+                if (byId.TryGetValue(item.Id, out var listing) && listing.Location is not null)
+                {
+                    item.Latitude = listing.Location.Latitude;
+                    item.Longitude = listing.Location.Longitude;
+                }
+            }
+        }
 
         return page;
     }

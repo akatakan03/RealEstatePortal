@@ -17,4 +17,6 @@ public class ListingBriefDto
 
     public string? CoverThumbnailKey { get; init; }   // from the projection
     public string? CoverThumbnailUrl { get; set; }     // filled after materialization
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 }

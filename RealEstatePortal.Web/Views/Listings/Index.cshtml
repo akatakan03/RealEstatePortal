@@ -3,11 +3,26 @@
 @{
     ViewData["Title"] = "Browse Listings";
     var routeData = Model.CurrentFilter();
+    var hasCenter = Model.Filter.CenterLat.HasValue && Model.Filter.CenterLng.HasValue;
+    var currentRadius = Model.Filter.RadiusKm ?? 10;
+
+    // Build the list of map pins from the current results, then JSON-encode it for the script.
+    var mapPoints = Model.Listings.Items
+        .Where(i => i.Latitude.HasValue && i.Longitude.HasValue)
+        .Select(i => new
+        {
+            id = i.Id,
+            lat = i.Latitude!.Value,
+            lng = i.Longitude!.Value,
+            title = i.Title,
+            price = i.PriceAmount.ToString("N0") + " " + i.PriceCurrency
+        });
+    var mapPointsJson = System.Text.Json.JsonSerializer.Serialize(mapPoints);
 }
 
 <h1>Browse Listings</h1>
 
-<form asp-action="Index" method="get" class="row g-2 mb-4">
+<form asp-action="Index" method="get" class="row g-2 mb-3">
     <div class="col-md-3">
         <input name="Keyword" value="@Model.Filter.Keyword" class="form-control" placeholder="Search title or address" />
     </div>
@@ -41,7 +56,39 @@
     <div class="col-md-2">
         <button type="submit" class="btn btn-primary w-100">Filter</button>
     </div>
+
+    @* Keep an active area-search when the user changes other filters *@
+    @if (hasCenter)
+    {
+        <input type="hidden" name="CenterLat" value="@Model.Filter.CenterLat" />
+        <input type="hidden" name="CenterLng" value="@Model.Filter.CenterLng" />
+        <input type="hidden" name="RadiusKm" value="@Model.Filter.RadiusKm" />
+    }
 </form>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="d-flex align-items-center gap-2 mb-2">
+    <label class="mb-0 fw-bold">Map search:</label>
+    <select id="radiusSelect" class="form-select form-select-sm" style="width:auto;">
+        @foreach (var km in new[] { 1, 5, 10, 25, 50 })
+        {
+            <option value="@km" selected="@(currentRadius == km)">@km km</option>
+        }
+    </select>
+    <button type="button" id="searchAreaBtn" class="btn btn-sm btn-primary">Search this area</button>
+    @if (hasCenter)
+    {
+        <a class="btn btn-sm btn-outline-secondary" asp-action="Index" asp-all-route-data="routeData">Clear area</a>
+        <span class="text-muted small">Showing listings within @currentRadius km of the marked area.</span>
+    }
+    else
+    {
+        <span class="text-muted small">Pan/zoom the map, then search its current area.</span>
+    }
+</div>
+
+<div id="browseMap" style="height: 400px;" class="mb-4 rounded border"></div>
 
 @if (!Model.Listings.Items.Any())
 {
@@ -96,4 +143,63 @@ else
             </li>
         </ul>
     </nav>
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        (function () {
+        var listingsData = @Html.Raw(mapPointsJson);
+        var hasCenter = @(hasCenter ? "true" : "false");
+        @if (hasCenter)
+        {
+            <text>
+                var searchCenter = {
+                lat: @Model.Filter.CenterLat!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                lng: @Model.Filter.CenterLng!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                };
+                var searchRadiusKm = @currentRadius;
+            </text>
+        }
+
+        function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+
+        var map = L.map('browseMap');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var markers = [];
+        listingsData.forEach(function (p) {
+        var m = L.marker([p.lat, p.lng]).addTo(map);
+        m.bindPopup('<strong>' + esc(p.title) + '</strong><br/>' + esc(p.price) +
+        '<br/><a href="/Listings/Details/' + p.id + '">View details</a>');
+        markers.push(m);
+        });
+
+        if (hasCenter) {
+        map.setView([searchCenter.lat, searchCenter.lng], 12);
+        L.circle([searchCenter.lat, searchCenter.lng], {
+        radius: searchRadiusKm * 1000,
+        color: '#0d6efd', weight: 1, fillOpacity: 0.05
+        }).addTo(map);
+        } else if (markers.length > 0) {
+        map.fitBounds(L.featureGroup(markers).getBounds().pad(0.2));
+        } else {
+        map.setView([39.0, 35.0], 6); // Turkey overview
+        }
+
+        document.getElementById('searchAreaBtn').addEventListener('click', function () {
+        var c = map.getCenter();
+        var radius = document.getElementById('radiusSelect').value;
+        var params = new URLSearchParams(window.location.search);
+        params.set('CenterLat', c.lat.toFixed(6));
+        params.set('CenterLng', c.lng.toFixed(6));
+        params.set('RadiusKm', radius);
+        params.set('pageNumber', '1');
+        window.location = window.location.pathname + '?' + params.toString();
+        });
+        })();
+    </script>
 }
