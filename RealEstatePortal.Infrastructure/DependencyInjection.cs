@@ -26,12 +26,14 @@ public static class DependencyInjection
 
         services.AddScoped<AuditableEntitySaveChangesInterceptor>();
         services.AddScoped<ListingGeographySaveChangesInterceptor>();
+        services.AddScoped<DispatchDomainEventsInterceptor>();
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.AddInterceptors(
                 sp.GetRequiredService<AuditableEntitySaveChangesInterceptor>(),
-                sp.GetRequiredService<ListingGeographySaveChangesInterceptor>());
+                sp.GetRequiredService<ListingGeographySaveChangesInterceptor>(),
+                sp.GetRequiredService<DispatchDomainEventsInterceptor>());
             options.UseSqlServer(connectionString, sql => sql.UseNetTopologySuite());
         });
 

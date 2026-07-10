@@ -28,6 +28,11 @@ public class IntegrationTestFixture : IAsyncLifetime
     private IServiceProvider _provider = default!;
     private Respawner _respawner = default!;
 
+    public IEmailService EmailService { get; } = Substitute.For<IEmailService>();
+    public IGeocodingService GeocodingService { get; } = Substitute.For<IGeocodingService>();
+    public IFileStorageService FileStorage { get; } = Substitute.For<IFileStorageService>();
+    public IIdentityService IdentityService { get; } = Substitute.For<IIdentityService>();
+
     public TestUser CurrentUser { get; } = new();
 
     public async Task InitializeAsync()
@@ -54,11 +59,13 @@ public class IntegrationTestFixture : IAsyncLifetime
         // Swap the web-provided and external services for test doubles.
         services.AddSingleton<IUser>(CurrentUser);
         services.RemoveAll<IFileStorageService>();
-        services.AddSingleton(Substitute.For<IFileStorageService>());
+        services.AddSingleton(FileStorage);
         services.RemoveAll<IEmailService>();
-        services.AddSingleton(Substitute.For<IEmailService>());
+        services.AddSingleton(EmailService);
         services.RemoveAll<IGeocodingService>();
-        services.AddSingleton(Substitute.For<IGeocodingService>());
+        services.AddSingleton(GeocodingService);
+        services.RemoveAll<IIdentityService>();
+        services.AddSingleton(IdentityService);
         // IListingSpatialSearch stays REAL — it hits the DB, which is what we want to test.
 
         _provider = services.BuildServiceProvider();
@@ -77,6 +84,8 @@ public class IntegrationTestFixture : IAsyncLifetime
             DbAdapter = DbAdapter.SqlServer,
             TablesToIgnore = new Table[] { new Table("__EFMigrationsHistory") }
         });
+        IdentityService.GetUserEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns("owner@test.local");
     }
 
     public async Task ResetStateAsync()
@@ -85,6 +94,10 @@ public class IntegrationTestFixture : IAsyncLifetime
         await connection.OpenAsync();
         await _respawner.ResetAsync(connection);
         CurrentUser.Id = null;
+
+        EmailService.ClearReceivedCalls();
+        FileStorage.ClearReceivedCalls();
+        GeocodingService.ClearReceivedCalls();
     }
 
     public async Task<TResult> SendAsync<TResult>(IRequest<TResult> request)
