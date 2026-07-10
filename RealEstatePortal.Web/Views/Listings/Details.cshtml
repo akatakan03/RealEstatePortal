@@ -3,6 +3,29 @@
     ViewData["Title"] = Model.Listing.Title;
     var listing = Model.Listing;
 }
+@{
+    // A plain-text, trimmed description for meta tags (~160 chars is the sweet spot).
+    var metaDescription = listing.Description.Length > 160
+        ? listing.Description.Substring(0, 157).TrimEnd() + "…"
+        : listing.Description;
+    var coverImage = listing.ImageUrls.FirstOrDefault();
+    var canonicalUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/listing/{listing.Id}/{listing.Slug}";
+}
+
+@section Head {
+    <meta name="description" content="@metaDescription" />
+    <link rel="canonical" href="@canonicalUrl" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@listing.Title" />
+    <meta property="og:description" content="@metaDescription" />
+    <meta property="og:url" content="@canonicalUrl" />
+    @if (coverImage is not null)
+    {
+        <meta property="og:image" content="@coverImage" />
+    }
+    <meta name="twitter:card" content="summary_large_image" />
+}
 
 <a asp-action="Index" class="btn btn-link px-0">← Back to listings</a>
 
@@ -113,3 +136,41 @@
         </script>
     }
 }
+@{
+    var propertyTypeSchema = listing.PropertyType switch
+    {
+        RealEstatePortal.Domain.Enums.PropertyType.Apartment => "Apartment",
+        RealEstatePortal.Domain.Enums.PropertyType.House => "House",
+        _ => "Residence"
+    };
+
+    var structuredData = new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = propertyTypeSchema,
+        ["name"] = listing.Title,
+        ["description"] = metaDescription,
+        ["url"] = canonicalUrl,
+        ["numberOfBedrooms"] = listing.Bedrooms,
+        ["numberOfBathroomsTotal"] = listing.Bathrooms,
+        ["floorSize"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "QuantitativeValue",
+            ["value"] = listing.AreaSqMeters,
+            ["unitCode"] = "MTK"   // square metre
+        },
+        ["image"] = listing.ImageUrls,
+        ["offers"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "Offer",
+            ["price"] = listing.PriceAmount,
+            ["priceCurrency"] = listing.PriceCurrency,
+            ["availability"] = "https://schema.org/InStock"
+        }
+    };
+    var jsonLd = System.Text.Json.JsonSerializer.Serialize(structuredData);
+}
+
+<script type="application/ld+json">
+    @Html.Raw(jsonLd)
+</script>

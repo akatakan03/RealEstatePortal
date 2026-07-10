@@ -152,11 +152,15 @@ public class ListingsController : Controller
         catch (ForbiddenAccessException) { return Forbid(); }
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Details(int id)
+    [HttpGet("listing/{id:int}/{slug?}")]
+    public async Task<IActionResult> Details(int id, string? slug)
     {
         var dto = await _sender.Send(new GetListingDetailQuery(id));
         if (dto is null) return NotFound();
+
+        // Canonicalize: if the slug is missing or wrong, 301 to the correct URL.
+        if (!string.Equals(slug, dto.Slug, StringComparison.Ordinal))
+            return RedirectToActionPermanent(nameof(Details), new { id, slug = dto.Slug });
 
         return View(new ListingDetailViewModel
         {

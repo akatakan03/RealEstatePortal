@@ -43,6 +43,7 @@ Modelled in the architecture but left as opt-in.
 - **Shared ownership-check helper** — the "load entity → verify `OwnerId == currentUser` → act" pattern is now duplicated across several command handlers (update/delete/publish listing, photo commands, inquiry status commands). Extract into a small shared helper or a MediatR authorization behaviour. Left inline so far because premature abstraction is worse than visible duplication; it has now recurred enough to justify the refactor.
 - **Reusable exception-handling filter** — controllers repeat `try/catch (ValidationException | NotFoundException | ForbiddenAccessException)` blocks that map to `ModelState` / `NotFound()` / `Forbid()`. A reusable MVC action filter (or exception filter) would DRY this up. One or two endpoints didn't justify it; it now spans many.
 - **Soft delete for listings** — current listing delete is a hard delete (row + R2 objects removed). A production system typically prefers soft delete (`IsDeleted` flag + global query filter) so listings can be recovered and history preserved. Clean to add via an EF query filter; would also change the R2-cleanup timing.
+- **Admin-archive is not agent-proof** — an admin can archive a listing, but the owning agent can currently re-publish it from their dashboard, because `Listing.Publish()` doesn't block the `Archived → Active` transition. A stricter moderation model would prevent agents re-activating admin-archived listings (e.g. an `AdminLocked` flag, or distinguishing agent-archived from admin-archived). Left out to keep the moderation pass focused.
 
 ## Performance
 
@@ -51,8 +52,8 @@ Modelled in the architecture but left as opt-in.
 
 ## Quality
 
-- **Automated tests** — the solution has `Domain.UnitTests`, `Application.UnitTests`, and `IntegrationTests` projects scaffolded but empty. Highest-value targets: domain entity invariants (status transitions, value-object validation), Application handlers (validation, ownership enforcement, geocode-on-save), and a few integration tests over the real query pipeline. Stack per `ARCHITECTURE.md`: xUnit + NSubstitute + Shouldly (Shouldly chosen over the now-paid FluentAssertions).
+- **Automated tests** — the test trio is now established and green: `Domain.UnitTests` (value-object + entity invariants), `Application.UnitTests` (validators + command handlers via NSubstitute/MockQueryable, incl. ownership enforcement and geocode-on-save), and `IntegrationTests` (real pipeline + LocalDB + spatial query via Respawn). **Remaining coverage gaps to fill as features grow:** inquiry commands/inbox, photo upload/processing, admin moderation commands, and the fallback geocoding logic. Stack: xUnit + NSubstitute + MockQueryable + Shouldly + Respawn.
 
 ---
 
-*Last updated: 2026-07-10*
+*Last updated: 2026-07-10 (admin moderation shipped; test trio established)*

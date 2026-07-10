@@ -12,6 +12,7 @@
         .Select(i => new
         {
             id = i.Id,
+            slug = i.Slug,
             lat = i.Latitude!.Value,
             lng = i.Longitude!.Value,
             title = i.Title,
@@ -121,7 +122,7 @@ else
                         <p class="card-text">
                             @listing.PropertyType · @listing.ListingType · @listing.Bedrooms bd · @listing.AreaSqMeters.ToString("N0") m²
                         </p>
-                        <a asp-action="Details" asp-route-id="@listing.Id" class="btn btn-sm btn-outline-primary">View details</a>
+                        <a asp-action="Details" asp-route-id="@listing.Id" asp-route-slug="@listing.Slug" class="btn btn-sm btn-outline-primary">View details</a>
                     </div>
                 </div>
             </div>
@@ -174,7 +175,7 @@ else
         listingsData.forEach(function (p) {
         var m = L.marker([p.lat, p.lng]).addTo(map);
         m.bindPopup('<strong>' + esc(p.title) + '</strong><br/>' + esc(p.price) +
-        '<br/><a href="/Listings/Details/' + p.id + '">View details</a>');
+        '<br/><a href="/listing/' + p.id + '/' + p.slug + '">View details</a>');
         markers.push(m);
         });
 
