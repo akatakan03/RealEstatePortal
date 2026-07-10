@@ -23,6 +23,48 @@ public class NominatimGeocodingService : IGeocodingService
         if (string.IsNullOrWhiteSpace(address))
             return null;
 
+        foreach (var candidate in BuildCandidates(address))
+        {
+            var coord = await TryGeocodeAsync(candidate, cancellationToken);
+            if (coord is not null)
+            {
+                if (!string.Equals(candidate, address, StringComparison.Ordinal))
+                    _logger.LogInformation("Geocoded via fallback \"{Candidate}\" for address \"{Address}\"", candidate, address);
+                return coord;
+            }
+        }
+
+        _logger.LogWarning("Geocoding found no match for address: {Address}", address);
+        return null;
+    }
+
+    // Full address first, then progressively broader versions.
+    private static IEnumerable<string> BuildCandidates(string address)
+    {
+        yield return address;
+
+        // Split into comma-separated parts, trimming common TR abbreviations.
+        var parts = address
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(p => !p.EndsWith("Mh.", StringComparison.OrdinalIgnoreCase)
+                     && !p.EndsWith("Cd.", StringComparison.OrdinalIgnoreCase)
+                     && !p.EndsWith("Sk.", StringComparison.OrdinalIgnoreCase)
+                     && !p.StartsWith("No", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        // Try the cleaned full set, then the last 3, then the last 2 parts.
+        if (parts.Count > 0)
+        {
+            var cleaned = string.Join(", ", parts);
+            yield return cleaned;
+
+            if (parts.Count > 3) yield return string.Join(", ", parts.TakeLast(3));
+            if (parts.Count > 2) yield return string.Join(", ", parts.TakeLast(2));
+        }
+    }
+
+    private async Task<GeoCoordinate?> TryGeocodeAsync(string address, CancellationToken cancellationToken)
+    {
         try
         {
             var url = $"search?q={Uri.EscapeDataString(address)}&format=json&limit=1";
@@ -41,7 +83,7 @@ public class NominatimGeocodingService : IGeocodingService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Geocoding failed for address: {Address}", address);
+            _logger.LogWarning(ex, "Geocoding request failed for: {Address}", address);
             return null;
         }
     }

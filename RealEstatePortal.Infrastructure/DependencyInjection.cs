@@ -11,6 +11,7 @@ using RealEstatePortal.Infrastructure.Geocoding;
 using RealEstatePortal.Infrastructure.Identity;
 using RealEstatePortal.Infrastructure.Imaging;
 using RealEstatePortal.Infrastructure.Storage;
+using RealEstatePortal.Infrastructure.Spatial;
 
 namespace RealEstatePortal.Infrastructure;
 
@@ -24,12 +25,14 @@ public static class DependencyInjection
                 "Connection string 'DefaultConnection' not found.");
 
         services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+        services.AddScoped<ListingGeographySaveChangesInterceptor>();
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.AddInterceptors(
-                sp.GetRequiredService<AuditableEntitySaveChangesInterceptor>());
-            options.UseSqlServer(connectionString);
+                sp.GetRequiredService<AuditableEntitySaveChangesInterceptor>(),
+                sp.GetRequiredService<ListingGeographySaveChangesInterceptor>());
+            options.UseSqlServer(connectionString, sql => sql.UseNetTopologySuite());
         });
 
         services.AddScoped<IApplicationDbContext>(
@@ -71,6 +74,8 @@ public static class DependencyInjection
         services.Configure<EmailSettings>(configuration.GetSection("Email"));
         services.AddScoped<IEmailService, SmtpEmailService>();
         services.AddScoped<IIdentityService, IdentityService>();
+
+        services.AddScoped<IListingSpatialSearch, ListingSpatialSearch>();
 
         services.AddHttpClient<IGeocodingService, NominatimGeocodingService>(client =>
         {

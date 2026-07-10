@@ -16,6 +16,9 @@ public record GetPublicListingsQuery : IRequest<PaginatedList<ListingBriefDto>>
     public int? MinBedrooms { get; set; }
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 9;
+    public double? CenterLat { get; set; }
+    public double? CenterLng { get; set; }
+    public double? RadiusKm { get; set; }
 }
 
 public class GetPublicListingsQueryHandler
@@ -23,11 +26,16 @@ public class GetPublicListingsQueryHandler
 {
     private readonly IApplicationDbContext _context;
     private readonly IFileStorageService _storage;
+    private readonly IListingSpatialSearch _spatial;
 
-    public GetPublicListingsQueryHandler(IApplicationDbContext context, IFileStorageService storage)
+    public GetPublicListingsQueryHandler(
+        IApplicationDbContext context,
+        IFileStorageService storage,
+        IListingSpatialSearch spatial)
     {
         _context = context;
         _storage = storage;
+        _spatial = spatial;
     }
 
     public async Task<PaginatedList<ListingBriefDto>> Handle(
@@ -52,10 +60,19 @@ public class GetPublicListingsQueryHandler
         if (request.MinBedrooms.HasValue)
             query = query.Where(l => l.Bedrooms >= request.MinBedrooms.Value);
 
+        // Spatial pre-filter: get IDs within the radius, then intersect with the other filters.
+        if (request.CenterLat.HasValue && request.CenterLng.HasValue && request.RadiusKm is > 0)
+        {
+            var ids = await _spatial.FindWithinRadiusAsync(
+                request.CenterLat.Value, request.CenterLng.Value,
+                request.RadiusKm.Value * 1000, cancellationToken);
+
+            query = query.Where(l => ids.Contains(l.Id));
+        }
+
         var pageSize = Math.Clamp(request.PageSize, 1, 50);
         var pageNumber = Math.Max(request.PageNumber, 1);
 
-        // Explicit projection: pull the cover thumbnail key via a correlated subquery.
         var projected = query
             .OrderByDescending(l => l.Created)
             .Select(l => new ListingBriefDto
@@ -79,7 +96,6 @@ public class GetPublicListingsQueryHandler
         var page = await PaginatedList<ListingBriefDto>
             .CreateAsync(projected, pageNumber, pageSize, cancellationToken);
 
-        // Turn keys into public URLs after the DB round-trip.
         foreach (var item in page.Items)
             item.CoverThumbnailUrl = item.CoverThumbnailKey is null
                 ? null

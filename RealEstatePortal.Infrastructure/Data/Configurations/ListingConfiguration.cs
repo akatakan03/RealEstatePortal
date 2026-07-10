@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RealEstatePortal.Domain.Entities;
+using NetTopologySuite.Geometries;
 
 namespace RealEstatePortal.Infrastructure.Data.Configurations;
 
@@ -38,5 +39,10 @@ public class ListingConfiguration : IEntityTypeConfiguration<Listing>
             loc.Property(p => p.Latitude).HasColumnName("Latitude");
             loc.Property(p => p.Longitude).HasColumnName("Longitude");
         });
+
+        // Shadow geography column — no property on the Listing entity (keeps NTS out of Domain).
+        builder.Property<Point>("GeoPoint")
+            .HasColumnType("geography")
+            .IsRequired(false);
     }
 }
