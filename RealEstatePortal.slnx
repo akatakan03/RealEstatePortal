@@ -3,4 +3,5 @@
   <Project Path="RealEstatePortal.Domain/RealEstatePortal.Domain.csproj" />
   <Project Path="RealEstatePortal.Infrastructure/RealEstatePortal.Infrastructure.csproj" />
   <Project Path="RealEstatePortal.Web/RealEstatePortal.Web.csproj" />
+  <Project Path="tests/RealEstatePortal.Domain.UnitTests/RealEstatePortal.Domain.UnitTests.csproj" Id="2fa7d74a-3211-4f56-a971-f09c22d31e51" />
 </Solution>
