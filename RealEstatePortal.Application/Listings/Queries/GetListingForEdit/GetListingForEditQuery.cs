@@ -41,7 +41,9 @@ public class GetListingForEditQueryHandler
             Bedrooms = entity.Bedrooms,
             Bathrooms = entity.Bathrooms,
             AreaSqMeters = entity.AreaSqMeters,
-            Address = entity.Address
+            Address = entity.Address,
+            Latitude = entity.Location?.Latitude,
+            Longitude = entity.Location?.Longitude
         };
     }
 }

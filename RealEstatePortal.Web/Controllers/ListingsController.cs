@@ -1,24 +1,25 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using RealEstatePortal.Application.Listings.Commands.CreateListing;
-using RealEstatePortal.Application.Listings.Queries.GetListings;
-using ValidationException = RealEstatePortal.Application.Common.Exceptions.ValidationException;
 using Microsoft.AspNetCore.Authorization;
-using RealEstatePortal.Domain.Constants;
-using RealEstatePortal.Application.Listings.Commands.DeleteListing;
-using RealEstatePortal.Application.Listings.Commands.UpdateListing;
-using RealEstatePortal.Application.Listings.Queries.GetListingForEdit;
-using RealEstatePortal.Application.Listings.Queries.GetMyListings;
+using Microsoft.AspNetCore.Mvc;
 using RealEstatePortal.Application.Common.Exceptions;
-using RealEstatePortal.Application.Listings.Commands.PublishListing;
-using RealEstatePortal.Application.Listings.Queries.GetListingDetail;
-using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
-using RealEstatePortal.Web.Models.Listings;
-using RealEstatePortal.Application.Listings.Commands.AddListingImages;
-using RealEstatePortal.Application.Listings.Queries.GetListingImages;
-using RealEstatePortal.Application.Listings.Commands.DeleteListingImage;
-using RealEstatePortal.Application.Listings.Commands.SetCoverImage;
+using RealEstatePortal.Application.Geocoding.Queries.GeocodeAddress;
 using RealEstatePortal.Application.Inquiries.Commands.CreateInquiry;
+using RealEstatePortal.Application.Listings.Commands.AddListingImages;
+using RealEstatePortal.Application.Listings.Commands.CreateListing;
+using RealEstatePortal.Application.Listings.Commands.DeleteListing;
+using RealEstatePortal.Application.Listings.Commands.DeleteListingImage;
+using RealEstatePortal.Application.Listings.Commands.PublishListing;
+using RealEstatePortal.Application.Listings.Commands.SetCoverImage;
+using RealEstatePortal.Application.Listings.Commands.UpdateListing;
+using RealEstatePortal.Application.Listings.Queries.GetListingDetail;
+using RealEstatePortal.Application.Listings.Queries.GetListingForEdit;
+using RealEstatePortal.Application.Listings.Queries.GetListingImages;
+using RealEstatePortal.Application.Listings.Queries.GetListings;
+using RealEstatePortal.Application.Listings.Queries.GetMyListings;
+using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
+using RealEstatePortal.Domain.Constants;
+using RealEstatePortal.Web.Models.Listings;
+using ValidationException = RealEstatePortal.Application.Common.Exceptions.ValidationException;
 
 namespace RealEstatePortal.Web.Controllers;
 
@@ -240,5 +241,18 @@ public class ListingsController : Controller
         catch (RealEstatePortal.Application.Common.Exceptions.ForbiddenAccessException) { return Forbid(); }
 
         return RedirectToAction(nameof(Edit), new { id = listingId });
+    }
+
+    [HttpGet]
+    [Authorize(Roles = Roles.Agent)]
+    public async Task<IActionResult> Geocode(string q)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return Json(new { found = false });
+
+        var coord = await _sender.Send(new GeocodeAddressQuery(q));
+        return coord is null
+            ? Json(new { found = false })
+            : Json(new { found = true, lat = coord.Latitude, lng = coord.Longitude });
     }
 }

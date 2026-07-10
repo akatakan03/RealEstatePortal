@@ -44,7 +44,12 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
         entity.Address = request.Address;
         // Slug intentionally left unchanged — stable URLs are better for SEO.
 
-        if (addressChanged)
+        if (request.Latitude.HasValue && request.Longitude.HasValue)
+        {
+            // Agent explicitly placed the pin — trust it over the geocoder.
+            entity.Location = new GeoLocation(request.Latitude.Value, request.Longitude.Value);
+        }
+        else if (addressChanged)
         {
             var coord = await _geocoding.GeocodeAsync(request.Address, cancellationToken);
             if (coord is not null)

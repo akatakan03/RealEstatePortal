@@ -15,4 +15,6 @@ public class CreateListingCommand : IRequest<int>
     public int Bathrooms { get; set; }
     public decimal AreaSqMeters { get; set; }
     public string Address { get; set; } = string.Empty;
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 }

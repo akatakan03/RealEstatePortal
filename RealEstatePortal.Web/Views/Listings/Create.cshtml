@@ -66,8 +66,18 @@
 
             <div class="mb-3">
                 <label asp-for="Address" class="form-label"></label>
-                <input asp-for="Address" class="form-control" />
+                <div class="input-group">
+                    <input asp-for="Address" class="form-control" />
+                    <button type="button" class="btn btn-outline-secondary" id="locateBtn">Locate on map</button>
+                </div>
+                <div class="form-text">Type the address and click "Locate on map", then drag the pin or click the map to fine-tune the exact spot.</div>
             </div>
+
+            <input type="hidden" asp-for="Latitude" />
+            <input type="hidden" asp-for="Longitude" />
+
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            <div id="pickerMap" style="height: 320px;" class="mb-3 rounded border"></div>
 
             <button type="submit" class="btn btn-primary">Save</button>
             <a asp-action="Index" class="btn btn-secondary">Cancel</a>
@@ -77,4 +87,17 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="~/js/location-picker.js"></script>
+    <script>
+        @{
+            var initLat = Model.Latitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null";
+            var initLng = Model.Longitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null";
+        }
+        initLocationPicker({
+        mapId: 'pickerMap', addressId: 'Address',
+        latId: 'Latitude', lngId: 'Longitude', locateBtnId: 'locateBtn',
+        initialLat: @initLat, initialLng: @initLng
+        });
+    </script>
 }

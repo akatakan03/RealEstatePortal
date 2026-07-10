@@ -44,9 +44,17 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
             OwnerId = _user.Id
         };
 
-        var coord = await _geocoding.GeocodeAsync(request.Address, cancellationToken);
-        if (coord is not null)
-            entity.Location = new GeoLocation(coord.Latitude, coord.Longitude);
+        // Prefer the coordinates the agent set on the map; fall back to geocoding the address.
+        if (request.Latitude.HasValue && request.Longitude.HasValue)
+        {
+            entity.Location = new GeoLocation(request.Latitude.Value, request.Longitude.Value);
+        }
+        else
+        {
+            var coord = await _geocoding.GeocodeAsync(request.Address, cancellationToken);
+            if (coord is not null)
+                entity.Location = new GeoLocation(coord.Latitude, coord.Longitude);
+        }
 
         _context.Listings.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
