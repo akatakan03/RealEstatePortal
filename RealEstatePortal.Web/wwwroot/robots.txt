@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /Account/
+Disallow: /Admin/
+Disallow: /Inquiries/
+
+Sitemap: /sitemap.xml
