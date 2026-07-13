@@ -3,28 +3,37 @@
     ViewData["Title"] = "Register";
 }
 
-<h1>Register</h1>
-<div class="row">
-    <div class="col-md-5">
-        <form asp-action="Register" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell narrow">
+            <div class="auth-lead">
+                <h1>List your property</h1>
+                <p>Create an agent account to publish and manage listings.</p>
             </div>
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+            <div class="form-card">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="All" class="text-danger" style="margin-bottom:1rem;"></div>
+
+                    <div class="mb-field">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-field">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="mb-field">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:.5rem;">Create account</button>
+                </form>
             </div>
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button type="submit" class="btn btn-primary">Register</button>
-        </form>
+            <p class="auth-alt">Already have an account? <a asp-action="Login">Sign in</a></p>
+        </div>
     </div>
 </div>
 

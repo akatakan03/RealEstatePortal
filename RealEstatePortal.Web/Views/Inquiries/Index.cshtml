@@ -4,44 +4,55 @@
     ViewData["Title"] = "Inquiries";
 }
 
-<h1>Inquiries</h1>
+<div class="dash">
+    <div class="container">
+        <div class="dash-head">
+            <div>
+                <span class="eyebrow">Agent dashboard</span>
+                <h1 class="page-title">Inquiries</h1>
+            </div>
+        </div>
 
-@if (!Model.Any())
-{
-    <p class="text-muted">No inquiries yet.</p>
-}
-else
-{
-    <table class="table align-middle">
-        <thead>
-            <tr><th>Status</th><th>Listing</th><th>From</th><th>Received</th><th></th></tr>
-        </thead>
-        <tbody>
-            @foreach (var inq in Model)
-            {
-                <tr class="@(inq.Status == InquiryStatus.New ? "fw-bold" : "")">
-                    <td>
-                        @switch (inq.Status)
+        @if (!Model.Any())
+        {
+            <div class="form-card" style="text-align:center;color:var(--muted);">No inquiries yet.</div>
+        }
+        else
+        {
+            <div class="table-card">
+                <table class="table">
+                    <thead>
+                        <tr><th>Status</th><th>Listing</th><th>From</th><th>Received</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var inq in Model)
                         {
-                            case InquiryStatus.New:
-                                <span class="badge bg-danger">New</span>
-                                break;
-                            case InquiryStatus.Read:
+                            <tr class="@(inq.Status == InquiryStatus.New ? "unread-row" : "")">
+                                <td>
+                                    @switch (inq.Status)
+                                    {
+                                        case InquiryStatus.New:
+                                            <span class="badge-status badge-sold">New</span>
+                                            break;
+                                        case InquiryStatus.Read:
 
-                                <span class="badge bg-secondary">Read</span>
-                                break;
-                            case InquiryStatus.Handled:
+                                            <span class="badge-status badge-draft">Read</span>
+                                            break;
+                                        case InquiryStatus.Handled:
 
-                                <span class="badge bg-success">Handled</span>
-                                break;
+                                            <span class="badge-status badge-active">Handled</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="row-title">@inq.ListingTitle</td>
+                                <td>@inq.Name</td>
+                                <td style="color:var(--muted);">@inq.Created.ToLocalTime().ToString("g")</td>
+                                <td><div class="row-actions"><a asp-action="Details" asp-route-id="@inq.Id" class="btn btn-ghost btn-sm">View</a></div></td>
+                            </tr>
                         }
-                    </td>
-                    <td>@inq.ListingTitle</td>
-                    <td>@inq.Name</td>
-                    <td>@inq.Created.ToLocalTime().ToString("g")</td>
-                    <td><a asp-action="Details" asp-route-id="@inq.Id" class="btn btn-sm btn-outline-primary">View</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

@@ -1,47 +1,59 @@
-﻿@model List<RealEstatePortal.Application.Listings.Queries.GetListings.ListingBriefDto>
+﻿@using RealEstatePortal.Domain.Enums
+@model List<RealEstatePortal.Application.Listings.Queries.GetListings.ListingBriefDto>
 @{
     ViewData["Title"] = "My Listings";
 }
 
-<h1>My Listings</h1>
-<p><a class="btn btn-primary" asp-action="Create">Create New Listing</a></p>
+<div class="dash">
+    <div class="container">
+        <div class="dash-head">
+            <div>
+                <span class="eyebrow">Agent dashboard</span>
+                <h1 class="page-title">My listings</h1>
+            </div>
+            <a class="btn btn-primary" asp-action="Create">+ New listing</a>
+        </div>
 
-@if (!Model.Any())
-{
-    <p>You haven't created any listings yet.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var listing in Model)
-            {
-                <tr>
-                    <td>@listing.Title</td>
-                    <td>@listing.ListingType</td>
-                    <td>@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</td>
-                    <td>@listing.Status</td>
-                    <td>
-                        @if (listing.Status == RealEstatePortal.Domain.Enums.ListingStatus.Draft)
+        @if (!Model.Any())
+        {
+            <div class="form-card" style="text-align:center;color:var(--muted);">
+                You haven't created any listings yet. <a asp-action="Create" style="color:var(--brass-dk);font-weight:600;">Add your first one</a>.
+            </div>
+        }
+        else
+        {
+            <div class="table-card">
+                <table class="table">
+                    <thead>
+                        <tr><th>Title</th><th>Type</th><th>Price</th><th>Status</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var l in Model)
                         {
-                            <form asp-action="Publish" asp-route-id="@listing.Id" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-success">Publish</button>
-                            </form>
+                            <tr>
+                                <td class="row-title">@l.Title</td>
+                                <td>@l.ListingType</td>
+                                <td><span class="value">@l.PriceAmount.ToString("N0") @l.PriceCurrency</span></td>
+                                <td>
+                                    <span class="badge-status badge-@l.Status.ToString().ToLower()">@l.Status</span>
+                                </td>
+                                <td>
+                                    <div class="row-actions">
+                                        @if (l.Status == ListingStatus.Draft)
+                                        {
+                                            <form asp-action="Publish" asp-route-id="@l.Id" method="post">
+                                                <button type="submit" class="btn btn-primary btn-sm">Publish</button>
+                                            </form>
+                                        }
+                                        <a asp-action="Edit" asp-route-id="@l.Id" class="btn btn-ghost btn-sm">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@l.Id" class="btn btn-danger btn-sm">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
                         }
-                        <a asp-action="Edit" asp-route-id="@listing.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@listing.Id" class="btn btn-sm btn-outline-danger">Delete</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

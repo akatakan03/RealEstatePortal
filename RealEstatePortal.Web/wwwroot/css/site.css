@@ -1094,3 +1094,197 @@ img {
         position: static
     }
 }
+
+/* ===== form pages ===== */
+.form-page {
+    padding: clamp(2rem,5vw,3.5rem) 0
+}
+
+.form-shell {
+    max-width: 760px;
+    margin: 0 auto
+}
+
+    .form-shell.narrow {
+        max-width: 440px
+    }
+
+.form-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow-sm);
+    padding: clamp(1.5rem,4vw,2.5rem)
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem
+}
+
+.form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.1rem
+}
+
+.mb-field {
+    margin-bottom: 1.1rem
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 110px
+}
+
+.input-with-btn {
+    display: flex;
+    gap: .6rem
+}
+
+    .input-with-btn .form-control {
+        flex: 1
+    }
+
+.form-hint {
+    font-size: .84rem;
+    color: var(--muted);
+    margin-top: .35rem
+}
+
+.form-actions {
+    display: flex;
+    gap: .7rem;
+    align-items: center;
+    margin-top: 1.6rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--line)
+}
+
+#pickerMap {
+    height: 300px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    overflow: hidden
+}
+
+/* photo manager (edit page) */
+.photo-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .9rem;
+    margin-top: .5rem
+}
+
+.photo-item {
+    text-align: center
+}
+
+    .photo-item img {
+        width: 120px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid var(--line)
+    }
+
+    .photo-item .actions {
+        display: flex;
+        gap: .35rem;
+        justify-content: center;
+        margin-top: .4rem
+    }
+
+.preview-thumb {
+    width: 90px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 8px;
+    opacity: .7;
+    border: 1px solid var(--line)
+}
+
+/* ===== dashboard ===== */
+.dash {
+    padding: clamp(2rem,5vw,3.5rem) 0
+}
+
+.dash-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem
+}
+
+    .dash-head .eyebrow {
+        margin-bottom: .5rem
+    }
+
+.table-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden
+}
+
+    .table-card .table td, .table-card .table th {
+        padding: .9rem 1.2rem
+    }
+
+.row-title {
+    font-weight: 600;
+    color: var(--ink)
+}
+
+.row-actions {
+    display: flex;
+    gap: .4rem;
+    justify-content: flex-end
+}
+
+.table .value {
+    color: var(--ink)
+}
+
+.unread-row {
+    background: #FBFAF6
+}
+
+/* auth pages */
+.auth-lead {
+    text-align: center;
+    margin-bottom: 1.8rem
+}
+
+    .auth-lead h1 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 2rem;
+        margin: 0 0 .3rem
+    }
+
+    .auth-lead p {
+        color: var(--muted)
+    }
+
+.auth-alt {
+    text-align: center;
+    margin-top: 1.3rem;
+    color: var(--muted);
+    font-size: .92rem
+}
+
+    .auth-alt a {
+        color: var(--brass-dk);
+        font-weight: 600
+    }
+
+@media (max-width:640px) {
+    .form-row, .form-row-3 {
+        grid-template-columns: 1fr
+    }
+}

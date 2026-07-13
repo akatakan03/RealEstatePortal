@@ -1,30 +1,38 @@
 ﻿@model RealEstatePortal.Web.Models.Account.LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign in";
 }
 
-<h1>Login</h1>
-<div class="row">
-    <div class="col-md-5">
-        <form asp-action="Login" method="post">
-            <input type="hidden" asp-for="ReturnUrl" />
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell narrow">
+            <div class="auth-lead">
+                <h1>Welcome back</h1>
+                <p>Sign in to manage your listings and inquiries.</p>
             </div>
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+            <div class="form-card">
+                <form asp-action="Login" method="post">
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <div asp-validation-summary="All" class="text-danger" style="margin-bottom:1rem;"></div>
+
+                    <div class="mb-field">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-field">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <label style="display:flex;align-items:center;gap:.5rem;font-size:.92rem;">
+                        <input asp-for="RememberMe" /> Remember me
+                    </label>
+                    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1.2rem;">Sign in</button>
+                </form>
             </div>
-            <div class="mb-3 form-check">
-                <input asp-for="RememberMe" class="form-check-input" />
-                <label asp-for="RememberMe" class="form-check-label"></label>
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
+            <p class="auth-alt">New here? <a asp-action="Register">Create an account</a></p>
+        </div>
     </div>
 </div>
 
