@@ -6,145 +6,152 @@
                  ?? new List<RealEstatePortal.Application.Listings.Queries.GetListingImages.ListingImageDto>();
 }
 
-<h1>Edit Listing</h1>
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell">
+            <span class="eyebrow">Agent dashboard</span>
+            <h1 class="page-title" style="margin-bottom:1.5rem;">Edit listing</h1>
 
-<div class="row">
-    <div class="col-md-8">
-        <form asp-action="Edit" method="post" enctype="multipart/form-data">
-            <input type="hidden" asp-for="Id" />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-card">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:1rem;"></div>
 
-            <div class="mb-3">
-                <label asp-for="Title" class="form-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Description" class="form-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="ListingType" class="form-label"></label>
-                <select asp-for="ListingType" asp-items="Html.GetEnumSelectList<ListingType>()" class="form-select"></select>
-            </div>
-            <div class="mb-3">
-                <label asp-for="PropertyType" class="form-label"></label>
-                <select asp-for="PropertyType" asp-items="Html.GetEnumSelectList<PropertyType>()" class="form-select"></select>
-            </div>
-            <div class="row">
-                <div class="col mb-3">
-                    <label asp-for="Price" class="form-label"></label>
-                    <input asp-for="Price" class="form-control" />
-                    <span asp-validation-for="Price" class="text-danger"></span>
-                </div>
-                <div class="col mb-3">
-                    <label asp-for="Currency" class="form-label"></label>
-                    <input asp-for="Currency" class="form-control" />
-                    <span asp-validation-for="Currency" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col mb-3">
-                    <label asp-for="Bedrooms" class="form-label"></label>
-                    <input asp-for="Bedrooms" class="form-control" />
-                    <span asp-validation-for="Bedrooms" class="text-danger"></span>
-                </div>
-                <div class="col mb-3">
-                    <label asp-for="Bathrooms" class="form-label"></label>
-                    <input asp-for="Bathrooms" class="form-control" />
-                    <span asp-validation-for="Bathrooms" class="text-danger"></span>
-                </div>
-                <div class="col mb-3">
-                    <label asp-for="AreaSqMeters" class="form-label"></label>
-                    <input asp-for="AreaSqMeters" class="form-control" />
-                    <span asp-validation-for="AreaSqMeters" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Address" class="form-label"></label>
-                <div class="input-group">
-                    <input asp-for="Address" class="form-control" />
-                    <button type="button" class="btn btn-outline-secondary" id="locateBtn">Locate on map</button>
-                </div>
-                <div class="form-text">Type the address and click "Locate on map", then drag the pin or click the map to fine-tune the exact spot.</div>
-            </div>
-
-            <input type="hidden" asp-for="Latitude" />
-            <input type="hidden" asp-for="Longitude" />
-
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-            <div id="pickerMap" style="height: 320px;" class="mb-3 rounded border"></div>
-
-            <hr />
-            <h4>Add photos</h4>
-            <div class="mb-3">
-                <label class="form-label">Select images (uploaded when you click Save)</label>
-                <input type="file" name="newPhotos" multiple accept="image/*" class="form-control" id="newPhotos" />
-                <div id="previewArea" class="row mt-2"></div>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a asp-action="Mine" class="btn btn-secondary">Cancel</a>
-        </form>
-
-        <hr />
-        <h4>Current photos</h4>
-        @if (photos.Any())
-        {
-            <div class="row">
-                @foreach (var photo in photos)
-                {
-                    <div class="col-auto mb-3 text-center">
-                        <img src="@photo.ThumbnailUrl" alt="listing photo" class="img-thumbnail" style="height:120px;" />
-                        <div class="mt-1">
-                            @if (photo.IsCover)
-                            {
-                                <span class="badge bg-primary">Cover</span>
-                            }
-                            else
-                            {
-                                <form asp-action="SetCover" method="post" class="d-inline">
-                                    <input type="hidden" name="listingId" value="@Model.Id" />
-                                    <input type="hidden" name="imageId" value="@photo.Id" />
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Set cover</button>
-                                </form>
-                            }
-                            <form asp-action="DeletePhoto" method="post" class="d-inline"
-                                  onsubmit="return confirm('Delete this photo? This cannot be undone.');">
-                                <input type="hidden" name="listingId" value="@Model.Id" />
-                                <input type="hidden" name="imageId" value="@photo.Id" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger">✕</button>
-                            </form>
+                    <div class="mb-field">
+                        <label asp-for="Title" class="form-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="mb-field">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="form-row">
+                        <div class="mb-field">
+                            <label asp-for="ListingType" class="form-label"></label>
+                            <select asp-for="ListingType" asp-items="Html.GetEnumSelectList<ListingType>()" class="form-select"></select>
+                        </div>
+                        <div class="mb-field">
+                            <label asp-for="PropertyType" class="form-label"></label>
+                            <select asp-for="PropertyType" asp-items="Html.GetEnumSelectList<PropertyType>()" class="form-select"></select>
                         </div>
                     </div>
-                }
+                    <div class="form-row">
+                        <div class="mb-field">
+                            <label asp-for="Price" class="form-label"></label>
+                            <input asp-for="Price" class="form-control" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        <div class="mb-field">
+                            <label asp-for="Currency" class="form-label"></label>
+                            <input asp-for="Currency" class="form-control" />
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="mb-field">
+                            <label asp-for="Bedrooms" class="form-label"></label>
+                            <input asp-for="Bedrooms" class="form-control" />
+                            <span asp-validation-for="Bedrooms" class="text-danger"></span>
+                        </div>
+                        <div class="mb-field">
+                            <label asp-for="Bathrooms" class="form-label"></label>
+                            <input asp-for="Bathrooms" class="form-control" />
+                            <span asp-validation-for="Bathrooms" class="text-danger"></span>
+                        </div>
+                        <div class="mb-field">
+                            <label asp-for="AreaSqMeters" class="form-label"></label>
+                            <input asp-for="AreaSqMeters" class="form-control" />
+                            <span asp-validation-for="AreaSqMeters" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-field">
+                        <label asp-for="Address" class="form-label"></label>
+                        <div class="input-with-btn">
+                            <input asp-for="Address" class="form-control" />
+                            <button type="button" class="btn btn-ghost" id="locateBtn">Locate on map</button>
+                        </div>
+                        <p class="form-hint">Type the address and click "Locate on map", then drag the pin to fine-tune.</p>
+                    </div>
+
+                    <input type="hidden" asp-for="Latitude" />
+                    <input type="hidden" asp-for="Longitude" />
+                    <div id="pickerMap"></div>
+
+                    <div class="mb-field" style="margin-top:1.4rem;">
+                        <label class="form-label">Add photos</label>
+                        <input type="file" name="newPhotos" multiple accept="image/*" class="form-control" id="newPhotos" />
+                        <p class="form-hint">Uploaded when you click Save.</p>
+                        <div id="previewArea" class="photo-grid"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                        <a asp-action="Mine" class="btn btn-ghost">Cancel</a>
+                    </div>
+                </form>
+
+                @* Photo management (separate forms — cannot nest inside the edit form) *@
+                <div style="margin-top:2rem;padding-top:1.6rem;border-top:1px solid var(--line);">
+                    <h3 style="font-family:var(--serif);font-weight:600;font-size:1.2rem;margin:0 0 1rem;">Current photos</h3>
+                    @if (photos.Any())
+                    {
+                        <div class="photo-grid">
+                            @foreach (var photo in photos)
+                            {
+                                <div class="photo-item">
+                                    <img src="@photo.ThumbnailUrl" alt="listing photo" />
+                                    <div class="actions">
+                                        @if (photo.IsCover)
+                                        {
+                                            <span class="badge-status badge-sold">Cover</span>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="SetCover" method="post">
+                                                <input type="hidden" name="listingId" value="@Model.Id" />
+                                                <input type="hidden" name="imageId" value="@photo.Id" />
+                                                <button type="submit" class="btn btn-ghost btn-sm">Set cover</button>
+                                            </form>
+                                        }
+                                        <form asp-action="DeletePhoto" method="post" onsubmit="return confirm('Delete this photo? This cannot be undone.');">
+                                            <input type="hidden" name="listingId" value="@Model.Id" />
+                                            <input type="hidden" name="imageId" value="@photo.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">✕</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p style="color:var(--muted);">No photos yet.</p>
+                    }
+                </div>
             </div>
-        }
-        else
-        {
-            <p class="text-muted">No photos yet.</p>
-        }
+        </div>
     </div>
 </div>
+
+@section Head {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         document.getElementById('newPhotos').addEventListener('change', function (e) {
-            const area = document.getElementById('previewArea');
+            var area = document.getElementById('previewArea');
             area.innerHTML = '';
             for (const file of e.target.files) {
                 if (!file.type.startsWith('image/')) continue;
-                const col = document.createElement('div');
-                col.className = 'col-auto mb-2';
-                const img = document.createElement('img');
-                img.className = 'img-thumbnail';
-                img.style.height = '90px';
-                img.style.opacity = '0.7';
+                var img = document.createElement('img');
+                img.className = 'preview-thumb';
                 img.src = URL.createObjectURL(file);
-                col.appendChild(img);
-                area.appendChild(col);
+                area.appendChild(img);
             }
         });
     </script>
@@ -156,9 +163,8 @@
             var initLng = Model.Longitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null";
         }
         initLocationPicker({
-        mapId: 'pickerMap', addressId: 'Address',
-        latId: 'Latitude', lngId: 'Longitude', locateBtnId: 'locateBtn',
-        initialLat: @initLat, initialLng: @initLng
+        mapId:'pickerMap', addressId:'Address', latId:'Latitude', lngId:'Longitude',
+        locateBtnId:'locateBtn', initialLat:@initLat, initialLng:@initLng
         });
     </script>
 }

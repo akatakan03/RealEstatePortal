@@ -3,22 +3,36 @@
     ViewData["Title"] = "Delete Listing";
 }
 
-<h1>Delete Listing</h1>
-<p class="text-danger">Are you sure you want to delete this listing? This cannot be undone.</p>
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell narrow">
+            <span class="eyebrow">Agent dashboard</span>
+            <h1 class="page-title" style="margin-bottom:1rem;">Delete listing</h1>
 
-<dl class="row">
-    <dt class="col-sm-3">Title</dt>
-    <dd class="col-sm-9">@Model.Title</dd>
-    <dt class="col-sm-3">Type</dt>
-    <dd class="col-sm-9">@Model.ListingType</dd>
-    <dt class="col-sm-3">Property</dt>
-    <dd class="col-sm-9">@Model.PropertyType</dd>
-    <dt class="col-sm-3">Price</dt>
-    <dd class="col-sm-9">@Model.Price.ToString("N0") @Model.Currency</dd>
-</dl>
+            <div class="form-card">
+                <div class="alert alert-danger" style="margin-bottom:1.4rem;">
+                    This will permanently delete the listing and its photos. This can't be undone.
+                </div>
 
-<form asp-action="Delete" method="post">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Delete</button>
-    <a asp-action="Mine" class="btn btn-secondary">Cancel</a>
-</form>
+                <dl style="display:grid;grid-template-columns:auto 1fr;gap:.6rem 1.2rem;margin:0 0 1.5rem;">
+                    <dt style="color:var(--muted);">Title</dt>
+                    <dd style="margin:0;font-weight:600;">@Model.Title</dd>
+                    <dt style="color:var(--muted);">Type</dt>
+                    <dd style="margin:0;">@Model.ListingType</dd>
+                    <dt style="color:var(--muted);">Property</dt>
+                    <dd style="margin:0;">@Model.PropertyType</dd>
+                    <dt style="color:var(--muted);">Price</dt>
+                    <dd style="margin:0;"><span class="value">@Model.Price.ToString("N0") @Model.Currency</span></dd>
+                </dl>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="form-actions" style="margin-top:0;padding-top:0;border-top:none;">
+                        <button type="submit" class="btn btn-danger">Delete permanently</button>
+                        <a asp-action="Mine" class="btn btn-ghost">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
