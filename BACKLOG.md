@@ -36,11 +36,21 @@ Modelled in the architecture but left as opt-in.
 
 ## Architecture & refactors (tech debt)
 
-- **Domain-event dispatcher** — `BaseEntity` already collects domain events (e.g. `ListingPublishedEvent` raised in `Listing.Publish()`), but nothing dispatches them yet. Add a `SaveChanges` interceptor that publishes collected events through MediatR after save, with `ListingPublishedEvent` as the first real handler. Deferred deliberately: a dispatcher with no listeners is speculative. Worth building as its own focused pass when a second side effect appears.
+- **Domain-event dispatcher** — ✅ **DONE.** `DispatchDomainEventsInterceptor` (Infrastructure) collects domain events off tracked entities *after* commit and publishes them through MediatR via a `DomainEventNotification<T>` wrapper (keeps Domain free of MediatR). First consumer: `ListingPublishedEventHandler` emails the owner when their listing goes live. Unit + integration tested. *Future: offload handlers to a background queue (see Performance).*
 - **Shared ownership-check helper** — ✅ **DONE.** Extracted the "load entity → verify `OwnerId == currentUser` → act" pattern into `IApplicationDbContext.GetOwnedListingAsync(...)` (with an `includeMedia` flag for handlers needing photos). Applied across update/delete/publish listing and the three photo commands; admin handlers deliberately excluded (they don't check ownership). Behaviour preserved — verified by the existing ownership tests staying green.
 - **Reusable exception-handling filter** — ✅ **DONE.** Added `DomainExceptionFilter` (registered globally) mapping `NotFoundException → 404` and `ForbiddenAccessException → 403`. Controllers no longer repeat those catches. `ValidationException` intentionally stays in the form actions (each re-fetches its own view model to redisplay field errors) — the genuinely action-specific case.
 - **Soft delete for listings** — current listing delete is a hard delete (row + R2 objects removed). A production system typically prefers soft delete (`IsDeleted` flag + global query filter) so listings can be recovered and history preserved. Clean to add via an EF query filter; would also change the R2-cleanup timing.
 - **Admin-archive is not agent-proof** — an admin can archive a listing, but the owning agent can currently re-publish it from their dashboard, because `Listing.Publish()` doesn't block the `Archived → Active` transition. A stricter moderation model would prevent agents re-activating admin-archived listings (e.g. an `AdminLocked` flag, or distinguishing agent-archived from admin-archived). Left out to keep the moderation pass focused.
+
+## REST API (shipped — future enhancements)
+
+The public REST API is live: read endpoints (`GET /api/listings`, `/api/listings/{id}`) plus JWT-secured write endpoints (`POST/PUT/DELETE /api/listings`, publish), documented with Swagger UI (ADR-008, ADR-009). Natural follow-ups:
+
+- **API integration tests** — ✅ **DONE.** `WebApplicationFactory<Program>`-based tests boot the real host against a dedicated LocalDB (`RealEstatePortalDb_ApiTest`) with external services faked, and exercise the endpoints over real HTTP: public read returns 200 without a token, bad login → 401, write without token → 401, agent create → 201, invalid body → 400, and cross-agent update → 403 (full JWT + ownership stack over the wire). Surfaced and fixed a real gap — the `DomainExceptionFilter` is now API-aware (clean 403/400 for `/api`, cookie redirect for MVC).
+- **Refresh tokens / revocation** — JWTs are stateless with a 60-min expiry and no server-side revocation. A refresh-token flow (or short access + rotating refresh) would harden the auth story for real use.
+- **API versioning** — routes are unversioned (`/api/listings`). `Asp.Versioning.Mvc` + `/api/v1/...` would future-proof the contract.
+- **Rate limiting** — the built-in .NET rate limiter on `/api/*` (especially `/api/auth/login`) to blunt brute-force and abuse.
+- **Scalar UI** — optionally add `Scalar.AspNetCore` (`MapScalarApiReference()`) as a modern docs UI alongside/instead of Swagger UI — reflects the 2026 .NET tooling direction.
 
 ## Performance
 
@@ -54,4 +64,4 @@ Modelled in the architecture but left as opt-in.
 
 ---
 
-*Last updated: 2026-07-10 (admin moderation, SEO, interactive map pin, domain events, and two refactors shipped; test suite covers full command surface)*
+*Last updated: 2026-07-10 (admin moderation, SEO, interactive map pin, domain events, refactors, and a JWT-secured REST API shipped; test suite covers full command surface)*

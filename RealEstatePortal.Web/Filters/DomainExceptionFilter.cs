@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using RealEstatePortal.Application.Common.Exceptions;
 
@@ -8,20 +9,30 @@ public class DomainExceptionFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
     {
+        var isApi = context.HttpContext.Request.Path.StartsWithSegments("/api");
+
         switch (context.Exception)
         {
+            // API validation failures -> 400 with a problem-details body.
+            // (MVC form actions catch ValidationException themselves, so this only fires for /api.)
+            case ValidationException validationEx when isApi:
+                context.Result = new BadRequestObjectResult(
+                    new ValidationProblemDetails(validationEx.Errors));
+                context.ExceptionHandled = true;
+                break;
+
             case NotFoundException:
-                context.Result = new NotFoundResult();          // 404
+                context.Result = new NotFoundResult();          // 404 for both API and MVC
                 context.ExceptionHandled = true;
                 break;
 
             case ForbiddenAccessException:
-                context.Result = new ForbidResult();            // 403 -> AccessDenied page
+                // API -> hard 403; MVC -> cookie Forbid (redirects to AccessDenied page).
+                context.Result = isApi
+                    ? new StatusCodeResult(StatusCodes.Status403Forbidden)
+                    : new ForbidResult();
                 context.ExceptionHandled = true;
                 break;
-
-                // ValidationException is intentionally NOT handled here — form actions
-                // catch it themselves to redisplay the form with field errors.
         }
     }
 }
