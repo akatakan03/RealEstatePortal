@@ -2,6 +2,7 @@ using RealEstatePortal.Application;
 using RealEstatePortal.Infrastructure;
 using RealEstatePortal.Infrastructure.Data;
 using RealEstatePortal.Web;
+using RealEstatePortal.Web.Filters;
 using Serilog;
 using System.Globalization;
 
@@ -16,7 +17,10 @@ builder.Host.UseSerilog((context, config) =>
           .WriteTo.Console());
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<DomainExceptionFilter>();
+});
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.ConfigureApplicationCookie(options =>

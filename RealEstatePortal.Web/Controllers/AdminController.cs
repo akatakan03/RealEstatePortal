@@ -7,7 +7,6 @@ using RealEstatePortal.Application.Admin.Commands.RestoreListing;
 using RealEstatePortal.Application.Admin.Queries.GetListingsForModeration;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
-using NotFoundException = RealEstatePortal.Application.Common.Exceptions.NotFoundException;
 
 namespace RealEstatePortal.Web.Controllers;
 
@@ -29,8 +28,7 @@ public class AdminController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Archive(int id, ListingStatus? status)
     {
-        try { await _sender.Send(new ArchiveListingCommand(id)); }
-        catch (NotFoundException) { return NotFound(); }
+        await _sender.Send(new ArchiveListingCommand(id));
         return RedirectToAction(nameof(Listings), new { status });
     }
 
@@ -38,8 +36,7 @@ public class AdminController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Restore(int id, ListingStatus? status)
     {
-        try { await _sender.Send(new RestoreListingCommand(id)); }
-        catch (NotFoundException) { return NotFound(); }
+        await _sender.Send(new RestoreListingCommand(id));
         return RedirectToAction(nameof(Listings), new { status });
     }
 
@@ -47,8 +44,7 @@ public class AdminController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id, ListingStatus? status)
     {
-        try { await _sender.Send(new AdminDeleteListingCommand(id)); }
-        catch (NotFoundException) { return NotFound(); }
+        await _sender.Send(new AdminDeleteListingCommand(id));
         return RedirectToAction(nameof(Listings), new { status });
     }
 }

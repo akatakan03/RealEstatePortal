@@ -7,8 +7,6 @@ using RealEstatePortal.Application.Inquiries.Queries.GetInquiryDetail;
 using RealEstatePortal.Application.Inquiries.Queries.GetMyInquiries;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
-using ForbiddenAccessException = RealEstatePortal.Application.Common.Exceptions.ForbiddenAccessException;
-using NotFoundException = RealEstatePortal.Application.Common.Exceptions.NotFoundException;
 
 namespace RealEstatePortal.Web.Controllers;
 
@@ -48,13 +46,7 @@ public class InquiriesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> MarkHandled(int id)
     {
-        try
-        {
-            await _sender.Send(new MarkInquiryHandledCommand(id));
-        }
-        catch (NotFoundException) { return NotFound(); }
-        catch (ForbiddenAccessException) { return Forbid(); }
-
+        await _sender.Send(new MarkInquiryHandledCommand(id));
         return RedirectToAction(nameof(Details), new { id });
     }
 }

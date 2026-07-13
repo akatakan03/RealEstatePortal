@@ -37,8 +37,8 @@ Modelled in the architecture but left as opt-in.
 ## Architecture & refactors (tech debt)
 
 - **Domain-event dispatcher** — `BaseEntity` already collects domain events (e.g. `ListingPublishedEvent` raised in `Listing.Publish()`), but nothing dispatches them yet. Add a `SaveChanges` interceptor that publishes collected events through MediatR after save, with `ListingPublishedEvent` as the first real handler. Deferred deliberately: a dispatcher with no listeners is speculative. Worth building as its own focused pass when a second side effect appears.
-- **Shared ownership-check helper** — the "load entity → verify `OwnerId == currentUser` → act" pattern is now duplicated across several command handlers (update/delete/publish listing, photo commands, inquiry status commands). Extract into a small shared helper or a MediatR authorization behaviour. Left inline so far because premature abstraction is worse than visible duplication; it has now recurred enough to justify the refactor.
-- **Reusable exception-handling filter** — controllers repeat `try/catch (ValidationException | NotFoundException | ForbiddenAccessException)` blocks that map to `ModelState` / `NotFound()` / `Forbid()`. A reusable MVC action filter (or exception filter) would DRY this up. One or two endpoints didn't justify it; it now spans many.
+- **Shared ownership-check helper** — ✅ **DONE.** Extracted the "load entity → verify `OwnerId == currentUser` → act" pattern into `IApplicationDbContext.GetOwnedListingAsync(...)` (with an `includeMedia` flag for handlers needing photos). Applied across update/delete/publish listing and the three photo commands; admin handlers deliberately excluded (they don't check ownership). Behaviour preserved — verified by the existing ownership tests staying green.
+- **Reusable exception-handling filter** — ✅ **DONE.** Added `DomainExceptionFilter` (registered globally) mapping `NotFoundException → 404` and `ForbiddenAccessException → 403`. Controllers no longer repeat those catches. `ValidationException` intentionally stays in the form actions (each re-fetches its own view model to redisplay field errors) — the genuinely action-specific case.
 - **Soft delete for listings** — current listing delete is a hard delete (row + R2 objects removed). A production system typically prefers soft delete (`IsDeleted` flag + global query filter) so listings can be recovered and history preserved. Clean to add via an EF query filter; would also change the R2-cleanup timing.
 - **Admin-archive is not agent-proof** — an admin can archive a listing, but the owning agent can currently re-publish it from their dashboard, because `Listing.Publish()` doesn't block the `Archived → Active` transition. A stricter moderation model would prevent agents re-activating admin-archived listings (e.g. an `AdminLocked` flag, or distinguishing agent-archived from admin-archived). Left out to keep the moderation pass focused.
 
@@ -54,4 +54,4 @@ Modelled in the architecture but left as opt-in.
 
 ---
 
-*Last updated: 2026-07-10 (admin moderation, SEO, interactive map pin, domain events shipped; test suite covers full command surface)*
+*Last updated: 2026-07-10 (admin moderation, SEO, interactive map pin, domain events, and two refactors shipped; test suite covers full command surface)*

@@ -126,8 +126,6 @@ public class ListingsController : Controller
             await LoadPhotosAsync(command.Id);
             return View(command);
         }
-        catch (RealEstatePortal.Application.Common.Exceptions.NotFoundException) { return NotFound(); }
-        catch (RealEstatePortal.Application.Common.Exceptions.ForbiddenAccessException) { return Forbid(); }
     }
 
     [HttpGet]
@@ -144,13 +142,8 @@ public class ListingsController : Controller
     [Authorize(Roles = Roles.Agent)]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        try
-        {
-            await _sender.Send(new DeleteListingCommand(id));
-            return RedirectToAction(nameof(Mine));
-        }
-        catch (NotFoundException) { return NotFound(); }
-        catch (ForbiddenAccessException) { return Forbid(); }
+        await _sender.Send(new DeleteListingCommand(id));
+        return RedirectToAction(nameof(Mine));
     }
 
     [HttpGet("listing/{id:int}/{slug?}")]
@@ -191,7 +184,6 @@ public class ListingsController : Controller
 
             return View(nameof(Details), new ListingDetailViewModel { Listing = dto, Inquiry = command });
         }
-        catch (RealEstatePortal.Application.Common.Exceptions.NotFoundException) { return NotFound(); }
     }
 
     [HttpPost]
@@ -199,13 +191,8 @@ public class ListingsController : Controller
     [Authorize(Roles = Roles.Agent)]
     public async Task<IActionResult> Publish(int id)
     {
-        try
-        {
-            await _sender.Send(new PublishListingCommand(id));
-            return RedirectToAction(nameof(Mine));
-        }
-        catch (NotFoundException) { return NotFound(); }
-        catch (ForbiddenAccessException) { return Forbid(); }
+        await _sender.Send(new PublishListingCommand(id));
+        return RedirectToAction(nameof(Mine));
     }
 
     private async Task LoadPhotosAsync(int listingId)
@@ -218,13 +205,7 @@ public class ListingsController : Controller
     [Authorize(Roles = Roles.Agent)]
     public async Task<IActionResult> DeletePhoto(int listingId, int imageId)
     {
-        try
-        {
-            await _sender.Send(new DeleteListingImageCommand(listingId, imageId));
-        }
-        catch (RealEstatePortal.Application.Common.Exceptions.NotFoundException) { return NotFound(); }
-        catch (RealEstatePortal.Application.Common.Exceptions.ForbiddenAccessException) { return Forbid(); }
-
+        await _sender.Send(new DeleteListingImageCommand(listingId, imageId));
         return RedirectToAction(nameof(Edit), new { id = listingId });
     }
 
@@ -233,13 +214,7 @@ public class ListingsController : Controller
     [Authorize(Roles = Roles.Agent)]
     public async Task<IActionResult> SetCover(int listingId, int imageId)
     {
-        try
-        {
-            await _sender.Send(new SetCoverImageCommand(listingId, imageId));
-        }
-        catch (RealEstatePortal.Application.Common.Exceptions.NotFoundException) { return NotFound(); }
-        catch (RealEstatePortal.Application.Common.Exceptions.ForbiddenAccessException) { return Forbid(); }
-
+        await _sender.Send(new SetCoverImageCommand(listingId, imageId));
         return RedirectToAction(nameof(Edit), new { id = listingId });
     }
 
