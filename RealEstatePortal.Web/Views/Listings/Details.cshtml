@@ -1,10 +1,8 @@
 ﻿@model RealEstatePortal.Web.Models.Listings.ListingDetailViewModel
 @{
-    ViewData["Title"] = Model.Listing.Title;
     var listing = Model.Listing;
-}
-@{
-    // A plain-text, trimmed description for meta tags (~160 chars is the sweet spot).
+    ViewData["Title"] = listing.Title;
+
     var metaDescription = listing.Description.Length > 160
         ? listing.Description.Substring(0, 157).TrimEnd() + "…"
         : listing.Description;
@@ -15,7 +13,6 @@
 @section Head {
     <meta name="description" content="@metaDescription" />
     <link rel="canonical" href="@canonicalUrl" />
-
     <meta property="og:type" content="website" />
     <meta property="og:title" content="@listing.Title" />
     <meta property="og:description" content="@metaDescription" />
@@ -25,100 +22,116 @@
         <meta property="og:image" content="@coverImage" />
     }
     <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 }
 
-<a asp-action="Index" class="btn btn-link px-0">← Back to listings</a>
+<div class="detail">
+    <div class="container">
+        <a class="back-link" asp-action="Index">← Back to listings</a>
 
-@if (TempData["InquirySuccess"] is string ok)
-{
-    <div class="alert alert-success">@ok</div>
-}
-
-<h1>@listing.Title</h1>
-<h3 class="text-muted">@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</h3>
-
-@if (listing.ImageUrls.Any())
-{
-    <div class="mb-4">
-        <img id="mainImage" src="@listing.ImageUrls.First()" alt="@listing.Title"
-             class="img-fluid rounded mb-2" style="width:100%; max-height:440px; object-fit:cover;" />
-        @if (listing.ImageUrls.Count > 1)
+        @if (TempData["InquirySuccess"] is string ok)
         {
-            <div class="d-flex flex-wrap gap-2">
-                @foreach (var url in listing.ImageUrls)
+            <div class="alert alert-success" style="margin-bottom:1.5rem;">@ok</div>
+        }
+
+        @if (listing.ImageUrls.Any())
+        {
+            <div class="gallery">
+                <div class="gallery-main">
+                    <img id="mainImage" src="@listing.ImageUrls.First()" alt="@listing.Title" />
+                </div>
+                @if (listing.ImageUrls.Count > 1)
                 {
-                    <img src="@url" class="img-thumbnail" style="height:72px; cursor:pointer;"
-                         onclick="document.getElementById('mainImage').src='@url'" alt="thumbnail" />
+                    <div class="gallery-thumbs">
+                        @for (var i = 0; i < listing.ImageUrls.Count; i++)
+                        {
+                            <img src="@listing.ImageUrls[i]" class="@(i == 0 ? "active" : "")"
+                                 onclick="selectImage(this, '@listing.ImageUrls[i]')" alt="thumbnail" />
+                        }
+                    </div>
                 }
             </div>
         }
-    </div>
-}
-@if (listing.Latitude is not null && listing.Longitude is not null)
-{
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <h4>Location</h4>
-    <div id="map" style="height: 320px;" class="mb-4 rounded border"></div>
-}
-<div class="row">
-    <div class="col-md-7">
-        <dl class="row">
-            <dt class="col-sm-3">Type</dt>
-            <dd class="col-sm-9">@listing.ListingType</dd>
-            <dt class="col-sm-3">Property</dt>
-            <dd class="col-sm-9">@listing.PropertyType</dd>
-            <dt class="col-sm-3">Bedrooms</dt>
-            <dd class="col-sm-9">@listing.Bedrooms</dd>
-            <dt class="col-sm-3">Bathrooms</dt>
-            <dd class="col-sm-9">@listing.Bathrooms</dd>
-            <dt class="col-sm-3">Area</dt>
-            <dd class="col-sm-9">@listing.AreaSqMeters.ToString("N0") m²</dd>
-            <dt class="col-sm-3">Address</dt>
-            <dd class="col-sm-9">@listing.Address</dd>
-        </dl>
+        else
+        {
+            <div class="gallery-none">No photos yet</div>
+        }
 
-        <h4>Description</h4>
-        <p>@listing.Description</p>
-    </div>
+        <div class="detail-grid">
+            <div>
+                <div class="detail-head">
+                    <span class="eyebrow">@listing.PropertyType · @listing.ListingType</span>
+                    <h1>@listing.Title</h1>
+                    <div class="detail-price">@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</div>
+                </div>
 
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Contact the agent</h5>
-                <form asp-action="Inquire" method="post">
-                    <input type="hidden" asp-for="Inquiry.ListingId" />
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="facts">
+                    <div class="fact"><span class="value">@listing.Bedrooms</span><span class="lbl">Bedrooms</span></div>
+                    <div class="fact"><span class="value">@listing.Bathrooms</span><span class="lbl">Bathrooms</span></div>
+                    <div class="fact"><span class="value">@listing.AreaSqMeters.ToString("N0")</span><span class="lbl">m² area</span></div>
+                    <div class="fact"><span class="value" style="font-size:1.05rem;">@listing.ListingType</span><span class="lbl">Listing</span></div>
+                </div>
 
-                    <div class="mb-2">
-                        <label asp-for="Inquiry.Name" class="form-label">Name</label>
-                        <input asp-for="Inquiry.Name" class="form-control" />
-                        <span asp-validation-for="Inquiry.Name" class="text-danger"></span>
-                    </div>
-                    <div class="mb-2">
-                        <label asp-for="Inquiry.Email" class="form-label">Email</label>
-                        <input asp-for="Inquiry.Email" class="form-control" />
-                        <span asp-validation-for="Inquiry.Email" class="text-danger"></span>
-                    </div>
-                    <div class="mb-2">
-                        <label asp-for="Inquiry.Phone" class="form-label">Phone (optional)</label>
-                        <input asp-for="Inquiry.Phone" class="form-control" />
-                        <span asp-validation-for="Inquiry.Phone" class="text-danger"></span>
-                    </div>
-                    <div class="mb-2">
-                        <label asp-for="Inquiry.Message" class="form-label">Message</label>
-                        <textarea asp-for="Inquiry.Message" class="form-control" rows="4"></textarea>
-                        <span asp-validation-for="Inquiry.Message" class="text-danger"></span>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Send message</button>
-                </form>
+                <div class="detail-section">
+                    <h3>About this property</h3>
+                    <p class="detail-desc">@listing.Description</p>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Location</h3>
+                    <p class="addr-line">@listing.Address</p>
+                    @if (listing.Latitude is not null && listing.Longitude is not null)
+                    {
+                        <div id="detailMap"></div>
+                    }
+                </div>
             </div>
+
+            <aside>
+                <div class="contact-card">
+                    <h3>Contact the agent</h3>
+                    <p class="sub">Interested? Send a message and the agent will get back to you.</p>
+                    <form asp-action="Inquire" method="post">
+                        <input type="hidden" asp-for="Inquiry.ListingId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:.8rem;"></div>
+
+                        <div class="field-group">
+                            <label asp-for="Inquiry.Name" class="form-label">Name</label>
+                            <input asp-for="Inquiry.Name" class="form-control" />
+                            <span asp-validation-for="Inquiry.Name" class="text-danger"></span>
+                        </div>
+                        <div class="field-group">
+                            <label asp-for="Inquiry.Email" class="form-label">Email</label>
+                            <input asp-for="Inquiry.Email" class="form-control" />
+                            <span asp-validation-for="Inquiry.Email" class="text-danger"></span>
+                        </div>
+                        <div class="field-group">
+                            <label asp-for="Inquiry.Phone" class="form-label">Phone (optional)</label>
+                            <input asp-for="Inquiry.Phone" class="form-control" />
+                            <span asp-validation-for="Inquiry.Phone" class="text-danger"></span>
+                        </div>
+                        <div class="field-group">
+                            <label asp-for="Inquiry.Message" class="form-label">Message</label>
+                            <textarea asp-for="Inquiry.Message" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Inquiry.Message" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:100%;">Send message</button>
+                    </form>
+                </div>
+            </aside>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
+    <script>
+        function selectImage(el, url){
+            document.getElementById('mainImage').src = url;
+            document.querySelectorAll('.gallery-thumbs img').forEach(function(t){t.classList.remove('active');});
+            el.classList.add('active');
+        }
+    </script>
     @if (listing.Latitude is not null && listing.Longitude is not null)
     {
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -126,51 +139,47 @@
             (function () {
             var lat = @listing.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
             var lng = @listing.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            var map = L.map('map').setView([lat, lng], 15);
+            var map = L.map('detailMap').setView([lat, lng], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
+            maxZoom: 19, attribution: '© OpenStreetMap contributors'
             }).addTo(map);
             L.marker([lat, lng]).addTo(map);
             })();
         </script>
     }
-}
-@{
-    var propertyTypeSchema = listing.PropertyType switch
-    {
-        RealEstatePortal.Domain.Enums.PropertyType.Apartment => "Apartment",
-        RealEstatePortal.Domain.Enums.PropertyType.House => "House",
-        _ => "Residence"
-    };
 
-    var structuredData = new Dictionary<string, object?>
-    {
-        ["@context"] = "https://schema.org",
-        ["@type"] = propertyTypeSchema,
-        ["name"] = listing.Title,
-        ["description"] = metaDescription,
-        ["url"] = canonicalUrl,
-        ["numberOfBedrooms"] = listing.Bedrooms,
-        ["numberOfBathroomsTotal"] = listing.Bathrooms,
-        ["floorSize"] = new Dictionary<string, object?>
+    @{
+        var propertyTypeSchema = listing.PropertyType switch
         {
-            ["@type"] = "QuantitativeValue",
-            ["value"] = listing.AreaSqMeters,
-            ["unitCode"] = "MTK"   // square metre
-        },
-        ["image"] = listing.ImageUrls,
-        ["offers"] = new Dictionary<string, object?>
+            RealEstatePortal.Domain.Enums.PropertyType.Apartment => "Apartment",
+            RealEstatePortal.Domain.Enums.PropertyType.House => "House",
+            _ => "Residence"
+        };
+        var structuredData = new Dictionary<string, object?>
         {
-            ["@type"] = "Offer",
-            ["price"] = listing.PriceAmount,
-            ["priceCurrency"] = listing.PriceCurrency,
-            ["availability"] = "https://schema.org/InStock"
-        }
-    };
-    var jsonLd = System.Text.Json.JsonSerializer.Serialize(structuredData);
+            ["@context"] = "https://schema.org",
+            ["@type"] = propertyTypeSchema,
+            ["name"] = listing.Title,
+            ["description"] = metaDescription,
+            ["url"] = canonicalUrl,
+            ["numberOfBedrooms"] = listing.Bedrooms,
+            ["numberOfBathroomsTotal"] = listing.Bathrooms,
+            ["floorSize"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "QuantitativeValue",
+                ["value"] = listing.AreaSqMeters,
+                ["unitCode"] = "MTK"
+            },
+            ["image"] = listing.ImageUrls,
+            ["offers"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "Offer",
+                ["price"] = listing.PriceAmount,
+                ["priceCurrency"] = listing.PriceCurrency,
+                ["availability"] = "https://schema.org/InStock"
+            }
+        };
+        var jsonLd = System.Text.Json.JsonSerializer.Serialize(structuredData);
+    }
+    <script type="application/ld+json">@Html.Raw(jsonLd)</script>
 }
-
-<script type="application/ld+json">
-    @Html.Raw(jsonLd)
-</script>
