@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Exceptions;
+using RealEstatePortal.Application.Common.Extensions;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Domain.Entities;
 
@@ -24,14 +25,7 @@ public class DeleteListingCommandHandler : IRequestHandler<DeleteListingCommand>
 
     public async Task Handle(DeleteListingCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Listings
-            .Include(l => l.Media)
-            .FirstOrDefaultAsync(l => l.Id == request.Id, cancellationToken);
-
-        if (entity is null)
-            throw new NotFoundException(nameof(Listing), request.Id);
-        if (entity.OwnerId != _user.Id)
-            throw new ForbiddenAccessException();
+        var entity = await _context.GetOwnedListingAsync(request.Id, _user.Id, cancellationToken, includeMedia: true);
 
         foreach (var m in entity.Media)
         {

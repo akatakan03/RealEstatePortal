@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Exceptions;
+using RealEstatePortal.Application.Common.Extensions;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Domain.Entities;
 
@@ -21,14 +22,7 @@ public class PublishListingCommandHandler : IRequestHandler<PublishListingComman
 
     public async Task Handle(PublishListingCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Listings
-            .FirstOrDefaultAsync(l => l.Id == request.Id, cancellationToken);
-
-        if (entity is null)
-            throw new NotFoundException(nameof(Listing), request.Id);
-
-        if (entity.OwnerId != _user.Id)
-            throw new ForbiddenAccessException();
+        var entity = await _context.GetOwnedListingAsync(request.Id, _user.Id, cancellationToken);
 
         entity.Publish();   // domain method: sets Active + raises ListingPublishedEvent
         await _context.SaveChangesAsync(cancellationToken);

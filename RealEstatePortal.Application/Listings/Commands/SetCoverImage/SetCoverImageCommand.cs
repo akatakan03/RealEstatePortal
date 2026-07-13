@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Exceptions;
+using RealEstatePortal.Application.Common.Extensions;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Domain.Entities;
 
@@ -21,14 +22,7 @@ public class SetCoverImageCommandHandler : IRequestHandler<SetCoverImageCommand>
 
     public async Task Handle(SetCoverImageCommand request, CancellationToken cancellationToken)
     {
-        var listing = await _context.Listings
-            .Include(l => l.Media)
-            .FirstOrDefaultAsync(l => l.Id == request.ListingId, cancellationToken);
-
-        if (listing is null)
-            throw new NotFoundException(nameof(Listing), request.ListingId);
-        if (listing.OwnerId != _user.Id)
-            throw new ForbiddenAccessException();
+        var listing = await _context.GetOwnedListingAsync(request.ListingId, _user.Id, cancellationToken, includeMedia: true);
 
         if (listing.Media.All(m => m.Id != request.ImageId))
             throw new NotFoundException(nameof(ListingMedia), request.ImageId);

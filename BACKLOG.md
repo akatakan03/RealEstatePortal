@@ -50,8 +50,8 @@ Modelled in the architecture but left as opt-in.
 
 ## Quality
 
-- **Automated tests** — the test trio is established and green (35+ tests): `Domain.UnitTests` (value-object + entity invariants), `Application.UnitTests` (validators + command handlers via NSubstitute/MockQueryable — listings, **inquiries**, **admin moderation**, domain-event handler; incl. ownership enforcement, geocode-on-save, save-first-email-best-effort, and R2-orphan cleanup), and `IntegrationTests` (real pipeline + LocalDB via Respawn — create/publish, spatial radius query, domain-event dispatch, **inquiry leads loop**). **Remaining coverage gaps:** photo upload/processing (mock `IImageProcessor` + `IFileStorageService`) and the geocoding fallback chain (mock `HttpMessageHandler` to simulate Nominatim empty-then-hit) — both introduce a new mocking technique, so they make a tidy final testing pass. Stack: xUnit + NSubstitute + MockQueryable + Shouldly + Respawn.
+- **Automated tests** — ✅ the test trio is established and green (40+ tests) with the full command surface covered. `Domain.UnitTests` (value-object + entity invariants); `Application.UnitTests` (validators + handlers via NSubstitute/MockQueryable — listings, inquiries, admin moderation, photo-upload orchestration, domain-event handler; plus `NominatimGeocodingService` fallback via a stub `HttpMessageHandler`); `IntegrationTests` (real pipeline + LocalDB via Respawn — create/publish, spatial radius query, domain-event dispatch, inquiry leads loop). Guarantees under test include ownership enforcement, geocode-on-save, save-first-email-best-effort, R2-orphan cleanup, cover-photo logic, and the empty-then-fallback geocoding chain. Stack: xUnit + NSubstitute + MockQueryable + Shouldly + Respawn. *Future: broaden as new features land.*
 
 ---
 
-*Last updated: 2026-07-10 (admin moderation, SEO, interactive map pin, and domain-event dispatcher shipped; test trio established)*
+*Last updated: 2026-07-10 (admin moderation, SEO, interactive map pin, domain events shipped; test suite covers full command surface)*
