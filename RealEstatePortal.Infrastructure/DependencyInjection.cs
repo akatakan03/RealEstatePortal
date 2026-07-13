@@ -87,6 +87,8 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(8);
         });
 
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+
         return services;
     }
 }
