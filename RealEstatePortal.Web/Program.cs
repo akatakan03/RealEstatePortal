@@ -1,3 +1,4 @@
+using Microsoft.OpenApi.Models;
 using RealEstatePortal.Application;
 using RealEstatePortal.Infrastructure;
 using RealEstatePortal.Infrastructure.Data;
@@ -30,6 +31,24 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 builder.Services.AddWebServices();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "RealEstatePortal API",
+        Version = "v1",
+        Description = "Public read API for browsing property listings."
+    });
+});
+
+builder.Services.AddCors(options =>
+{
+    // Permissive dev policy so browser clients on other origins can call the API.
+    // A production API would restrict AllowAnyOrigin to known domains.
+    options.AddPolicy("ApiCors", policy =>
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
 
 var app = builder.Build();
 
@@ -50,11 +69,23 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "RealEstatePortal API v1");
+    });
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCors("ApiCors");
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseAuthentication();
 app.UseAuthorization();
