@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\RealEstatePortal.Application\RealEstatePortal.Application.csproj" />
+    <ProjectReference Include="..\..\RealEstatePortal.Infrastructure\RealEstatePortal.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

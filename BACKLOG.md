@@ -26,14 +26,11 @@ Modelled in the architecture but left as opt-in.
 
 ## Features (future enhancements)
 
-- **Interactive map pin on create/edit** *(high value)* — let the agent confirm/correct the location instead of trusting the geocoder. The address field and a Leaflet map work together: typing an address geocodes to a **draggable marker** (a first guess); the agent drags it or clicks the map to set the true spot. The marker's final position — not the geocoder's guess — is saved as `Latitude`/`Longitude`.
-  - Flips coordinates from a server-side side effect into explicit user input: `CreateListingCommand`/`UpdateListingCommand` gain nullable `Latitude`/`Longitude` submitted from the map.
-  - Server-side geocoding (Nominatim + fallback) becomes the *backstop* when the agent never touches the map — so existing work is reused, not discarded.
-  - Needs a thin AJAX geocode endpoint (`/Listings/Geocode?q=...`) and, optionally, reverse geocoding (pin → address) via a new `ReverseAsync` on the geocoding service.
-  - Trade-off: JS-only; keep server-side geocode as the no-JS fallback.
-  - This is the standard pattern on mature portals (Sahibinden, Zillow, Rightmove) and sidesteps geocoder accuracy limits entirely.
+- **Interactive map pin on create/edit** — ✅ **DONE.** Agent confirms/corrects location on a Leaflet map: "Locate on map" geocodes the typed address to a draggable marker (first guess), then the agent drags it or clicks the map to set the true spot. The marker's final position is saved as `Latitude`/`Longitude`; server-side geocoding remains the fallback when the agent never touches the map. Shared `location-picker.js` powers both create and edit; AJAX endpoint at `/Listings/Geocode?q=...`.
+  - **Still optional / not built:** *reverse* geocoding (pin → address), i.e. updating the address text box when the agent drags the marker, via a `ReverseAsync` on `IGeocodingService`. Minor nicety; the forward flow is complete without it.
+  - Retires the geocoder-accuracy limitation — agents now have final say on location.
 
-- **Commercial geocoder option** — Nominatim + fallback geocodes reliably but only to district/neighbourhood centre for sparsely-mapped Turkish streets (OSM coverage gap, not a bug). For building-level accuracy, a commercial provider (Google, HERE, or a Turkey-specialised service) behind the existing `IGeocodingService` interface would be a drop-in swap. Deferred because it needs an API key + billing, which this project deliberately avoids. The interactive map pin above is the preferred, cost-free path to accuracy.
+- **Commercial geocoder option** — Nominatim + fallback geocodes reliably but only to district/neighbourhood centre for sparsely-mapped Turkish streets (OSM coverage gap, not a bug). For building-level accuracy, a commercial provider (Google, HERE, or a Turkey-specialised service) behind the existing `IGeocodingService` interface would be a drop-in swap. Deferred because it needs an API key + billing, which this project deliberately avoids. **Largely mooted by the interactive map pin (now done)** — agents place the exact spot manually, so the geocoder no longer needs building-level precision.
 
 ---
 
@@ -49,11 +46,12 @@ Modelled in the architecture but left as opt-in.
 
 - **Cache the unread-inquiry count** — the nav badge runs a `COUNT` query on every page load for logged-in agents. Fine at current scale; if it ever matters, cache it briefly (short in-memory TTL) or refresh on inquiry create / mark-read.
 - **`IQueryable` projection for read queries** — some read paths materialise entities then map/fill in memory (e.g. cover-image URLs, detail images). At scale, projecting straight to DTO columns in SQL is cheaper. Kept explicit for readability while data volumes are tiny.
+- **Async / background domain-event handlers** — the domain-event dispatcher (`DispatchDomainEventsInterceptor`) publishes events synchronously *after* commit, so the triggering request waits for handlers (e.g. the listing-published email) to finish. Fine locally; a production system would offload event handlers to a background queue (e.g. hosted service + channel, or an outbox pattern) so the user's request returns immediately and side effects retry on failure.
 
 ## Quality
 
-- **Automated tests** — the test trio is now established and green: `Domain.UnitTests` (value-object + entity invariants), `Application.UnitTests` (validators + command handlers via NSubstitute/MockQueryable, incl. ownership enforcement and geocode-on-save), and `IntegrationTests` (real pipeline + LocalDB + spatial query via Respawn). **Remaining coverage gaps to fill as features grow:** inquiry commands/inbox, photo upload/processing, admin moderation commands, and the fallback geocoding logic. Stack: xUnit + NSubstitute + MockQueryable + Shouldly + Respawn.
+- **Automated tests** — the test trio is established and green (35+ tests): `Domain.UnitTests` (value-object + entity invariants), `Application.UnitTests` (validators + command handlers via NSubstitute/MockQueryable — listings, **inquiries**, **admin moderation**, domain-event handler; incl. ownership enforcement, geocode-on-save, save-first-email-best-effort, and R2-orphan cleanup), and `IntegrationTests` (real pipeline + LocalDB via Respawn — create/publish, spatial radius query, domain-event dispatch, **inquiry leads loop**). **Remaining coverage gaps:** photo upload/processing (mock `IImageProcessor` + `IFileStorageService`) and the geocoding fallback chain (mock `HttpMessageHandler` to simulate Nominatim empty-then-hit) — both introduce a new mocking technique, so they make a tidy final testing pass. Stack: xUnit + NSubstitute + MockQueryable + Shouldly + Respawn.
 
 ---
 
-*Last updated: 2026-07-10 (admin moderation shipped; test trio established)*
+*Last updated: 2026-07-10 (admin moderation, SEO, interactive map pin, and domain-event dispatcher shipped; test trio established)*
