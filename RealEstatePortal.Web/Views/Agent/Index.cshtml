@@ -1,0 +1,74 @@
+﻿@using RealEstatePortal.Domain.Enums
+@model RealEstatePortal.Application.Agents.Queries.GetAgentPublicProfile.AgentPublicProfileDto
+@{
+    ViewData["Title"] = Model.DisplayName;
+}
+
+<div class="page">
+    <div class="container">
+        <div class="agent-hero">
+            <div class="agent-avatar">
+                @if (Model.AvatarUrl is not null)
+                {
+                    <img src="@Model.AvatarUrl" alt="@Model.DisplayName" />
+                }
+                else
+                {
+                    <span class="initial">@Model.DisplayName.Substring(0, 1).ToUpper()</span>
+                }
+            </div>
+            <div class="agent-info">
+                <span class="eyebrow">Agent</span>
+                <h1>@Model.DisplayName</h1>
+                <div class="agent-meta">
+                    @Model.Listings.Count active listing@(Model.Listings.Count == 1 ? "" : "s")
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.Bio))
+                {
+                    <p class="agent-bio">@Model.Bio</p>
+                }
+            </div>
+        </div>
+
+        <div class="sec-head">
+            <h2>Listings by @Model.DisplayName</h2>
+        </div>
+
+        @if (!Model.Listings.Any())
+        {
+            <div class="form-card" style="text-align:center;color:var(--muted);">
+                This agent has no active listings right now.
+            </div>
+        }
+        else
+        {
+            <div class="card-grid">
+                @foreach (var listing in Model.Listings)
+                {
+                    <a class="listing-card" asp-controller="Listings" asp-action="Details" asp-route-id="@listing.Id" asp-route-slug="@listing.Slug">
+                        <div class="lc-media">
+                            <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@listing.ListingType</span>
+                            @if (!string.IsNullOrEmpty(listing.CoverThumbnailUrl))
+                            {
+                                <img src="@listing.CoverThumbnailUrl" alt="@listing.Title" />
+                            }
+                            else
+                            {
+                                <div class="noimg">No photo yet</div>
+                            }
+                        </div>
+                        <div class="lc-body">
+                            <div class="lc-loc">@listing.PropertyType</div>
+                            <div class="lc-title">@listing.Title</div>
+                            <div class="lc-meta">
+                                <span><span class="value">@listing.Bedrooms</span> bd</span>
+                                <span><span class="value">@listing.AreaSqMeters.ToString("N0")</span> m²</span>
+                            </div>
+                            <div class="lc-price"><span class="value">@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</span></div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -19,4 +19,7 @@ public class ListingDetailDto
     public List<string> ImageUrls { get; set; } = new();
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
+    public string OwnerId { get; set; } = string.Empty;
+    public string? OwnerName { get; set; }
+    public string? OwnerAvatarUrl { get; set; }
 }

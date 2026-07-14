@@ -1422,3 +1422,113 @@ textarea.form-control {
         grid-template-columns: 1fr
     }
 }
+
+/* ===== public agent profile ===== */
+.agent-hero {
+    display: flex;
+    gap: 1.75rem;
+    align-items: center;
+    padding: clamp(1.5rem,4vw,2.5rem);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2.5rem
+}
+
+.agent-avatar {
+    width: 104px;
+    height: 104px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--brass-soft);
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--brass);
+    flex: none
+}
+
+    .agent-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover
+    }
+
+    .agent-avatar .initial {
+        font-family: var(--serif);
+        font-size: 2.2rem;
+        color: var(--brass-dk)
+    }
+
+.agent-info h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(1.6rem,3vw,2.2rem);
+    margin: 0 0 .3rem;
+    letter-spacing: -.01em
+}
+
+.agent-info .agent-meta {
+    color: var(--muted);
+    font-size: .95rem;
+    margin-bottom: .6rem
+}
+
+.agent-info .agent-bio {
+    color: #33413C;
+    line-height: 1.6;
+    max-width: 60ch
+}
+
+@media (max-width:640px) {
+    .agent-hero {
+        flex-direction: column;
+        text-align: center
+    }
+}
+
+/* "listed by" on detail */
+.listed-by {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    margin-top: 1.5rem;
+    transition: border-color .18s
+}
+
+    .listed-by:hover {
+        border-color: var(--brass)
+    }
+
+    .listed-by .lb-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: var(--brass-soft);
+        display: grid;
+        place-items: center;
+        flex: none;
+        color: var(--brass-dk);
+        font-family: var(--serif)
+    }
+
+        .listed-by .lb-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover
+        }
+
+    .listed-by .lb-name {
+        font-weight: 600;
+        color: var(--ink)
+    }
+
+    .listed-by .lb-label {
+        font-size: .8rem;
+        color: var(--muted)
+    }

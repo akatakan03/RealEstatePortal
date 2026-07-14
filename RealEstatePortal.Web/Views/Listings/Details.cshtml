@@ -91,6 +91,27 @@
                     <p class="detail-desc">@listing.Description</p>
                 </div>
 
+                <!-- YENİ: EMLAKÇI PROFİL KARTI BURAYA EKLENDİ -->
+                @if (!string.IsNullOrEmpty(listing.OwnerId))
+                {
+                    <a class="listed-by" asp-controller="Agent" asp-action="Index" asp-route-id="@listing.OwnerId" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; margin: 2rem 0; padding: 1rem; border: 1px solid #eee; border-radius: 8px;">
+                        <div class="lb-avatar" style="width: 48px; height: 48px; border-radius: 50%; overflow: hidden; background: #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #555;">
+                            @if (listing.OwnerAvatarUrl is not null)
+                            {
+                                <img src="@listing.OwnerAvatarUrl" alt="@listing.OwnerName" style="width: 100%; height: 100%; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <span>@((listing.OwnerName ?? "A").Substring(0, 1).ToUpper())</span>
+                            }
+                        </div>
+                        <div>
+                            <div class="lb-label" style="font-size: 0.85rem; color: #888;">Listed by</div>
+                            <div class="lb-name" style="font-weight: 600; color: #333;">@(listing.OwnerName ?? "Agent")</div>
+                        </div>
+                    </a>
+                }
+
                 <div class="detail-section">
                     <h3>Location</h3>
                     <p class="addr-line">@listing.Address</p>
