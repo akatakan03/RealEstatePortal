@@ -9,6 +9,7 @@ public interface IApplicationDbContext
     DbSet<ListingMedia> ListingMedia { get; }
     DbSet<Inquiry> Inquiries { get; }
     DbSet<Favorite> Favorites { get; }
+    DbSet<SavedSearch> SavedSearches { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -19,6 +19,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<ListingMedia> ListingMedia => Set<ListingMedia>();
     public DbSet<Inquiry> Inquiries => Set<Inquiry>();
     public DbSet<Favorite> Favorites => Set<Favorite>();
+    public DbSet<SavedSearch> SavedSearches => Set<SavedSearch>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

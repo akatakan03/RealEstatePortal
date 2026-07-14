@@ -76,6 +76,19 @@
 <section class="listings-sec">
     <div class="container">
         <div class="map-bar">
+            @if (User.Identity is not null && User.Identity.IsAuthenticated)
+            {
+                <form asp-controller="SavedSearches" asp-action="Create" method="post"
+                      style="display:flex;gap:.6rem;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;">
+                    <input type="hidden" name="Keyword" value="@Model.Filter.Keyword" />
+                    <input type="hidden" name="ListingType" value="@Model.Filter.ListingType" />
+                    <input type="hidden" name="PropertyType" value="@Model.Filter.PropertyType" />
+                    <input type="hidden" name="MaxPrice" value="@Model.Filter.MaxPrice" />
+                    <input type="hidden" name="MinBedrooms" value="@Model.Filter.MinBedrooms" />
+                    <input name="Name" class="form-control" style="max-width:260px;" placeholder="Name this search (e.g. Kadıköy flats)" />
+                    <button type="submit" class="btn btn-ghost btn-sm">🔔 Save this search</button>
+                </form>
+            }
             <label>Search on the map:</label>
             <select id="radiusSelect" class="form-select select-inline">
                 @foreach (var km in new[] { 1, 5, 10, 25, 50 })

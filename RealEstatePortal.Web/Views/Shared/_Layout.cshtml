@@ -22,6 +22,8 @@
                 @if (User.Identity is not null && User.Identity.IsAuthenticated)
                 {
                     <li><a asp-controller="Favorites" asp-action="Mine">Saved</a></li>
+                    <li><a asp-controller="Favorites" asp-action="Mine">Saved</a></li>
+                    <li><a asp-controller="SavedSearches" asp-action="Mine">Alerts</a></li>
                 }
                 @if (User.IsInRole("Agent"))
                 {
