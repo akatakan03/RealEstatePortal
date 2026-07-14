@@ -15,6 +15,17 @@
                     <div asp-validation-summary="All" class="text-danger" style="margin-bottom:1rem;"></div>
 
                     <div class="mb-field">
+                        <label class="form-label">I'm here to…</label>
+                        <div style="display:flex;gap:1rem;">
+                            <label style="flex:1;display:flex;gap:.5rem;align-items:center;border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;cursor:pointer;">
+                                <input type="radio" asp-for="Role" value="Member" /> Find a property
+                            </label>
+                            <label style="flex:1;display:flex;gap:.5rem;align-items:center;border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;cursor:pointer;">
+                                <input type="radio" asp-for="Role" value="Agent" /> List properties
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-field">
                         <label asp-for="Email" class="form-label"></label>
                         <input asp-for="Email" class="form-control" />
                         <span asp-validation-for="Email" class="text-danger"></span>

@@ -1288,3 +1288,8 @@ textarea.form-control {
         grid-template-columns: 1fr
     }
 }
+
+.listing-card .lc-link {
+    display: block;
+    color: inherit
+}

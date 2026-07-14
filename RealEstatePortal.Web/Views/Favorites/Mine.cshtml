@@ -1,0 +1,56 @@
+﻿@using RealEstatePortal.Domain.Enums
+@model List<RealEstatePortal.Application.Listings.Queries.GetListings.ListingBriefDto>
+@{
+    ViewData["Title"] = "Saved listings";
+}
+
+<div class="dash">
+    <div class="container">
+        <div class="dash-head">
+            <div>
+                <span class="eyebrow">Your account</span>
+                <h1 class="page-title">Saved listings</h1>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="form-card" style="text-align:center;color:var(--muted);">
+                You haven't saved any listings yet. <a asp-controller="Listings" asp-action="Index" style="color:var(--brass-dk);font-weight:600;">Browse listings</a>.
+            </div>
+        }
+        else
+        {
+            <div class="card-grid">
+                @foreach (var listing in Model)
+                {
+                    <div class="listing-card">
+                        <a class="lc-link" asp-controller="Listings" asp-action="Details" asp-route-id="@listing.Id" asp-route-slug="@listing.Slug" style="color:inherit;">
+                            <div class="lc-media">
+                                <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@listing.ListingType</span>
+                                @if (!string.IsNullOrEmpty(listing.CoverThumbnailUrl))
+                                {
+                                    <img src="@listing.CoverThumbnailUrl" alt="@listing.Title" />
+                                }
+                                else
+                                {
+                                    <div class="noimg">No photo yet</div>
+                                }
+                            </div>
+                        </a>
+                        <div class="lc-body">
+                            <div class="lc-loc">@listing.PropertyType</div>
+                            <div class="lc-title">@listing.Title</div>
+                            <div class="lc-price"><span class="value">@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</span></div>
+                            <form asp-controller="Favorites" asp-action="Toggle" method="post" style="margin-top:.9rem;">
+                                <input type="hidden" name="listingId" value="@listing.Id" />
+                                <input type="hidden" name="returnUrl" value="/Favorites/Mine" />
+                                <button type="submit" class="btn btn-ghost btn-sm" style="width:100%;">♥ Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

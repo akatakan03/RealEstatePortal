@@ -21,7 +21,7 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Register() => View();
+    public IActionResult Register(string? role = null) => View(new RegisterViewModel { Role = role == "agent" ? "Agent" : "Member" });
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -30,18 +30,14 @@ public class AccountController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        var user = new ApplicationUser
-        {
-            UserName = model.Email,
-            Email = model.Email
-        };
-
+        var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
         var result = await _userManager.CreateAsync(user, model.Password);
 
         if (result.Succeeded)
         {
-            // Every self-registration is an Agent (Admins are seeded/promoted)
-            await _userManager.AddToRoleAsync(user, Roles.Agent);
+            // Only ever Member or Agent from self-registration — never Admin.
+            var role = model.Role == "Agent" ? Roles.Agent : Roles.Member;
+            await _userManager.AddToRoleAsync(user, role);
             await _signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToAction("Index", "Home");
         }

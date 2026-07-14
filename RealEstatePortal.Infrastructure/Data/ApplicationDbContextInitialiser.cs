@@ -37,7 +37,7 @@ public class ApplicationDbContextInitialiser
     private async Task TrySeedAsync()
     {
         // Roles
-        foreach (var roleName in new[] { Roles.Admin, Roles.Agent })
+        foreach (var roleName in new[] { Roles.Admin, Roles.Agent, Roles.Member })
         {
             if (!await _roleManager.RoleExistsAsync(roleName))
             {

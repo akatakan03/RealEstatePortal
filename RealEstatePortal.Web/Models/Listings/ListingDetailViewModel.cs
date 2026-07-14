@@ -7,4 +7,5 @@ public class ListingDetailViewModel
 {
     public ListingDetailDto Listing { get; set; } = default!;
     public CreateInquiryCommand Inquiry { get; set; } = new();
+    public bool IsFavorited { get; set; }
 }

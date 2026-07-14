@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RealEstatePortal.Application.Common.Exceptions;
+using RealEstatePortal.Application.Favorites.Queries.IsListingFavorited;
 using RealEstatePortal.Application.Geocoding.Queries.GeocodeAddress;
 using RealEstatePortal.Application.Inquiries.Commands.CreateInquiry;
 using RealEstatePortal.Application.Listings.Commands.AddListingImages;
@@ -156,11 +157,16 @@ public class ListingsController : Controller
         if (!string.Equals(slug, dto.Slug, StringComparison.Ordinal))
             return RedirectToActionPermanent(nameof(Details), new { id, slug = dto.Slug });
 
-        return View(new ListingDetailViewModel
+        var vm = new ListingDetailViewModel
         {
             Listing = dto,
             Inquiry = new CreateInquiryCommand { ListingId = id }
-        });
+        };
+
+        if (User.Identity?.IsAuthenticated == true)
+            vm.IsFavorited = await _sender.Send(new IsListingFavoritedQuery(id));
+
+        return View(vm);
     }
 
     [HttpPost]

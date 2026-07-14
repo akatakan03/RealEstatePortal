@@ -19,6 +19,10 @@
 
             <ul class="nav-links">
                 <li><a asp-controller="Listings" asp-action="Index">Browse</a></li>
+                @if (User.Identity is not null && User.Identity.IsAuthenticated)
+                {
+                    <li><a asp-controller="Favorites" asp-action="Mine">Saved</a></li>
+                }
                 @if (User.IsInRole("Agent"))
                 {
                     <li><a asp-controller="Listings" asp-action="Mine">My listings</a></li>
@@ -45,7 +49,7 @@
                 else
                 {
                     <a class="btn btn-ghost btn-sm" asp-controller="Account" asp-action="Login">Sign in</a>
-                    <a class="btn btn-ink btn-sm" asp-controller="Account" asp-action="Register">List your property</a>
+                    <a class="btn btn-ink btn-sm" asp-controller="Account" asp-action="Register">Sign up</a>
                 }
             </div>
         </div>
