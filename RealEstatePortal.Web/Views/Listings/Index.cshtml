@@ -116,6 +116,16 @@
                 {
                     <a class="listing-card rise d1" asp-action="Details" asp-route-id="@listing.Id" asp-route-slug="@listing.Slug">
                         <div class="lc-media">
+                            @if (User.Identity is not null && User.Identity.IsAuthenticated)
+                            {
+                                <button type="button"
+                                        class="lc-fav @(listing.IsFavorited ? "is-fav" : "")"
+                                        data-listing-id="@listing.Id"
+                                        aria-label="Save listing"
+                                        onclick="toggleFav(event, this)">
+                                    @(listing.IsFavorited ? "♥" : "♡")
+                                </button>
+                            }
                             <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@listing.ListingType</span>
                             @if (!string.IsNullOrEmpty(listing.CoverThumbnailUrl))
                             {
@@ -162,6 +172,7 @@
             </nav>
         }
     </div>
+    <form id="favToken" style="display:none;">@Html.AntiForgeryToken()</form>
 </section>
 
 @section Scripts {
@@ -218,5 +229,26 @@
         window.location = window.location.pathname + '?' + params.toString();
         });
         })();
+
+        function toggleFav(event, btn) {
+        event.preventDefault();
+        event.stopPropagation();   // don't trigger the card's link
+        var id = btn.getAttribute('data-listing-id');
+        var token = document.querySelector('#favToken input[name="__RequestVerificationToken"]').value;
+
+        fetch('/Favorites/ToggleAjax', {
+        method: 'POST',
+        headers: { 'RequestVerificationToken': token, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'listingId=' + encodeURIComponent(id)
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+        if (d.favorited) { btn.classList.add('is-fav'); btn.textContent = '♥'; }
+        else { btn.classList.remove('is-fav'); btn.textContent = '♡'; }
+        })
+        .catch(function () { /* leave the heart unchanged on failure */ });
+        }
     </script>
+
+
 }

@@ -28,15 +28,18 @@ public class GetPublicListingsQueryHandler
     private readonly IApplicationDbContext _context;
     private readonly IFileStorageService _storage;
     private readonly IListingSpatialSearch _spatial;
+    private readonly IUser _user;
 
     public GetPublicListingsQueryHandler(
         IApplicationDbContext context,
         IFileStorageService storage,
-        IListingSpatialSearch spatial)
+        IListingSpatialSearch spatial,
+        IUser user)
     {
         _context = context;
         _storage = storage;
         _spatial = spatial;
+        _user = user;
     }
 
     public async Task<PaginatedList<ListingBriefDto>> Handle(
@@ -117,6 +120,20 @@ public class GetPublicListingsQueryHandler
                     item.Latitude = listing.Location.Latitude;
                     item.Longitude = listing.Location.Longitude;
                 }
+            }
+
+            // Mark which of this page's listings the signed-in user has already saved.
+            if (_user.Id is not null && page.Items.Count > 0)
+            {
+                var pageIdsForFav = page.Items.Select(i => i.Id).ToList();
+                var favoritedIds = await _context.Favorites
+                    .Where(f => f.UserId == _user.Id && pageIdsForFav.Contains(f.ListingId))
+                    .Select(f => f.ListingId)
+                    .ToListAsync(cancellationToken);
+
+                var favSet = favoritedIds.ToHashSet();
+                foreach (var item in page.Items)
+                    item.IsFavorited = favSet.Contains(item.Id);
             }
         }
 

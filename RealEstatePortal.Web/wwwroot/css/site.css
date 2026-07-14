@@ -1293,3 +1293,32 @@ textarea.form-control {
     display: block;
     color: inherit
 }
+
+.lc-fav {
+    position: absolute;
+    top: .7rem;
+    right: .7rem;
+    z-index: 3;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    background: rgba(255,255,255,.92);
+    color: var(--ink);
+    font-size: 1.1rem;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    transition: background .18s,color .18s,transform .18s;
+    box-shadow: var(--shadow-sm);
+}
+
+    .lc-fav:hover {
+        background: #fff;
+        transform: scale(1.1)
+    }
+
+    .lc-fav.is-fav {
+        color: var(--brass)
+    }

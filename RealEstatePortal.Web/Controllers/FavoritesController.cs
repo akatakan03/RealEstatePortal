@@ -30,4 +30,12 @@ public class FavoritesController : Controller
 
         return RedirectToAction(nameof(Mine));
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleAjax(int listingId)
+    {
+        var isFavorited = await _sender.Send(new ToggleFavoriteCommand(listingId));
+        return Json(new { favorited = isFavorited });
+    }
 }

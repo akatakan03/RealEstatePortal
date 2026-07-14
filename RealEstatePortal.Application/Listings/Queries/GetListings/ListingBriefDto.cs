@@ -19,4 +19,5 @@ public class ListingBriefDto
     public string? CoverThumbnailUrl { get; set; }     // filled after materialization
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
+    public bool IsFavorited { get; set; }
 }
