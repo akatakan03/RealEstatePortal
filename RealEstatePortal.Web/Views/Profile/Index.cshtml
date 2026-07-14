@@ -1,0 +1,74 @@
+﻿@model RealEstatePortal.Web.Models.Profile.ProfileHubViewModel
+@{
+    ViewData["Title"] = "My account";
+}
+
+<div class="dash">
+    <div class="container">
+        <div class="dash-head">
+            <div>
+                <span class="eyebrow">Your account</span>
+                <h1 class="page-title">My account</h1>
+            </div>
+            <a class="btn btn-ghost" asp-action="Edit">Edit profile</a>
+        </div>
+
+        @if (TempData["ProfileSaved"] is string ok)
+        {
+            <div class="alert alert-success" style="margin-bottom:1.5rem;">@ok</div>
+        }
+
+        <div class="profile-grid">
+            <div class="form-card profile-card">
+                <div class="avatar-lg">
+                    @if (Model.AvatarUrl is not null)
+                    {
+                        <img src="@Model.AvatarUrl" alt="Profile photo" />
+                    }
+                    else
+                    {
+                        <span class="avatar-initial">@((Model.DisplayName ?? Model.Email).Substring(0, 1).ToUpper())</span>
+                    }
+                </div>
+                <h2 class="profile-name">@(string.IsNullOrWhiteSpace(Model.DisplayName) ? Model.Email : Model.DisplayName)</h2>
+                <div class="profile-roles">
+                    @foreach (var r in Model.Roles)
+                    {
+                        <span class="badge-status badge-sold">@r</span>
+                    }
+                </div>
+            </div>
+
+            <div>
+                <div class="form-card" style="margin-bottom:1.5rem;">
+                    <h3 class="profile-h3">Details</h3>
+                    <dl class="profile-dl">
+                        <dt>Email</dt>
+                        <dd>@Model.Email</dd>
+                        <dt>Phone</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)</dd>
+                        <dt>About</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(Model.Bio) ? "—" : Model.Bio)</dd>
+                    </dl>
+                </div>
+
+                <div class="form-card">
+                    <h3 class="profile-h3">Shortcuts</h3>
+                    <div class="profile-links">
+                        <a class="btn btn-ghost" asp-controller="Favorites" asp-action="Mine">♥ Saved listings</a>
+                        <a class="btn btn-ghost" asp-controller="SavedSearches" asp-action="Mine">🔔 Alerts</a>
+                        @if (Model.IsAgent)
+                        {
+                            <a class="btn btn-ghost" asp-controller="Listings" asp-action="Mine">My listings</a>
+                            <a class="btn btn-ghost" asp-controller="Inquiries" asp-action="Index">Inquiries</a>
+                        }
+                        @if (Model.IsAdmin)
+                        {
+                            <a class="btn btn-ghost" asp-controller="Admin" asp-action="Listings">Admin moderation</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

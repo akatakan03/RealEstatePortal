@@ -22,7 +22,6 @@
                 @if (User.Identity is not null && User.Identity.IsAuthenticated)
                 {
                     <li><a asp-controller="Favorites" asp-action="Mine">Saved</a></li>
-                    <li><a asp-controller="Favorites" asp-action="Mine">Saved</a></li>
                     <li><a asp-controller="SavedSearches" asp-action="Mine">Alerts</a></li>
                 }
                 @if (User.IsInRole("Agent"))
@@ -43,7 +42,7 @@
             <div class="nav-actions">
                 @if (User.Identity is not null && User.Identity.IsAuthenticated)
                 {
-                    <span style="font-size:.9rem;color:var(--muted);">@User.Identity.Name</span>
+                    <a asp-controller="Profile" asp-action="Index" style="font-size:.9rem;color:var(--muted);font-weight:600;">@User.Identity.Name</a>
                     <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                         <button type="submit" class="btn btn-ghost btn-sm">Sign out</button>
                     </form>
