@@ -90,6 +90,12 @@
         </div>
     </footer>
 
+    @if (User.IsInRole("Agent"))
+    {
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+        <script src="~/js/notifications.js" asp-append-version="true"></script>
+    }
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

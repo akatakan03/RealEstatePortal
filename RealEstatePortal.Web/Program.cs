@@ -90,6 +90,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("ApiCors", policy =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 });
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -131,6 +132,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapHub<RealEstatePortal.Web.Hubs.NotificationHub>("/hubs/notifications");
 
 using (var scope = app.Services.CreateScope())
 {
