@@ -37,14 +37,8 @@ public class CreateInquiryCommandHandler : IRequestHandler<CreateInquiryCommand,
         if (listing is null)
             throw new NotFoundException(nameof(Listing), request.ListingId);
 
-        var inquiry = new Inquiry
-        {
-            ListingId = listing.Id,
-            Name = request.Name,
-            Email = request.Email,
-            Phone = request.Phone,
-            Message = request.Message
-        };
+        var inquiry = Inquiry.Create(
+            listing.Id, request.Name, request.Email, request.Phone, request.Message);
 
         _context.Inquiries.Add(inquiry);
         await _context.SaveChangesAsync(cancellationToken);   // save FIRST — never lose the lead

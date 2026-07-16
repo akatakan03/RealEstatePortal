@@ -1,10 +1,12 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RealEstatePortal.Application;
+using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Infrastructure;
 using RealEstatePortal.Infrastructure.Data;
 using RealEstatePortal.Web;
 using RealEstatePortal.Web.Filters;
+using RealEstatePortal.Web.Services;
 using Serilog;
 using System.Globalization;
 using System.Text;
@@ -91,6 +93,8 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 });
 builder.Services.AddSignalR();
+
+builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
 
 var app = builder.Build();
 
