@@ -20,5 +20,25 @@ public class CreateListingCommandValidator : AbstractValidator<CreateListingComm
         RuleFor(v => v.PropertyType).IsInEnum();
         RuleFor(v => v.Latitude).Must(BeValidLatitude).WithMessage("Latitude is out of range.");
         RuleFor(v => v.Longitude).Must(BeValidLongitude).WithMessage("Longitude is out of range.");
+        RuleFor(v => v.FloorNumber)
+            .GreaterThanOrEqualTo(-5).When(v => v.FloorNumber.HasValue)
+            .WithMessage("Floor number looks invalid.");
+
+        RuleFor(v => v.TotalFloors)
+            .GreaterThan(0).When(v => v.TotalFloors.HasValue)
+            .WithMessage("Total floors must be positive.");
+
+        RuleFor(v => v.FloorNumber)
+            .LessThanOrEqualTo(v => v.TotalFloors!.Value)
+            .When(v => v.FloorNumber.HasValue && v.TotalFloors.HasValue)
+            .WithMessage("Floor can't be higher than the building's total floors.");
+
+        RuleFor(v => v.BuildingAge)
+            .InclusiveBetween(0, 200).When(v => v.BuildingAge.HasValue)
+            .WithMessage("Building age looks invalid.");
+
+        RuleFor(v => v.MonthlyDues)
+            .GreaterThanOrEqualTo(0).When(v => v.MonthlyDues.HasValue)
+            .WithMessage("Monthly dues can't be negative.");
     }
 }
