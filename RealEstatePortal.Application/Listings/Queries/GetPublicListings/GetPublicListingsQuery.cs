@@ -20,6 +20,12 @@ public record GetPublicListingsQuery : IRequest<PaginatedList<ListingBriefDto>>
     public double? CenterLat { get; set; }
     public double? CenterLng { get; set; }
     public double? RadiusKm { get; set; }
+    public HeatingType? Heating { get; set; }
+    public InternetInfrastructure? Internet { get; set; }
+    public bool? Furnished { get; set; }
+    public bool? Parking { get; set; }
+    public bool? Balcony { get; set; }
+    public decimal? MaxDues { get; set; }
 }
 
 public class GetPublicListingsQueryHandler
@@ -63,6 +69,23 @@ public class GetPublicListingsQueryHandler
             query = query.Where(l => l.Price.Amount <= request.MaxPrice.Value);
         if (request.MinBedrooms.HasValue)
             query = query.Where(l => l.Bedrooms >= request.MinBedrooms.Value);
+        if (request.Heating.HasValue)
+            query = query.Where(l => l.Heating == request.Heating.Value);
+
+        if (request.Internet.HasValue)
+            query = query.Where(l => l.Internet == request.Internet.Value);
+
+        if (request.Furnished == true)
+            query = query.Where(l => l.IsFurnished);
+
+        if (request.Parking == true)
+            query = query.Where(l => l.HasParking);
+
+        if (request.Balcony == true)
+            query = query.Where(l => l.HasBalcony);
+
+        if (request.MaxDues.HasValue)
+            query = query.Where(l => l.MonthlyDues != null && l.MonthlyDues <= request.MaxDues.Value);
 
         // Spatial pre-filter: get IDs within the radius, then intersect with the other filters.
         if (request.CenterLat.HasValue && request.CenterLng.HasValue && request.RadiusKm is > 0)

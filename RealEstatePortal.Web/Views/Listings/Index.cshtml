@@ -1,4 +1,5 @@
 ﻿@using RealEstatePortal.Domain.Enums
+@using RealEstatePortal.Application.Listings.Queries.GetPublicListings
 @model RealEstatePortal.Web.Models.Listings.ListingBrowseViewModel
 @{
     ViewData["Title"] = "Browse Listings";
@@ -18,6 +19,11 @@
             price = i.PriceAmount.ToString("N0") + " " + i.PriceCurrency
         });
     var mapPointsJson = System.Text.Json.JsonSerializer.Serialize(mapPoints);
+
+    // Gelişmiş filtrelerden herhangi biri aktifse panelin açık kalmasını sağlayan yardımcı metot
+    bool HasAdvancedFilter(GetPublicListingsQuery f) =>
+        f.Heating.HasValue || f.Internet.HasValue || f.Furnished == true ||
+        f.Parking == true || f.Balcony == true || f.MaxDues.HasValue || f.MinBedrooms.HasValue;
 }
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -29,38 +35,81 @@
         <p class="lead">Verified listings from local agents — filter by area, type, and price to find your next home.</p>
 
         <div class="console-wrap rise d1">
-            <form asp-action="Index" method="get" class="console">
-                <div class="field">
-                    <label>Location</label>
-                    <input name="Keyword" value="@Model.Filter.Keyword" placeholder="Neighbourhood or address" />
+            <form asp-action="Index" method="get">
+                <div class="console">
+                    <div class="field">
+                        <label>Location</label>
+                        <input name="Keyword" value="@Model.Filter.Keyword" placeholder="Neighbourhood or address" />
+                    </div>
+                    <div class="field">
+                        <label>Type</label>
+                        <select name="ListingType">
+                            <option value="">Any type</option>
+                            @foreach (var t in Enum.GetValues<ListingType>())
+                            {
+                                <option value="@t" selected="@(Model.Filter.ListingType == t)">@t</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Property</label>
+                        <select name="PropertyType">
+                            <option value="">Any property</option>
+                            @foreach (var p in Enum.GetValues<PropertyType>())
+                            {
+                                <option value="@p" selected="@(Model.Filter.PropertyType == p)">@p</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Max price</label>
+                        <input name="MaxPrice" value="@Model.Filter.MaxPrice" placeholder="Any" />
+                    </div>
+                    <div class="search-cell">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
                 </div>
-                <div class="field">
-                    <label>Type</label>
-                    <select name="ListingType">
-                        <option value="">Any type</option>
-                        @foreach (var t in Enum.GetValues<ListingType>())
-                        {
-                            <option value="@t" selected="@(Model.Filter.ListingType == t)">@t</option>
-                        }
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Property</label>
-                    <select name="PropertyType">
-                        <option value="">Any property</option>
-                        @foreach (var p in Enum.GetValues<PropertyType>())
-                        {
-                            <option value="@p" selected="@(Model.Filter.PropertyType == p)">@p</option>
-                        }
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Max price</label>
-                    <input name="MaxPrice" value="@Model.Filter.MaxPrice" placeholder="Any" />
-                </div>
-                <div class="search-cell">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </div>
+
+                @* Gelişmiş Filtreler Paneli *@
+                <details class="more-filters" @(HasAdvancedFilter(Model.Filter) ? "open" : "")>
+                    <summary>More filters</summary>
+                    <div class="filter-grid">
+                        <div class="mb-field">
+                            <label class="form-label">Heating</label>
+                            <select name="Heating" class="form-select">
+                                <option value="">Any</option>
+                                @foreach (var h in Enum.GetValues<RealEstatePortal.Domain.Enums.HeatingType>())
+                                {
+                                    <option value="@h" selected="@(Model.Filter.Heating == h)">@h</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-field">
+                            <label class="form-label">Internet</label>
+                            <select name="Internet" class="form-select">
+                                <option value="">Any</option>
+                                @foreach (var i in Enum.GetValues<RealEstatePortal.Domain.Enums.InternetInfrastructure>())
+                                {
+                                    <option value="@i" selected="@(Model.Filter.Internet == i)">@i</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-field">
+                            <label class="form-label">Min bedrooms</label>
+                            <input name="MinBedrooms" value="@Model.Filter.MinBedrooms" class="form-control" placeholder="Any" />
+                        </div>
+                        <div class="mb-field">
+                            <label class="form-label">Max monthly dues</label>
+                            <input name="MaxDues" value="@Model.Filter.MaxDues" class="form-control" placeholder="Any" />
+                        </div>
+                    </div>
+                    <div class="filter-checks">
+                        <label><input type="checkbox" name="Furnished" value="true" @(Model.Filter.Furnished == true ? "checked" : "") /> Furnished</label>
+                        <label><input type="checkbox" name="Parking" value="true" @(Model.Filter.Parking == true ? "checked" : "") /> Parking</label>
+                        <label><input type="checkbox" name="Balcony" value="true" @(Model.Filter.Balcony == true ? "checked" : "") /> Balcony</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:1rem;">Apply filters</button>
+                </details>
 
                 @if (hasCenter)
                 {
@@ -211,7 +260,6 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19, attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-
         var markers = [];
         listingsData.forEach(function (p) {
         var m = L.marker([p.lat, p.lng]).addTo(map);
@@ -219,7 +267,6 @@
         '<br/><a href="/listing/' + p.id + '/' + p.slug + '">View details</a>');
         markers.push(m);
         });
-
         if (hasCenter) {
         map.setView([searchCenter.lat, searchCenter.lng], 12);
         L.circle([searchCenter.lat, searchCenter.lng], {
@@ -245,7 +292,8 @@
 
         function toggleFav(event, btn) {
         event.preventDefault();
-        event.stopPropagation();   // don't trigger the card's link
+        event.stopPropagation();
+        // don't trigger the card's link
         var id = btn.getAttribute('data-listing-id');
         var token = document.querySelector('#favToken input[name="__RequestVerificationToken"]').value;
 
@@ -262,6 +310,4 @@
         .catch(function () { /* leave the heart unchanged on failure */ });
         }
     </script>
-
-
 }

@@ -20,6 +20,12 @@ public class ListingBrowseViewModel
         if (Filter.MinPrice.HasValue) d["MinPrice"] = Filter.MinPrice.Value.ToString(CultureInfo.InvariantCulture);
         if (Filter.MaxPrice.HasValue) d["MaxPrice"] = Filter.MaxPrice.Value.ToString(CultureInfo.InvariantCulture);
         if (Filter.MinBedrooms.HasValue) d["MinBedrooms"] = Filter.MinBedrooms.Value.ToString();
+        if (Filter.Heating.HasValue) d["Heating"] = Filter.Heating.ToString();
+        if (Filter.Internet.HasValue) d["Internet"] = Filter.Internet.ToString();
+        if (Filter.Furnished == true) d["Furnished"] = "true";
+        if (Filter.Parking == true) d["Parking"] = "true";
+        if (Filter.Balcony == true) d["Balcony"] = "true";
+        if (Filter.MaxDues.HasValue) d["MaxDues"] = Filter.MaxDues.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
         return d;
     }
 }
