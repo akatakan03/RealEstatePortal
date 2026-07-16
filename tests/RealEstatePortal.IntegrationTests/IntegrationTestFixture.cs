@@ -66,6 +66,8 @@ public class IntegrationTestFixture : IAsyncLifetime
         services.AddSingleton(GeocodingService);
         services.RemoveAll<IIdentityService>();
         services.AddSingleton(IdentityService);
+        services.RemoveAll<IRealtimeNotifier>();
+        services.AddSingleton(Substitute.For<IRealtimeNotifier>());
         // IListingSpatialSearch stays REAL — it hits the DB, which is what we want to test.
 
         _provider = services.BuildServiceProvider();

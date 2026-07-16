@@ -20,7 +20,7 @@ These were always intended and are the natural next features.
 Modelled in the architecture but left as opt-in.
 
 - **Agency grouping** — agents optionally belong to an `Agency` (name, logo, address). Table is designed in the data model; not built.
-- **Favorites & saved searches** — requires visitor accounts. Enables buyers to save listings and re-run filter sets.
+- **Favorites & saved searches** — ✅ **DONE.** Added a **Member** role and role-choice registration (Member vs Agent). Favorites: toggle from the detail page (form-POST) or browse-grid hearts (AJAX), with a "Saved" page. Saved searches: members name a filter set on the browse page; a second `ListingPublishedEvent` handler (`NotifySavedSearchesHandler`) emails matches via the shared `SavedSearchMatcher` when an agent publishes a matching listing (ADR-010). Manageable from an "Alerts" page.
 
 ---
 
@@ -62,6 +62,8 @@ The public REST API is live: read endpoints (`GET /api/listings`, `/api/listings
 
 - **Automated tests** — ✅ the test trio is established and green (40+ tests) with the full command surface covered. `Domain.UnitTests` (value-object + entity invariants); `Application.UnitTests` (validators + handlers via NSubstitute/MockQueryable — listings, inquiries, admin moderation, photo-upload orchestration, domain-event handler; plus `NominatimGeocodingService` fallback via a stub `HttpMessageHandler`); `IntegrationTests` (real pipeline + LocalDB via Respawn — create/publish, spatial radius query, domain-event dispatch, inquiry leads loop). Guarantees under test include ownership enforcement, geocode-on-save, save-first-email-best-effort, R2-orphan cleanup, cover-photo logic, and the empty-then-fallback geocoding chain. Stack: xUnit + NSubstitute + MockQueryable + Shouldly + Respawn. *Future: broaden as new features land.*
 
+- **Turkish-locale case-insensitive text matching** — `SavedSearchMatcher` keyword matching uses `StringComparison.OrdinalIgnoreCase`, which does not handle the Turkish dotted/dotless İ (`"KADIKÖY"` won't match `"kadıköy"`). Fine for typical input; a locale-aware improvement would use `InvariantCultureIgnoreCase` or normalize both sides. Deferred as a considered decision rather than a silent default — Turkish casing is subtle enough to warrant its own pass. The same consideration applies anywhere user text is compared case-insensitively.
+
 ---
 
-*Last updated: 2026-07-10 (admin moderation, SEO, interactive map pin, domain events, refactors, and a JWT-secured REST API shipped; test suite covers full command surface)*
+*Last updated: 2026-07-10 (admin moderation, SEO, map pin, domain events, refactors, REST API, favorites & saved searches, user profiles, public agent profiles, and SignalR real-time notifications shipped). **Test-coverage note:** the test suite covers the command surface up to the REST API; features shipped since (saved-search matching, favorites, profiles, agent-profile query, real-time push) are **not yet covered** — a consolidation testing pass is the recommended next step.*
