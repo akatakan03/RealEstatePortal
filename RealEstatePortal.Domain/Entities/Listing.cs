@@ -39,4 +39,15 @@ public class Listing : BaseAuditableEntity
 
     public void Archive() => Status = ListingStatus.Archived;
     public void ReturnToDraft() => Status = ListingStatus.Draft;
+
+    // Structured attributes
+    public HeatingType? Heating { get; set; }
+    public InternetInfrastructure? Internet { get; set; }
+    public bool IsFurnished { get; set; }
+    public bool HasBalcony { get; set; }
+    public bool HasParking { get; set; }
+    public int? FloorNumber { get; set; }
+    public int? TotalFloors { get; set; }
+    public int? BuildingAge { get; set; }
+    public decimal? MonthlyDues { get; set; }
 }

@@ -41,7 +41,16 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
             Bathrooms = request.Bathrooms,
             AreaSqMeters = request.AreaSqMeters,
             Address = request.Address,
-            OwnerId = _user.Id
+            OwnerId = _user.Id,
+            Heating = request.Heating,
+            Internet = request.Internet,
+            IsFurnished = request.IsFurnished,
+            HasBalcony = request.HasBalcony,
+            HasParking = request.HasParking,
+            FloorNumber = request.FloorNumber,
+            TotalFloors = request.TotalFloors,
+            BuildingAge = request.BuildingAge,
+            MonthlyDues = request.MonthlyDues
         };
 
         // Prefer the coordinates the agent set on the map; fall back to geocoding the address.

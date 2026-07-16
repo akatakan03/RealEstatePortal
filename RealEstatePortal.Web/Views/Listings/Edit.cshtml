@@ -67,6 +67,55 @@
                         </div>
                     </div>
 
+                    <h3 style="font-family:var(--serif);font-weight:600;font-size:1.2rem;margin:1.8rem 0 1rem;">Features &amp; details</h3>
+
+                    <div class="form-row">
+                        <div class="mb-field">
+                            <label asp-for="Heating" class="form-label">Heating</label>
+                            <select asp-for="Heating" asp-items="Html.GetEnumSelectList<RealEstatePortal.Domain.Enums.HeatingType>()" class="form-select">
+                                <option value="">Not specified</option>
+                            </select>
+                        </div>
+                        <div class="mb-field">
+                            <label asp-for="Internet" class="form-label">Internet</label>
+                            <select asp-for="Internet" asp-items="Html.GetEnumSelectList<RealEstatePortal.Domain.Enums.InternetInfrastructure>()" class="form-select">
+                                <option value="">Not specified</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="mb-field">
+                            <label asp-for="FloorNumber" class="form-label">Floor</label>
+                            <input asp-for="FloorNumber" class="form-control" />
+                        </div>
+                        <div class="mb-field">
+                            <label asp-for="TotalFloors" class="form-label">Total floors</label>
+                            <input asp-for="TotalFloors" class="form-control" />
+                        </div>
+                        <div class="mb-field">
+                            <label asp-for="BuildingAge" class="form-label">Building age (yrs)</label>
+                            <input asp-for="BuildingAge" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-field">
+                        <label asp-for="MonthlyDues" class="form-label">Monthly dues (aidat)</label>
+                        <input asp-for="MonthlyDues" class="form-control" />
+                    </div>
+
+                    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:.5rem;">
+                        <label style="display:flex;align-items:center;gap:.5rem;">
+                            <input type="checkbox" asp-for="IsFurnished" /> Furnished
+                        </label>
+                        <label style="display:flex;align-items:center;gap:.5rem;">
+                            <input type="checkbox" asp-for="HasBalcony" /> Balcony
+                        </label>
+                        <label style="display:flex;align-items:center;gap:.5rem;">
+                            <input type="checkbox" asp-for="HasParking" /> Parking / garage
+                        </label>
+                    </div>
+
                     <div class="mb-field">
                         <label asp-for="Address" class="form-label"></label>
                         <div class="input-with-btn">

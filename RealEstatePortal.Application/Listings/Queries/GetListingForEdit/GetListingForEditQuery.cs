@@ -43,7 +43,16 @@ public class GetListingForEditQueryHandler
             AreaSqMeters = entity.AreaSqMeters,
             Address = entity.Address,
             Latitude = entity.Location?.Latitude,
-            Longitude = entity.Location?.Longitude
+            Longitude = entity.Location?.Longitude,
+            Heating = entity.Heating,
+            Internet = entity.Internet,
+            IsFurnished = entity.IsFurnished,
+            HasBalcony = entity.HasBalcony,
+            HasParking = entity.HasParking,
+            FloorNumber = entity.FloorNumber,
+            TotalFloors = entity.TotalFloors,
+            BuildingAge = entity.BuildingAge,
+            MonthlyDues = entity.MonthlyDues
         };
     }
 }

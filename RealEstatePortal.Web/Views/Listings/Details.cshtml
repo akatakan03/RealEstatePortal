@@ -87,6 +87,35 @@
                 </div>
 
                 <div class="detail-section">
+                    <h3>Features</h3>
+                    <div class="feature-list">
+                        @if (listing.Heating is not null && listing.Heating != RealEstatePortal.Domain.Enums.HeatingType.None)
+                        {
+                            <div class="feature"><span class="fk">Heating</span><span class="fv">@listing.Heating</span></div>
+                        }
+                        @if (listing.Internet is not null && listing.Internet != RealEstatePortal.Domain.Enums.InternetInfrastructure.Unknown)
+                        {
+                            <div class="feature"><span class="fk">Internet</span><span class="fv">@listing.Internet</span></div>
+                        }
+                        @if (listing.FloorNumber is not null)
+                        {
+                            <div class="feature"><span class="fk">Floor</span><span class="fv value">@listing.FloorNumber@(listing.TotalFloors is not null ? $" / {listing.TotalFloors}" : "")</span></div>
+                        }
+                        @if (listing.BuildingAge is not null)
+                        {
+                            <div class="feature"><span class="fk">Building age</span><span class="fv"><span class="value">@listing.BuildingAge</span> yrs</span></div>
+                        }
+                        @if (listing.MonthlyDues is not null)
+                        {
+                            <div class="feature"><span class="fk">Monthly dues</span><span class="fv"><span class="value">@listing.MonthlyDues.Value.ToString("N0")</span> @listing.PriceCurrency</span></div>
+                        }
+                        <div class="feature"><span class="fk">Furnished</span><span class="fv">@(listing.IsFurnished ? "Yes" : "No")</span></div>
+                        <div class="feature"><span class="fk">Balcony</span><span class="fv">@(listing.HasBalcony ? "Yes" : "No")</span></div>
+                        <div class="feature"><span class="fk">Parking</span><span class="fv">@(listing.HasParking ? "Yes" : "No")</span></div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
                     <h3>About this property</h3>
                     <p class="detail-desc">@listing.Description</p>
                 </div>

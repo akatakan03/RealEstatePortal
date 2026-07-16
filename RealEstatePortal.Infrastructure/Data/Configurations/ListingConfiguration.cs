@@ -44,5 +44,9 @@ public class ListingConfiguration : IEntityTypeConfiguration<Listing>
         builder.Property<Point>("GeoPoint")
             .HasColumnType("geography")
             .IsRequired(false);
+
+        builder.Property(l => l.Heating).HasConversion<string>().HasMaxLength(30);
+        builder.Property(l => l.Internet).HasConversion<string>().HasMaxLength(20);
+        builder.Property(l => l.MonthlyDues).HasPrecision(18, 2);
     }
 }

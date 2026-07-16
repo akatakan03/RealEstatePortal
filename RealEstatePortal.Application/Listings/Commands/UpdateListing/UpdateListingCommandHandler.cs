@@ -36,6 +36,15 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
         entity.Bathrooms = request.Bathrooms;
         entity.AreaSqMeters = request.AreaSqMeters;
         entity.Address = request.Address;
+        entity.Heating = request.Heating;
+        entity.Internet = request.Internet;
+        entity.IsFurnished = request.IsFurnished;
+        entity.HasBalcony = request.HasBalcony;
+        entity.HasParking = request.HasParking;
+        entity.FloorNumber = request.FloorNumber;
+        entity.TotalFloors = request.TotalFloors;
+        entity.BuildingAge = request.BuildingAge;
+        entity.MonthlyDues = request.MonthlyDues;
         // Slug intentionally left unchanged — stable URLs are better for SEO.
 
         if (request.Latitude.HasValue && request.Longitude.HasValue)

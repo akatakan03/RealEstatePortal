@@ -18,4 +18,13 @@ public class UpdateListingCommand : IRequest
     public string Address { get; set; } = string.Empty;
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
+    public HeatingType? Heating { get; set; }
+    public InternetInfrastructure? Internet { get; set; }
+    public bool IsFurnished { get; set; }
+    public bool HasBalcony { get; set; }
+    public bool HasParking { get; set; }
+    public int? FloorNumber { get; set; }
+    public int? TotalFloors { get; set; }
+    public int? BuildingAge { get; set; }
+    public decimal? MonthlyDues { get; set; }
 }

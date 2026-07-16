@@ -1582,3 +1582,35 @@ textarea.form-control {
         transition: opacity .2s
     }
 }
+
+/* ===== detail features ===== */
+.feature-list {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: .1rem 2rem
+}
+
+.feature {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .7rem 0;
+    border-bottom: 1px solid var(--line)
+}
+
+    .feature .fk {
+        color: var(--muted);
+        font-size: .92rem
+    }
+
+    .feature .fv {
+        font-weight: 600;
+        color: var(--ink);
+        font-size: .95rem
+    }
+
+@media (max-width:640px) {
+    .feature-list {
+        grid-template-columns: 1fr
+    }
+}

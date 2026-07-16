@@ -22,4 +22,13 @@ public class ListingDetailDto
     public string OwnerId { get; set; } = string.Empty;
     public string? OwnerName { get; set; }
     public string? OwnerAvatarUrl { get; set; }
+    public HeatingType? Heating { get; set; }
+    public InternetInfrastructure? Internet { get; set; }
+    public bool IsFurnished { get; set; }
+    public bool HasBalcony { get; set; }
+    public bool HasParking { get; set; }
+    public int? FloorNumber { get; set; }
+    public int? TotalFloors { get; set; }
+    public int? BuildingAge { get; set; }
+    public decimal? MonthlyDues { get; set; }
 }
