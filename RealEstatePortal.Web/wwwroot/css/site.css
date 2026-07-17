@@ -1748,3 +1748,43 @@ textarea.form-control {
         color: var(--muted);
         font-size: .78rem
     }
+
+/* ===== lock dialog ===== */
+.lock-dialog {
+    border: none;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    padding: 1.6rem;
+    max-width: 460px;
+    width: 90%;
+    color: var(--ink)
+}
+
+    .lock-dialog::backdrop {
+        background: rgba(11,26,22,.45);
+        backdrop-filter: blur(2px)
+    }
+
+.lock-dialog-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin: 0 0 .3rem
+}
+
+.lock-dialog-sub {
+    color: var(--muted);
+    font-size: .9rem;
+    margin: 0 0 1.2rem
+}
+
+.lock-dialog .form-label {
+    margin-bottom: .4rem
+}
+
+.lock-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .6rem;
+    margin-top: 1.2rem
+}

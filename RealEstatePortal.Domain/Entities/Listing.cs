@@ -44,14 +44,14 @@ public class Listing : BaseAuditableEntity
     public void Lock(string reason)
     {
         if (string.IsNullOrWhiteSpace(reason))
-            throw new ArgumentException("A lock reason is required.");
+            throw new InvalidOperationException("A lock reason is required.");   // (or your exception type)
 
         IsLocked = true;
         LockReason = reason.Trim();
         LockedAt = DateTimeOffset.UtcNow;
-
-        // Taking it off the public site — return to Draft (per the chosen workflow).
         Status = ListingStatus.Draft;
+
+        AddDomainEvent(new ListingLockedEvent(this, LockReason));   // ← notify via the dispatcher
     }
 
     public void Unlock()

@@ -80,15 +80,10 @@
 
                                     @if (!l.IsLocked)
                                     {
-                                        <details class="lock-pop">
-                                            <summary>🔒 Lock</summary>
-                                            <form asp-action="Lock" method="post" class="lock-form">
-                                                <input type="hidden" name="id" value="@l.Id" />
-                                                <input type="hidden" name="status" value="@current" />
-                                                <input name="reason" class="form-control" placeholder="Reason (shown to the agent)" required maxlength="500" />
-                                                <button type="submit" class="btn btn-primary btn-sm">Lock listing</button>
-                                            </form>
-                                        </details>
+                                        <button type="button" class="btn btn-ghost btn-sm lock-trigger"
+                                                data-id="@l.Id" data-title="@l.Title">
+                                            🔒 Lock
+                                        </button>
                                     }
                                     else
                                     {
@@ -103,3 +98,37 @@
         }
     </div>
 </div>
+
+<dialog id="lockDialog" class="lock-dialog">
+    <form asp-action="Lock" method="post">
+        <input type="hidden" name="id" id="lockId" />
+        <input type="hidden" name="status" value="@current" />
+        <h3 class="lock-dialog-title">Lock listing</h3>
+        <p class="lock-dialog-sub" id="lockSubtitle">This takes the listing off the public site and prevents the agent from publishing it until you unlock it.</p>
+        <label class="form-label" for="lockReason">Reason (the agent will see this and be emailed it)</label>
+        <textarea name="reason" id="lockReason" class="form-control" rows="4" maxlength="500" required
+                  placeholder="e.g. The photos don't match the described property. Please re-upload accurate images."></textarea>
+        <div class="lock-dialog-actions">
+            <button type="button" class="btn btn-ghost" id="lockCancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Lock listing</button>
+        </div>
+    </form>
+</dialog>
+
+@section Scripts {
+    <script>
+        (function () {
+            var dialog = document.getElementById('lockDialog');
+            document.querySelectorAll('.lock-trigger').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    document.getElementById('lockId').value = btn.getAttribute('data-id');
+                    document.getElementById('lockSubtitle').textContent =
+                        'Locking “' + btn.getAttribute('data-title') + '”. This takes it off the public site until you unlock it.';
+                    document.getElementById('lockReason').value = '';
+                    dialog.showModal();
+                });
+            });
+            document.getElementById('lockCancel').addEventListener('click', function () { dialog.close(); });
+        })();
+    </script>
+}
