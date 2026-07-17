@@ -1685,3 +1685,66 @@ textarea.form-control {
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== admin lock ===== */
+.lock-pop {
+    margin-top: .5rem
+}
+
+    .lock-pop summary {
+        cursor: pointer;
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--brass-dk);
+        list-style: none
+    }
+
+        .lock-pop summary::-webkit-details-marker {
+            display: none
+        }
+
+.lock-form {
+    display: flex;
+    gap: .5rem;
+    margin-top: .5rem;
+    align-items: center
+}
+
+    .lock-form .form-control {
+        max-width: 260px;
+        padding: .5rem .7rem;
+        font-size: .88rem
+    }
+
+.lock-note {
+    margin-top: .5rem;
+    font-size: .82rem;
+    color: var(--danger);
+    font-weight: 600
+}
+
+.locked-msg {
+    background: #F6E5E3;
+    border: 1px solid #E6C4BF;
+    border-radius: 10px;
+    padding: .6rem .8rem;
+    max-width: 320px
+}
+
+    .locked-msg strong {
+        display: block;
+        color: #9A3B30;
+        font-size: .88rem
+    }
+
+    .locked-msg span {
+        display: block;
+        color: #7A3129;
+        font-size: .85rem;
+        margin: .2rem 0
+    }
+
+    .locked-msg small {
+        color: var(--muted);
+        font-size: .78rem
+    }

@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RealEstatePortal.Application.Admin.Commands.AdminDeleteListing;
 using RealEstatePortal.Application.Admin.Commands.ArchiveListing;
+using RealEstatePortal.Application.Admin.Commands.LockListing;
 using RealEstatePortal.Application.Admin.Commands.RestoreListing;
+using RealEstatePortal.Application.Admin.Commands.UnlockListing;
 using RealEstatePortal.Application.Admin.Queries.GetListingsForModeration;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
@@ -45,6 +47,21 @@ public class AdminController : Controller
     public async Task<IActionResult> Delete(int id, ListingStatus? status)
     {
         await _sender.Send(new AdminDeleteListingCommand(id));
+        return RedirectToAction(nameof(Listings), new { status });
+    }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Lock(int id, string reason, ListingStatus? status)
+    {
+        await _sender.Send(new LockListingCommand(id, reason ?? string.Empty));
+        return RedirectToAction(nameof(Listings), new { status });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Unlock(int id, ListingStatus? status)
+    {
+        await _sender.Send(new UnlockListingCommand(id));
         return RedirectToAction(nameof(Listings), new { status });
     }
 }

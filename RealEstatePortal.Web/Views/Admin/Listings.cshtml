@@ -61,12 +61,39 @@
                                                 <button type="submit" class="btn btn-ghost btn-sm">Restore</button>
                                             </form>
                                         }
+
+                                        @if (l.IsLocked)
+                                        {
+                                            <form asp-action="Unlock" method="post">
+                                                <input type="hidden" name="id" value="@l.Id" />
+                                                <input type="hidden" name="status" value="@current" />
+                                                <button type="submit" class="btn btn-ghost btn-sm">🔓 Unlock</button>
+                                            </form>
+                                        }
+
                                         <form asp-action="Delete" method="post" onsubmit="return confirm('Permanently delete this listing and its photos?');">
                                             <input type="hidden" name="id" value="@l.Id" />
                                             <input type="hidden" name="status" value="@current" />
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                         </form>
                                     </div>
+
+                                    @if (!l.IsLocked)
+                                    {
+                                        <details class="lock-pop">
+                                            <summary>🔒 Lock</summary>
+                                            <form asp-action="Lock" method="post" class="lock-form">
+                                                <input type="hidden" name="id" value="@l.Id" />
+                                                <input type="hidden" name="status" value="@current" />
+                                                <input name="reason" class="form-control" placeholder="Reason (shown to the agent)" required maxlength="500" />
+                                                <button type="submit" class="btn btn-primary btn-sm">Lock listing</button>
+                                            </form>
+                                        </details>
+                                    }
+                                    else
+                                    {
+                                        <div class="lock-note">🔒 Locked — @l.LockReason</div>
+                                    }
                                 </td>
                             </tr>
                         }

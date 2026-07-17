@@ -38,7 +38,9 @@ public class GetListingsForModerationQueryHandler
                 OwnerId = l.OwnerId,
                 PriceAmount = l.Price.Amount,
                 PriceCurrency = l.Price.Currency,
-                Created = l.Created
+                Created = l.Created,
+                IsLocked = l.IsLocked,
+                LockReason = l.LockReason
             })
             .ToListAsync(cancellationToken);
 

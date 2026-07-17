@@ -38,16 +38,37 @@
                                     <span class="badge-status badge-@l.Status.ToString().ToLower()">@l.Status</span>
                                 </td>
                                 <td>
-                                    <div class="row-actions">
-                                        @if (l.Status == ListingStatus.Draft)
-                                        {
-                                            <form asp-action="Publish" asp-route-id="@l.Id" method="post">
-                                                <button type="submit" class="btn btn-primary btn-sm">Publish</button>
-                                            </form>
-                                        }
-                                        <a asp-action="Edit" asp-route-id="@l.Id" class="btn btn-ghost btn-sm">Edit</a>
-                                        <a asp-action="Delete" asp-route-id="@l.Id" class="btn btn-danger btn-sm">Delete</a>
-                                    </div>
+                                    @if (l.IsLocked)
+                                    {
+                                        <span class="badge-status badge-archived">🔒 Locked</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-status badge-@l.Status.ToString().ToLower()">@l.Status</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (l.IsLocked)
+                                    {
+                                        <div class="locked-msg">
+                                            <strong>Locked by an administrator.</strong>
+                                            <span>@l.LockReason</span>
+                                            <small>Contact support once resolved.</small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="row-actions">
+                                            @if (l.Status == ListingStatus.Draft)
+                                            {
+                                                <form asp-action="Publish" asp-route-id="@l.Id" method="post">
+                                                    <button type="submit" class="btn btn-primary btn-sm">Publish</button>
+                                                </form>
+                                            }
+                                            <a asp-action="Edit" asp-route-id="@l.Id" class="btn btn-ghost btn-sm">Edit</a>
+                                            <a asp-action="Delete" asp-route-id="@l.Id" class="btn btn-danger btn-sm">Delete</a>
+                                        </div>
+                                    }
                                 </td>
                             </tr>
                         }

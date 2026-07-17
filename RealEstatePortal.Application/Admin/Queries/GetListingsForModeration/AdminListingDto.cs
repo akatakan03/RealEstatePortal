@@ -12,4 +12,6 @@ public class AdminListingDto
     public decimal PriceAmount { get; init; }
     public string PriceCurrency { get; init; } = string.Empty;
     public DateTimeOffset Created { get; init; }
+    public bool IsLocked { get; init; }
+    public string? LockReason { get; init; }
 }
