@@ -48,5 +48,7 @@ public class ListingConfiguration : IEntityTypeConfiguration<Listing>
         builder.Property(l => l.Heating).HasConversion<string>().HasMaxLength(30);
         builder.Property(l => l.Internet).HasConversion<string>().HasMaxLength(20);
         builder.Property(l => l.MonthlyDues).HasPrecision(18, 2);
+
+        builder.Property(l => l.LockReason).HasMaxLength(500);
     }
 }

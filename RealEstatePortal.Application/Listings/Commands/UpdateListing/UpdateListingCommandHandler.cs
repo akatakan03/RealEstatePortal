@@ -25,6 +25,9 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
     {
         var entity = await _context.GetOwnedListingAsync(request.Id, _user.Id, cancellationToken);
 
+        if (entity.IsLocked)
+            throw new ForbiddenAccessException();
+
         var addressChanged = !string.Equals(entity.Address, request.Address, StringComparison.Ordinal);
 
         entity.Title = request.Title;
