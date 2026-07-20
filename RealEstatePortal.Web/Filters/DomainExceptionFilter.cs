@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using RealEstatePortal.Application.Common.Exceptions;
+using RealEstatePortal.Domain.Exceptions;
 
 namespace RealEstatePortal.Web.Filters;
 
@@ -22,7 +23,7 @@ public class DomainExceptionFilter : IExceptionFilter
                 break;
 
             // Domain rule violations (e.g. publishing a locked listing) -> 409 Conflict.
-            case ArgumentException domainEx:
+            case DomainException domainEx:
                 context.Result = isApi
                     ? new ConflictObjectResult(new ProblemDetails
                     {

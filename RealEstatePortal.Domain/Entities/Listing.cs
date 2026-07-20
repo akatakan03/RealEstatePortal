@@ -1,6 +1,7 @@
 ﻿using RealEstatePortal.Domain.Common;
 using RealEstatePortal.Domain.Enums;
 using RealEstatePortal.Domain.Events;
+using RealEstatePortal.Domain.Exceptions;
 using RealEstatePortal.Domain.ValueObjects;
 
 namespace RealEstatePortal.Domain.Entities;
@@ -31,7 +32,7 @@ public class Listing : BaseAuditableEntity
     public void Publish()
     {
         if (IsLocked)
-            throw new ArgumentException("This listing is locked by an administrator and cannot be published.");
+            throw new DomainException("This listing is locked by an administrator and cannot be published.");
         if (Status == ListingStatus.Active)
             return;
 
@@ -44,7 +45,7 @@ public class Listing : BaseAuditableEntity
     public void Lock(string reason)
     {
         if (string.IsNullOrWhiteSpace(reason))
-            throw new InvalidOperationException("A lock reason is required.");   // (or your exception type)
+            throw new DomainException("A lock reason is required.");
 
         IsLocked = true;
         LockReason = reason.Trim();
