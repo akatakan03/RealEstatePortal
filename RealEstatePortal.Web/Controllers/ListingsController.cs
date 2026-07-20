@@ -15,6 +15,7 @@ using RealEstatePortal.Application.Listings.Commands.UpdateListing;
 using RealEstatePortal.Application.Listings.Queries.GetListingDetail;
 using RealEstatePortal.Application.Listings.Queries.GetListingForEdit;
 using RealEstatePortal.Application.Listings.Queries.GetListingImages;
+using RealEstatePortal.Application.Listings.Queries.GetListingMapPoints;
 using RealEstatePortal.Application.Listings.Queries.GetListings;
 using RealEstatePortal.Application.Listings.Queries.GetMyListings;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
@@ -37,7 +38,17 @@ public class ListingsController : Controller
     public async Task<IActionResult> Index([FromQuery] GetPublicListingsQuery filter)
     {
         var listings = await _sender.Send(filter);
+
+        // Map pins are loaded lazily by viewport via the MapPoints endpoint (see the view).
         return View(new ListingBrowseViewModel { Listings = listings, Filter = filter });
+    }
+
+    // Returns map pins for the current viewport; called by the browse map as the user pans/zooms.
+    [HttpGet]
+    public async Task<IActionResult> MapPoints([FromQuery] GetListingMapPointsQuery query)
+    {
+        var points = await _sender.Send(query);
+        return Json(points);
     }
 
     [HttpGet]

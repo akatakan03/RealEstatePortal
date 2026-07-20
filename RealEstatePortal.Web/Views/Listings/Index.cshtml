@@ -7,19 +7,6 @@
     var hasCenter = Model.Filter.CenterLat.HasValue && Model.Filter.CenterLng.HasValue;
     var currentRadius = Model.Filter.RadiusKm ?? 10;
 
-    var mapPoints = Model.Listings.Items
-        .Where(i => i.Latitude.HasValue && i.Longitude.HasValue)
-        .Select(i => new
-        {
-            id = i.Id,
-            slug = i.Slug,
-            lat = i.Latitude!.Value,
-            lng = i.Longitude!.Value,
-            title = i.Title,
-            price = i.PriceAmount.ToString("N0") + " " + i.PriceCurrency
-        });
-    var mapPointsJson = System.Text.Json.JsonSerializer.Serialize(mapPoints);
-
     // Gelişmiş filtrelerden herhangi biri aktifse panelin açık kalmasını sağlayan yardımcı metot
     bool HasAdvancedFilter(GetPublicListingsQuery f) =>
         f.Heating.HasValue || f.Internet.HasValue || f.Furnished == true ||
@@ -27,6 +14,8 @@
 }
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
 <section class="browse-hero">
     <div class="container">
@@ -239,9 +228,9 @@
 
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script>
         (function () {
-        var listingsData = @Html.Raw(mapPointsJson);
         var hasCenter = @(hasCenter ? "true" : "false");
         @if (hasCenter)
         {
@@ -260,23 +249,65 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19, attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-        var markers = [];
-        listingsData.forEach(function (p) {
-        var m = L.marker([p.lat, p.lng]).addTo(map);
-        m.bindPopup('<strong>' + esc(p.title) + '</strong><br/>' + esc(p.price) +
-        '<br/><a href="/listing/' + p.id + '/' + p.slug + '">View details</a>');
-        markers.push(m);
-        });
+
+        // Cluster group keeps rendering cheap even with thousands of pins in view.
+        var cluster = L.markerClusterGroup({ chunkedLoading: true });
+        map.addLayer(cluster);
+
         if (hasCenter) {
         map.setView([searchCenter.lat, searchCenter.lng], 12);
         L.circle([searchCenter.lat, searchCenter.lng], {
         radius: searchRadiusKm * 1000, color:'#B08A4F', weight:1, fillColor:'#B08A4F', fillOpacity:.06
         }).addTo(map);
-        } else if (markers.length > 0) {
-        map.fitBounds(L.featureGroup(markers).getBounds().pad(0.2));
         } else {
-        map.setView([39.0, 35.0], 6);
+        // Default to İstanbul; pins for whatever area the user pans to load on demand.
+        map.setView([41.01, 28.97], 11);
         }
+
+        // Carry the active list filters (keyword, type, price, …) into the pin request,
+        // minus paging/area params the map manages itself.
+        function baseFilterParams() {
+        var params = new URLSearchParams(window.location.search);
+        ['pageNumber', 'PageNumber', 'MinLat', 'MaxLat', 'MinLng', 'MaxLng'].forEach(function (k) {
+        params.delete(k);
+        });
+        return params;
+        }
+
+        var reqToken = 0;
+        function loadPins() {
+        var b = map.getBounds();
+        var params = baseFilterParams();
+        params.set('MinLat', b.getSouth().toFixed(6));
+        params.set('MaxLat', b.getNorth().toFixed(6));
+        params.set('MinLng', b.getWest().toFixed(6));
+        params.set('MaxLng', b.getEast().toFixed(6));
+
+        var mine = ++reqToken;
+        fetch('/Listings/MapPoints?' + params.toString())
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+        if (mine !== reqToken) return; // a newer request already superseded this one
+        cluster.clearLayers();
+        var markers = data.map(function (p) {
+        var m = L.marker([p.latitude, p.longitude]);
+        m.bindPopup('<strong>' + esc(p.title) + '</strong><br/>' +
+        esc(p.priceAmount.toLocaleString() + ' ' + p.priceCurrency) +
+        '<br/><a href="/listing/' + p.id + '/' + p.slug + '">View details</a>');
+        return m;
+        });
+        cluster.addLayers(markers);
+        })
+        .catch(function () { /* leave existing pins on failure */ });
+        }
+
+        // Debounce so panning/zooming doesn't fire a request on every frame.
+        var debounceTimer;
+        map.on('moveend', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(loadPins, 250);
+        });
+        loadPins();
 
         document.getElementById('searchAreaBtn').addEventListener('click', function () {
         var c = map.getCenter();
