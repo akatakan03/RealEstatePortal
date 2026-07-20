@@ -21,6 +21,19 @@ public class DomainExceptionFilter : IExceptionFilter
                 context.ExceptionHandled = true;
                 break;
 
+            // Domain rule violations (e.g. publishing a locked listing) -> 409 Conflict.
+            case ArgumentException domainEx:
+                context.Result = isApi
+                    ? new ConflictObjectResult(new ProblemDetails
+                    {
+                        Title = "Operation not allowed",
+                        Detail = domainEx.Message,
+                        Status = StatusCodes.Status409Conflict
+                    })
+                    : new StatusCodeResult(StatusCodes.Status409Conflict);
+                context.ExceptionHandled = true;
+                break;
+
             case NotFoundException:
                 context.Result = new NotFoundResult();          // 404 for both API and MVC
                 context.ExceptionHandled = true;
