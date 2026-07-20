@@ -114,6 +114,8 @@ public class GetPublicListingsQueryHandler
                 Status = l.Status,
                 Bedrooms = l.Bedrooms,
                 AreaSqMeters = l.AreaSqMeters,
+                Latitude = l.Location != null ? l.Location.Latitude : (double?)null,
+                Longitude = l.Location != null ? l.Location.Longitude : (double?)null,
                 CoverThumbnailKey = l.Media
                     .Where(m => m.IsCover)
                     .Select(m => m.ThumbnailKey)
@@ -128,36 +130,18 @@ public class GetPublicListingsQueryHandler
                 ? null
                 : _storage.GetPublicUrl(item.CoverThumbnailKey);
 
-        var pageIds = page.Items.Select(i => i.Id).ToList();
-        if (pageIds.Count > 0)
+        // Mark which of this page's listings the signed-in user has already saved.
+        if (_user.Id is not null && page.Items.Count > 0)
         {
-            var located = await _context.Listings
-                .Where(l => pageIds.Contains(l.Id))
+            var pageIds = page.Items.Select(i => i.Id).ToList();
+            var favoritedIds = await _context.Favorites
+                .Where(f => f.UserId == _user.Id && pageIds.Contains(f.ListingId))
+                .Select(f => f.ListingId)
                 .ToListAsync(cancellationToken);
 
-            var byId = located.ToDictionary(l => l.Id);
+            var favSet = favoritedIds.ToHashSet();
             foreach (var item in page.Items)
-            {
-                if (byId.TryGetValue(item.Id, out var listing) && listing.Location is not null)
-                {
-                    item.Latitude = listing.Location.Latitude;
-                    item.Longitude = listing.Location.Longitude;
-                }
-            }
-
-            // Mark which of this page's listings the signed-in user has already saved.
-            if (_user.Id is not null && page.Items.Count > 0)
-            {
-                var pageIdsForFav = page.Items.Select(i => i.Id).ToList();
-                var favoritedIds = await _context.Favorites
-                    .Where(f => f.UserId == _user.Id && pageIdsForFav.Contains(f.ListingId))
-                    .Select(f => f.ListingId)
-                    .ToListAsync(cancellationToken);
-
-                var favSet = favoritedIds.ToHashSet();
-                foreach (var item in page.Items)
-                    item.IsFavorited = favSet.Contains(item.Id);
-            }
+                item.IsFavorited = favSet.Contains(item.Id);
         }
 
         return page;
