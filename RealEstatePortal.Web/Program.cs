@@ -142,10 +142,15 @@ using (var scope = app.Services.CreateScope())
 {
     var initialiser = scope.ServiceProvider
         .GetRequiredService<ApplicationDbContextInitialiser>();
-    await initialiser.SeedAsync();
-}
 
-app.Run();
+    // Seed the default admin only in Development, or when a deploy opts in via config.
+    var seedAdmin = app.Environment.IsDevelopment()
+        || app.Configuration.GetValue<bool>("SeedAdmin:Enabled");
+    var adminPassword = app.Configuration["SeedAdmin:Password"]
+        ?? (app.Environment.IsDevelopment() ? "Admin123!" : null);
+
+    await initialiser.SeedAsync(seedAdmin, adminPassword);
+}
 
 app.Run();
 

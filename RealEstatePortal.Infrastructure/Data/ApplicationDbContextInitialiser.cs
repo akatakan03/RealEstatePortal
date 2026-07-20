@@ -21,11 +21,11 @@ public class ApplicationDbContextInitialiser
         _roleManager = roleManager;
     }
 
-    public async Task SeedAsync()
+    public async Task SeedAsync(bool seedDefaultAdmin = false, string? adminPassword = null)
     {
         try
         {
-            await TrySeedAsync();
+            await TrySeedAsync(seedDefaultAdmin, adminPassword);
         }
         catch (Exception ex)
         {
@@ -34,9 +34,9 @@ public class ApplicationDbContextInitialiser
         }
     }
 
-    private async Task TrySeedAsync()
+    private async Task TrySeedAsync(bool seedDefaultAdmin, string? adminPassword)
     {
-        // Roles
+        // Roles are required in every environment.
         foreach (var roleName in new[] { Roles.Admin, Roles.Agent, Roles.Member })
         {
             if (!await _roleManager.RoleExistsAsync(roleName))
@@ -46,8 +46,15 @@ public class ApplicationDbContextInitialiser
             }
         }
 
-        // Default administrator
-        //Dev-only convenience
+        // Default administrator — only when explicitly requested (dev convenience or an
+        // opt-in deploy). Never auto-created in production with a hard-coded password.
+        if (!seedDefaultAdmin)
+            return;
+
+        if (string.IsNullOrWhiteSpace(adminPassword))
+            throw new InvalidOperationException(
+                "Cannot seed the default admin without a password. Set SeedAdmin:Password.");
+
         const string adminEmail = "admin@realestate.local";
         if (await _userManager.FindByEmailAsync(adminEmail) is null)
         {
@@ -58,7 +65,7 @@ public class ApplicationDbContextInitialiser
                 EmailConfirmed = true
             };
 
-            await _userManager.CreateAsync(admin, "Admin123!");
+            await _userManager.CreateAsync(admin, adminPassword);
             await _userManager.AddToRoleAsync(admin, Roles.Admin);
             _logger.LogInformation("Seeded default admin {Email}", adminEmail);
         }
