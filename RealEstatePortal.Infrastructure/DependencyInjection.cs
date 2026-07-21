@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RealEstatePortal.Application.Common.Interfaces;
@@ -79,13 +80,18 @@ public static class DependencyInjection
 
         services.AddScoped<IListingSpatialSearch, ListingSpatialSearch>();
 
-        services.AddHttpClient<IGeocodingService, NominatimGeocodingService>(client =>
+        services.AddMemoryCache();
+        services.AddHttpClient<NominatimGeocodingService>(client =>
         {
             client.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");
             // REQUIRED by Nominatim's policy — a stock User-Agent gets a 403.
             client.DefaultRequestHeaders.UserAgent.ParseAdd("RealEstatePortal/1.0 (internship project)");
             client.Timeout = TimeSpan.FromSeconds(8);
         });
+        // Resolve IGeocodingService to a caching wrapper around the Nominatim client.
+        services.AddScoped<IGeocodingService>(sp => new CachingGeocodingService(
+            sp.GetRequiredService<NominatimGeocodingService>(),
+            sp.GetRequiredService<IMemoryCache>()));
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 
