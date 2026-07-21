@@ -11,6 +11,7 @@ using RealEstatePortal.Application.Listings.Commands.CreateListing;
 using RealEstatePortal.Application.Listings.Commands.DeleteListing;
 using RealEstatePortal.Application.Listings.Commands.DeleteListingImage;
 using RealEstatePortal.Application.Listings.Commands.PublishListing;
+using RealEstatePortal.Application.Listings.Commands.RecordListingView;
 using RealEstatePortal.Application.Listings.Commands.SetCoverImage;
 using RealEstatePortal.Application.Listings.Commands.UpdateListing;
 using RealEstatePortal.Application.Listings.Queries.GetListingDetail;
@@ -169,6 +170,8 @@ public class ListingsController : Controller
         if (!string.Equals(slug, dto.Slug, StringComparison.Ordinal))
             return RedirectToActionPermanent(nameof(Details), new { id, slug = dto.Slug });
 
+        await RecordViewAsync(id);
+
         var vm = new ListingDetailViewModel
         {
             Listing = dto,
@@ -217,6 +220,34 @@ public class ListingsController : Controller
     private async Task LoadPhotosAsync(int listingId)
     {
         ViewBag.Photos = await _sender.Send(new GetListingImagesQuery(listingId));
+    }
+
+    private const string ViewerCookie = "vk";
+
+    // Counts a detail-page view. Uses an opaque per-browser cookie (not PII) so repeat
+    // views can be de-duplicated. Never lets a counting failure break the page.
+    private async Task RecordViewAsync(int listingId)
+    {
+        try
+        {
+            if (!Request.Cookies.TryGetValue(ViewerCookie, out var key) || string.IsNullOrWhiteSpace(key))
+            {
+                key = Guid.NewGuid().ToString("N");
+                Response.Cookies.Append(ViewerCookie, key, new CookieOptions
+                {
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.Lax,
+                    Secure = Request.IsHttps,
+                    Expires = DateTimeOffset.UtcNow.AddYears(1)
+                });
+            }
+
+            await _sender.Send(new RecordListingViewCommand(listingId, key));
+        }
+        catch
+        {
+            // View counting is best-effort; swallow anything so the page still renders.
+        }
     }
 
     [HttpPost]

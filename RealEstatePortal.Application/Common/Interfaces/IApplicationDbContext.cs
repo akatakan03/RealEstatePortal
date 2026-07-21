@@ -10,6 +10,7 @@ public interface IApplicationDbContext
     DbSet<Inquiry> Inquiries { get; }
     DbSet<Favorite> Favorites { get; }
     DbSet<SavedSearch> SavedSearches { get; }
+    DbSet<ListingView> ListingViews { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

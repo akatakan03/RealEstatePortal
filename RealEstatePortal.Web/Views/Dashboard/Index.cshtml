@@ -1,0 +1,99 @@
+@using System.Globalization
+@using RealEstatePortal.Domain.Enums
+@model RealEstatePortal.Application.Agents.Queries.GetAgentDashboard.AgentDashboardDto
+@{
+    ViewData["Title"] = "Dashboard";
+    var inv = CultureInfo.InvariantCulture;
+    var trend = Model.ViewTrend;
+    var chartMax = Math.Max(trend.Count > 0 ? trend.Max(t => t.Count) : 0, 1);
+}
+
+<section class="dash-sec">
+    <div class="container">
+        <div class="dash-hero">
+            <h1>Dashboard</h1>
+            <p class="lead">How your listings are performing.</p>
+        </div>
+
+        @if (Model.TotalListings == 0)
+        {
+            <div class="empty-state">
+                <span class="value">No listings yet</span>
+                Once you publish a listing, its views and inquiries will show up here.
+                <div style="margin-top:1rem;"><a class="btn btn-primary" asp-controller="Listings" asp-action="Create">Create a listing</a></div>
+            </div>
+        }
+        else
+        {
+            <div class="kpi-row">
+                <div class="kpi">
+                    <div class="kpi-label">Total views</div>
+                    <div class="kpi-value">@Model.TotalViews.ToString("N0")</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Views · 30 days</div>
+                    <div class="kpi-value">@Model.Views30d.ToString("N0")</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Inquiries</div>
+                    <div class="kpi-value">@Model.TotalInquiries.ToString("N0")</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Active listings</div>
+                    <div class="kpi-value">@Model.ActiveListings / @Model.TotalListings</div>
+                </div>
+            </div>
+
+            <div class="dash-card">
+                <div class="dash-card-head">
+                    <h2>Views</h2>
+                    <span class="dash-card-sub">last 30 days</span>
+                </div>
+                <div class="trend" role="img" aria-label="Daily views over the last 30 days">
+                    @foreach (var d in trend)
+                    {
+                        var pct = (d.Count * 100.0 / chartMax).ToString("0.##", inv);
+                        <div class="trend-bar" style="height:@pct%"
+                             title="@d.Date.ToString("MMM d"): @d.Count view@(d.Count == 1 ? "" : "s")"></div>
+                    }
+                </div>
+            </div>
+
+            <div class="dash-card">
+                <div class="dash-card-head">
+                    <h2>By listing</h2>
+                    <span class="dash-card-sub">ranked by total views</span>
+                </div>
+                <div class="table-scroll">
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Listing</th>
+                                <th>Status</th>
+                                <th class="num">7 days</th>
+                                <th class="num">30 days</th>
+                                <th class="num">Total views</th>
+                                <th class="num">Inquiries</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.Listings)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-controller="Listings" asp-action="Details" asp-route-id="@row.Id" asp-route-slug="@row.Slug">@row.Title</a>
+                                    </td>
+                                    <td><span class="status-pill status-@row.Status.ToString().ToLowerInvariant()">@row.Status</span></td>
+                                    <td class="num">@row.Views7d.ToString("N0")</td>
+                                    <td class="num">@row.Views30d.ToString("N0")</td>
+                                    <td class="num">@row.TotalViews.ToString("N0")</td>
+                                    <td class="num">@row.Inquiries.ToString("N0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</section>

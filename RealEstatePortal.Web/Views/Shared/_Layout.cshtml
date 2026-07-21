@@ -26,6 +26,7 @@
                 }
                 @if (User.IsInRole("Agent"))
                 {
+                    <li><a asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
                     <li><a asp-controller="Listings" asp-action="Mine">My listings</a></li>
                     <li>
                         <a asp-controller="Inquiries" asp-action="Index">
