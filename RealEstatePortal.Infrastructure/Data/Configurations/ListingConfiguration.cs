@@ -13,6 +13,13 @@ public class ListingConfiguration : IEntityTypeConfiguration<Listing>
         builder.Property(l => l.Slug).HasMaxLength(250).IsRequired();
         builder.HasIndex(l => l.Slug).IsUnique();
 
+        // Browse/map queries filter by Status and order by Created DESC — one composite
+        // index serves both, and (leading with Status) also covers plain Status lookups.
+        builder.HasIndex(l => new { l.Status, l.Created });
+
+        // "My listings" and every ownership check filter by OwnerId.
+        builder.HasIndex(l => l.OwnerId);
+
         builder.Property(l => l.Description).HasMaxLength(4000).IsRequired();
         builder.Property(l => l.Address).HasMaxLength(500);
         builder.Property(l => l.AreaSqMeters).HasPrecision(10, 2);
