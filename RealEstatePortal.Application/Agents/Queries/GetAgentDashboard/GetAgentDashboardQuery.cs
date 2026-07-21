@@ -49,10 +49,19 @@ public class GetAgentDashboardQueryHandler
             {
                 ListingId = g.Key,
                 Total = g.Count(),
+                Unique = g.Select(v => v.ViewerKey).Distinct().Count(),
                 Last7 = g.Sum(v => v.ViewedAt >= since7 ? 1 : 0),
                 Last30 = g.Sum(v => v.ViewedAt >= since30 ? 1 : 0)
             })
             .ToListAsync(cancellationToken);
+
+        // Distinct visitors across all of the agent's listings (one person viewing several
+        // listings counts once).
+        var uniqueVisitors = await _context.ListingViews
+            .Where(v => listingIds.Contains(v.ListingId))
+            .Select(v => v.ViewerKey)
+            .Distinct()
+            .CountAsync(cancellationToken);
 
         var inquiryStats = await _context.Inquiries
             .Where(i => listingIds.Contains(i.ListingId))
@@ -82,6 +91,7 @@ public class GetAgentDashboardQueryHandler
                     Slug = l.Slug,
                     Status = l.Status,
                     TotalViews = v?.Total ?? 0,
+                    UniqueVisitors = v?.Unique ?? 0,
                     Views7d = v?.Last7 ?? 0,
                     Views30d = v?.Last30 ?? 0,
                     Inquiries = inq
@@ -98,6 +108,7 @@ public class GetAgentDashboardQueryHandler
             TotalListings = listings.Count,
             ActiveListings = listings.Count(l => l.Status == ListingStatus.Active),
             TotalViews = rows.Sum(r => r.TotalViews),
+            UniqueVisitors = uniqueVisitors,
             Views30d = rows.Sum(r => r.Views30d),
             TotalInquiries = rows.Sum(r => r.Inquiries),
             Listings = rows,
