@@ -26,6 +26,7 @@ public class ListingBrowseViewModel
         if (Filter.Parking == true) d["Parking"] = "true";
         if (Filter.Balcony == true) d["Balcony"] = "true";
         if (Filter.MaxDues.HasValue) d["MaxDues"] = Filter.MaxDues.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        if (Filter.Sort != ListingSort.Newest) d["Sort"] = Filter.Sort.ToString();
         return d;
     }
 }

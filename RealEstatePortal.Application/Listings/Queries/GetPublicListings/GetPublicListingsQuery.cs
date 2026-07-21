@@ -20,6 +20,7 @@ public record GetPublicListingsQuery : IRequest<PaginatedList<ListingBriefDto>>
     public double? CenterLat { get; set; }
     public double? CenterLng { get; set; }
     public double? RadiusKm { get; set; }
+    public ListingSort Sort { get; set; } = ListingSort.Newest;
     public HeatingType? Heating { get; set; }
     public InternetInfrastructure? Internet { get; set; }
     public bool? Furnished { get; set; }
@@ -100,8 +101,17 @@ public class GetPublicListingsQueryHandler
         var pageSize = Math.Clamp(request.PageSize, 1, 50);
         var pageNumber = Math.Max(request.PageNumber, 1);
 
-        var projected = query
-            .OrderByDescending(l => l.Created)
+        // A stable secondary key (Id) keeps pagination deterministic when the primary
+        // sort has ties (e.g. many listings at the same price).
+        IOrderedQueryable<Domain.Entities.Listing> ordered = request.Sort switch
+        {
+            ListingSort.PriceAsc => query.OrderBy(l => l.Price.Amount).ThenByDescending(l => l.Id),
+            ListingSort.PriceDesc => query.OrderByDescending(l => l.Price.Amount).ThenByDescending(l => l.Id),
+            ListingSort.AreaDesc => query.OrderByDescending(l => l.AreaSqMeters).ThenByDescending(l => l.Id),
+            _ => query.OrderByDescending(l => l.Created).ThenByDescending(l => l.Id)
+        };
+
+        var projected = ordered
             .Select(l => new ListingBriefDto
             {
                 Id = l.Id,

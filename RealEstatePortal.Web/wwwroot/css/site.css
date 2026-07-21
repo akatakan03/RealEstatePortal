@@ -622,6 +622,12 @@ img {
         font-size: .95rem
     }
 
+    .sec-head-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem
+    }
+
 .card-grid {
     display: grid;
     grid-template-columns: repeat(3,1fr);

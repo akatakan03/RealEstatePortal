@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using RealEstatePortal.Application.Listings.Commands.CreateListing;
 using RealEstatePortal.Application.Listings.Commands.PublishListing;
@@ -55,6 +56,68 @@ public class PublicListingsQueryIntegrationTests : IntegrationTestBase
         // Proves the geography column + spatial STDistance query run on real SQL Server.
         result.Items.ShouldContain(x => x.Title == "Istanbul place");
         result.Items.ShouldNotContain(x => x.Title == "Ankara place");
+    }
+
+    [Fact]
+    public async Task SortByPriceAscending_OrdersCheapestFirst()
+    {
+        await Fixture.ExecuteDbAsync(async db =>
+        {
+            db.Listings.Add(SeedPriced("Expensive", "exp", 3_000_000));
+            db.Listings.Add(SeedPriced("Cheap", "cheap", 1_000_000));
+            db.Listings.Add(SeedPriced("Mid", "mid", 2_000_000));
+            await db.SaveChangesAsync(CancellationToken.None);
+            return 0;
+        });
+
+        var result = await Fixture.SendAsync(new GetPublicListingsQuery
+        {
+            Sort = ListingSort.PriceAsc,
+            PageSize = 50
+        });
+
+        var prices = result.Items.Select(i => i.PriceAmount).ToList();
+        prices.ShouldBe(prices.OrderBy(p => p).ToList());
+        result.Items.First().Title.ShouldBe("Cheap");
+    }
+
+    [Fact]
+    public async Task SortByPriceDescending_OrdersMostExpensiveFirst()
+    {
+        await Fixture.ExecuteDbAsync(async db =>
+        {
+            db.Listings.Add(SeedPriced("Expensive", "exp", 3_000_000));
+            db.Listings.Add(SeedPriced("Cheap", "cheap", 1_000_000));
+            await db.SaveChangesAsync(CancellationToken.None);
+            return 0;
+        });
+
+        var result = await Fixture.SendAsync(new GetPublicListingsQuery
+        {
+            Sort = ListingSort.PriceDesc,
+            PageSize = 50
+        });
+
+        result.Items.First().Title.ShouldBe("Expensive");
+    }
+
+    private static Listing SeedPriced(string title, string slug, decimal price)
+    {
+        var listing = new Listing
+        {
+            Title = title,
+            Slug = slug,
+            Description = "desc",
+            Address = "somewhere",
+            OwnerId = "agent-1",
+            Price = new Money(price, "TRY"),
+            ListingType = ListingType.Sale,
+            PropertyType = PropertyType.Apartment,
+            AreaSqMeters = 90,
+            Location = new GeoLocation(41.0, 29.0)
+        };
+        listing.Publish();
+        return listing;
     }
 
     private static CreateListingCommand NewCommand(string title) => new()

@@ -150,7 +150,15 @@
 
         <div class="sec-head">
             <h2>Homes on the market</h2>
-            <span class="count">@Model.Listings.TotalCount listing@(Model.Listings.TotalCount == 1 ? "" : "s")</span>
+            <div class="sec-head-right">
+                <select id="sortSelect" class="form-select select-inline" onchange="applySort(this.value)" aria-label="Sort listings">
+                    <option value="Newest" selected="@(Model.Filter.Sort == ListingSort.Newest)">Newest</option>
+                    <option value="PriceAsc" selected="@(Model.Filter.Sort == ListingSort.PriceAsc)">Price: low to high</option>
+                    <option value="PriceDesc" selected="@(Model.Filter.Sort == ListingSort.PriceDesc)">Price: high to low</option>
+                    <option value="AreaDesc" selected="@(Model.Filter.Sort == ListingSort.AreaDesc)">Area: largest first</option>
+                </select>
+                <span class="count">@Model.Listings.TotalCount listing@(Model.Listings.TotalCount == 1 ? "" : "s")</span>
+            </div>
         </div>
 
         @if (!Model.Listings.Items.Any())
@@ -321,6 +329,14 @@
         window.location = window.location.pathname + '?' + params.toString();
         });
         })();
+
+        // Re-run the search with a new sort, keeping all current filters, from page 1.
+        function applySort(value) {
+        var params = new URLSearchParams(window.location.search);
+        params.set('Sort', value);
+        params.set('pageNumber', '1');
+        window.location = window.location.pathname + '?' + params.toString();
+        }
 
         function toggleFav(event, btn) {
         event.preventDefault();
