@@ -1,4 +1,4 @@
-﻿using NetCloudFramework.Shouldly;
+﻿using Shouldly;
 using RealEstatePortal.Domain.ValueObjects;
 using System;
 using Xunit;
