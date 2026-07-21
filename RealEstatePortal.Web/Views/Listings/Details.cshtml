@@ -52,6 +52,14 @@
                 }
             </div>
         }
+        else if (Configuration.GetValue<bool>("Demo:PlaceholderImages"))
+        {
+            <div class="gallery">
+                <div class="gallery-main">
+                    <img id="mainImage" src="https://picsum.photos/seed/listing@(listing.Id)/1200/800" alt="@listing.Title" />
+                </div>
+            </div>
+        }
         else
         {
             <div class="gallery-none">No photos yet</div>

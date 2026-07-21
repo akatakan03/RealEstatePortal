@@ -178,9 +178,10 @@
                                 </button>
                             }
                             <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@listing.ListingType</span>
-                            @if (!string.IsNullOrEmpty(listing.CoverThumbnailUrl))
+                            @{ var cover = ListingImages.CoverOrPlaceholder(listing.CoverThumbnailUrl, listing.Id, Configuration.GetValue<bool>("Demo:PlaceholderImages")); }
+                            @if (!string.IsNullOrEmpty(cover))
                             {
-                                <img src="@listing.CoverThumbnailUrl" alt="@listing.Title" />
+                                <img src="@cover" alt="@listing.Title" loading="lazy" />
                             }
                             else
                             {
