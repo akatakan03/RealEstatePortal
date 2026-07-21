@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -87,12 +88,29 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Behind a reverse proxy/load balancer, honour X-Forwarded-* so the real client IP
+// (used by the rate limiter) and scheme (used by HTTPS redirect) are correct.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // The app is expected to be reachable only through the front-end proxy. In a hardened
+    // deployment, list the proxy addresses in KnownProxies instead of clearing these.
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+// Allowed CORS origins come from config in production; with none set (e.g. local dev)
+// we fall back to a permissive policy.
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 builder.Services.AddCors(options =>
 {
-    // Permissive dev policy so browser clients on other origins can call the API.
-    // A production API would restrict AllowAnyOrigin to known domains.
     options.AddPolicy("ApiCors", policy =>
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+    {
+        if (corsOrigins is { Length: > 0 })
+            policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod();
+        else
+            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
 });
 
 // Per-IP rate limits on abuse-prone public endpoints (contact form, auth).
@@ -137,6 +155,9 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
 
 var app = builder.Build();
+
+// Must run before anything that reads the client IP or scheme (rate limiter, HTTPS redirect, logging).
+app.UseForwardedHeaders();
 
 var supportedCultures = new[] { new CultureInfo("en-US") };
 app.UseRequestLocalization(new RequestLocalizationOptions
