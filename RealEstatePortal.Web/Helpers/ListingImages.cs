@@ -15,4 +15,14 @@ public static class ListingImages
             ? $"https://loremflickr.com/600/400/house,apartment?lock={listingId}"
             : null;
     }
+
+    // Stable per-listing seeds for a demo gallery. The first seed is the listing id itself,
+    // so the detail gallery's opening photo matches the card's cover.
+    public static IReadOnlyList<int> PlaceholderSeeds(int listingId, int count)
+    {
+        var seeds = new List<int>(count);
+        for (var i = 0; i < count; i++)
+            seeds.Add(i == 0 ? listingId : listingId * 100 + i);
+        return seeds;
+    }
 }
