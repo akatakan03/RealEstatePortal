@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RealEstatePortal.Application.Common.Exceptions;
 using RealEstatePortal.Application.Favorites.Queries.IsListingFavorited;
 using RealEstatePortal.Application.Geocoding.Queries.GeocodeAddress;
@@ -182,6 +183,7 @@ public class ListingsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("contact")]
     public async Task<IActionResult> Inquire([Bind(Prefix = "Inquiry")] CreateInquiryCommand command)
     {
         try

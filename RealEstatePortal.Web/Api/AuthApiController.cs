@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Infrastructure.Identity;
 
@@ -26,6 +27,7 @@ public class AuthApiController : ControllerBase
 
     /// <summary>Exchange email + password for a JWT bearer token.</summary>
     [HttpPost("login")]
+    [EnableRateLimiting("auth")]
     [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<TokenResponse>> Login(LoginApiRequest request)

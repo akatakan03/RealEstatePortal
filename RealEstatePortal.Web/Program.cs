@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Threading.RateLimiting;
 using RealEstatePortal.Application;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Infrastructure;
@@ -92,6 +94,44 @@ builder.Services.AddCors(options =>
     options.AddPolicy("ApiCors", policy =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 });
+
+// Per-IP rate limits on abuse-prone public endpoints (contact form, auth).
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Emits a Retry-After hint so well-behaved clients can back off.
+    options.OnRejected = (context, _) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+            context.HttpContext.Response.Headers.RetryAfter =
+                ((int)retryAfter.TotalSeconds).ToString(CultureInfo.InvariantCulture);
+        return ValueTask.CompletedTask;
+    };
+
+    static string IpKey(HttpContext ctx) =>
+        ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+    var cfg = builder.Configuration;
+
+    // Contact form: enough for a genuine visitor, hostile to bulk spammers.
+    options.AddPolicy("contact", ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(IpKey(ctx), _ =>
+            new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = cfg.GetValue("RateLimiting:Contact:PermitLimit", 5),
+                Window = TimeSpan.FromMinutes(cfg.GetValue("RateLimiting:Contact:WindowMinutes", 5))
+            }));
+
+    // Login/register: slows credential stuffing and account-spam.
+    options.AddPolicy("auth", ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(IpKey(ctx), _ =>
+            new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = cfg.GetValue("RateLimiting:Auth:PermitLimit", 10),
+                Window = TimeSpan.FromMinutes(cfg.GetValue("RateLimiting:Auth:WindowMinutes", 5))
+            }));
+});
 builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
@@ -128,6 +168,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseRateLimiter();
 
 app.UseCors("ApiCors");
 app.UseAuthentication();

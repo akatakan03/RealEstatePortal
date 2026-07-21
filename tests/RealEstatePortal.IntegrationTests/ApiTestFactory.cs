@@ -48,6 +48,11 @@ public class ApiTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Jwt:ExpiryMinutes", "60");
         builder.UseSetting("Jwt:Key", "integration-test-signing-key-at-least-32-chars-long");
 
+        // Effectively disable rate limits here — the suite logs in many times per run
+        // and would otherwise trip the shared per-IP bucket. A dedicated test lowers these.
+        builder.UseSetting("RateLimiting:Auth:PermitLimit", "1000000");
+        builder.UseSetting("RateLimiting:Contact:PermitLimit", "1000000");
+
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<IEmailService>();
