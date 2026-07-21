@@ -13,6 +13,9 @@ namespace RealEstatePortal.IntegrationTests;
 
 public class RecordListingViewCommandIntegrationTests : IntegrationTestBase
 {
+    private const string Browser =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36";
+
     public RecordListingViewCommandIntegrationTests(IntegrationTestFixture fixture) : base(fixture) { }
 
     [Fact]
@@ -21,7 +24,7 @@ public class RecordListingViewCommandIntegrationTests : IntegrationTestBase
         var id = await SeedListingAsync("agent-1");
         Fixture.CurrentUser.Id = null;   // anonymous visitor
 
-        await Fixture.SendAsync(new RecordListingViewCommand(id, "visitor-key"));
+        await Fixture.SendAsync(new RecordListingViewCommand(id, "visitor-key", Browser));
 
         (await CountViewsAsync(id)).ShouldBe(1);
     }
@@ -32,7 +35,19 @@ public class RecordListingViewCommandIntegrationTests : IntegrationTestBase
         var id = await SeedListingAsync("agent-1");
         Fixture.CurrentUser.Id = "agent-1";   // the owner
 
-        await Fixture.SendAsync(new RecordListingViewCommand(id, "owner-key"));
+        await Fixture.SendAsync(new RecordListingViewCommand(id, "owner-key", Browser));
+
+        (await CountViewsAsync(id)).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task DoesNotCountABotVisitor()
+    {
+        var id = await SeedListingAsync("agent-1");
+        Fixture.CurrentUser.Id = null;
+
+        await Fixture.SendAsync(new RecordListingViewCommand(id, "bot-key",
+            "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"));
 
         (await CountViewsAsync(id)).ShouldBe(0);
     }
@@ -43,8 +58,8 @@ public class RecordListingViewCommandIntegrationTests : IntegrationTestBase
         var id = await SeedListingAsync("agent-1");
         Fixture.CurrentUser.Id = null;
 
-        await Fixture.SendAsync(new RecordListingViewCommand(id, "same-key"));
-        await Fixture.SendAsync(new RecordListingViewCommand(id, "same-key"));
+        await Fixture.SendAsync(new RecordListingViewCommand(id, "same-key", Browser));
+        await Fixture.SendAsync(new RecordListingViewCommand(id, "same-key", Browser));
 
         (await CountViewsAsync(id)).ShouldBe(1);
     }
@@ -55,8 +70,8 @@ public class RecordListingViewCommandIntegrationTests : IntegrationTestBase
         var id = await SeedListingAsync("agent-1");
         Fixture.CurrentUser.Id = null;
 
-        await Fixture.SendAsync(new RecordListingViewCommand(id, "key-a"));
-        await Fixture.SendAsync(new RecordListingViewCommand(id, "key-b"));
+        await Fixture.SendAsync(new RecordListingViewCommand(id, "key-a", Browser));
+        await Fixture.SendAsync(new RecordListingViewCommand(id, "key-b", Browser));
 
         (await CountViewsAsync(id)).ShouldBe(2);
     }

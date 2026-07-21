@@ -242,7 +242,7 @@ public class ListingsController : Controller
                 });
             }
 
-            await _sender.Send(new RecordListingViewCommand(listingId, key));
+            await _sender.Send(new RecordListingViewCommand(listingId, key, Request.Headers.UserAgent.ToString()));
         }
         catch
         {

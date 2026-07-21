@@ -1,11 +1,12 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RealEstatePortal.Application.Common;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Domain.Entities;
 
 namespace RealEstatePortal.Application.Listings.Commands.RecordListingView;
 
-public record RecordListingViewCommand(int ListingId, string? ViewerKey) : IRequest;
+public record RecordListingViewCommand(int ListingId, string? ViewerKey, string? UserAgent = null) : IRequest;
 
 public class RecordListingViewCommandHandler : IRequestHandler<RecordListingViewCommand>
 {
@@ -27,6 +28,10 @@ public class RecordListingViewCommandHandler : IRequestHandler<RecordListingView
     public async Task Handle(RecordListingViewCommand request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.ViewerKey))
+            return;
+
+        // Don't let crawlers / link-preview fetchers inflate the count.
+        if (BotDetection.IsBot(request.UserAgent))
             return;
 
         var listing = await _context.Listings
