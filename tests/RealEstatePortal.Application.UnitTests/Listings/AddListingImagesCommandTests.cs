@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MockQueryable.NSubstitute;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using RealEstatePortal.Application.Common.Exceptions;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Application.Common.Models;
@@ -88,6 +89,37 @@ public class AddListingImagesCommandTests
         await handler.Handle(Command(1, imageCount: 1), CancellationToken.None);
 
         listing.Media.Count(m => m.IsCover).ShouldBe(1);   // still exactly one
+    }
+
+    [Fact]
+    public async Task Handle_WhenTotalWouldExceedMax_ThrowsValidation_AndUploadsNothing()
+    {
+        var listing = new Listing { Id = 1, OwnerId = "agent-1" };
+        for (var i = 0; i < ListingImageRules.MaxImagesPerListing; i++)
+            listing.Media.Add(new ListingMedia { ObjectKey = $"k{i}", ThumbnailKey = $"t{i}" });
+
+        var (ctx, img, storage, user) = Deps(new List<Listing> { listing });
+        var handler = new AddListingImagesCommandHandler(ctx, img, storage, user);
+
+        await Should.ThrowAsync<ValidationException>(
+            () => handler.Handle(Command(1, imageCount: 1), CancellationToken.None));
+
+        await img.DidNotReceive().ProcessAsync(Arg.Any<byte[]>(), Arg.Any<CancellationToken>());
+        await storage.DidNotReceive().UploadAsync(
+            Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_WhenImageCannotBeProcessed_ThrowsValidation()
+    {
+        var listing = new Listing { Id = 1, OwnerId = "agent-1" };
+        var (ctx, img, storage, user) = Deps(new List<Listing> { listing });
+        img.ProcessAsync(Arg.Any<byte[]>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new InvalidOperationException("corrupt / not an image"));
+        var handler = new AddListingImagesCommandHandler(ctx, img, storage, user);
+
+        await Should.ThrowAsync<ValidationException>(
+            () => handler.Handle(Command(1, imageCount: 1), CancellationToken.None));
     }
 
     [Fact]
