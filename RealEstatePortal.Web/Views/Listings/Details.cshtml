@@ -39,14 +39,20 @@
             <div class="gallery">
                 <div class="gallery-main">
                     <img id="mainImage" src="@listing.ImageUrls.First()" alt="@listing.Title" />
+                    @if (listing.ImageUrls.Count > 1)
+                    {
+                        <button type="button" class="gallery-nav prev" onclick="stepGallery(-1)" aria-label="Previous photo">‹</button>
+                        <button type="button" class="gallery-nav next" onclick="stepGallery(1)" aria-label="Next photo">›</button>
+                    }
                 </div>
                 @if (listing.ImageUrls.Count > 1)
                 {
                     <div class="gallery-thumbs">
                         @for (var i = 0; i < listing.ImageUrls.Count; i++)
                         {
-                            <img src="@listing.ImageUrls[i]" class="@(i == 0 ? "active" : "")"
-                                 onclick="selectImage(this, '@listing.ImageUrls[i]')" alt="thumbnail" />
+                            <img src="@listing.ImageUrls[i]" data-full="@listing.ImageUrls[i]"
+                                 class="@(i == 0 ? "active" : "")"
+                                 onclick="selectThumb(this)" alt="thumbnail" />
                         }
                     </div>
                 }
@@ -58,13 +64,16 @@
             <div class="gallery">
                 <div class="gallery-main">
                     <img id="mainImage" src="https://loremflickr.com/1200/800/house,apartment?lock=@seeds[0]" alt="@listing.Title" />
+                    <button type="button" class="gallery-nav prev" onclick="stepGallery(-1)" aria-label="Previous photo">‹</button>
+                    <button type="button" class="gallery-nav next" onclick="stepGallery(1)" aria-label="Next photo">›</button>
                 </div>
                 <div class="gallery-thumbs">
                     @for (var i = 0; i < seeds.Count; i++)
                     {
                         <img src="https://loremflickr.com/300/200/house,apartment?lock=@seeds[i]"
+                             data-full="https://loremflickr.com/1200/800/house,apartment?lock=@seeds[i]"
                              class="@(i == 0 ? "active" : "")"
-                             onclick="selectImage(this, 'https://loremflickr.com/1200/800/house,apartment?lock=@seeds[i]')"
+                             onclick="selectThumb(this)"
                              alt="thumbnail" loading="lazy" />
                     }
                 </div>
@@ -208,11 +217,29 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        function selectImage(el, url){
-            document.getElementById('mainImage').src = url;
+        function selectThumb(el){
+            document.getElementById('mainImage').src = el.dataset.full;
             document.querySelectorAll('.gallery-thumbs img').forEach(function(t){t.classList.remove('active');});
             el.classList.add('active');
+            el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
         }
+
+        // Cycle prev/next through the thumbnails (wraps around at both ends).
+        function stepGallery(dir){
+            var thumbs = Array.prototype.slice.call(document.querySelectorAll('.gallery-thumbs img'));
+            if (thumbs.length < 2) return;
+            var idx = thumbs.findIndex(function(t){ return t.classList.contains('active'); });
+            if (idx < 0) idx = 0;
+            selectThumb(thumbs[(idx + dir + thumbs.length) % thumbs.length]);
+        }
+
+        // Left/right arrow keys navigate the gallery (unless typing in a field).
+        document.addEventListener('keydown', function(e){
+            if (!document.querySelector('.gallery-thumbs')) return;
+            if (e.target.matches('input, textarea, select')) return;
+            if (e.key === 'ArrowLeft') stepGallery(-1);
+            else if (e.key === 'ArrowRight') stepGallery(1);
+        });
     </script>
     @if (listing.Latitude is not null && listing.Longitude is not null)
     {
