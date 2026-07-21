@@ -9,6 +9,7 @@ using RealEstatePortal.Infrastructure;
 using RealEstatePortal.Infrastructure.Data;
 using RealEstatePortal.Web;
 using RealEstatePortal.Web.Filters;
+using RealEstatePortal.Web.HealthChecks;
 using RealEstatePortal.Web.Services;
 using Serilog;
 using System.Globalization;
@@ -150,6 +151,9 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(cfg.GetValue("RateLimiting:Auth:WindowMinutes", 5))
             }));
 });
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database");
+
 builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
@@ -195,6 +199,8 @@ app.UseRateLimiter();
 app.UseCors("ApiCors");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHealthChecks("/health");
 
 app.MapControllerRoute(
     name: "default",
