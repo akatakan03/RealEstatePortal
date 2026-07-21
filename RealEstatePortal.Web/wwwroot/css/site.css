@@ -901,6 +901,9 @@ img {
 
 .gallery-main {
     aspect-ratio: 16/9;
+    /* On wide screens a full-width 16/9 image gets huge and buries the listing
+       details; cap the height so the gallery stays usable. */
+    max-height: 60vh;
     border-radius: 18px;
     overflow: hidden;
     background: var(--brass-soft);
@@ -939,6 +942,7 @@ img {
 
 .gallery-none {
     aspect-ratio: 16/9;
+    max-height: 60vh;
     border-radius: 18px;
     background: var(--brass-soft);
     display: grid;
