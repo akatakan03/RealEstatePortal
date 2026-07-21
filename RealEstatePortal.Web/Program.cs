@@ -212,6 +212,11 @@ using (var scope = app.Services.CreateScope())
     var initialiser = scope.ServiceProvider
         .GetRequiredService<ApplicationDbContextInitialiser>();
 
+    // Apply pending migrations automatically in Development (or when a deploy opts in).
+    // Production usually migrates as a separate, controlled step, so this stays off there.
+    if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
+        await initialiser.InitialiseAsync();
+
     // Seed the default admin only in Development, or when a deploy opts in via config.
     var seedAdmin = app.Environment.IsDevelopment()
         || app.Configuration.GetValue<bool>("SeedAdmin:Enabled");
