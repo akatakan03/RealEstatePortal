@@ -70,15 +70,15 @@
             var seeds = ListingImages.PlaceholderSeeds(listing.Id, 5);
             <div class="gallery">
                 <div class="gallery-main">
-                    <img id="mainImage" src="https://loremflickr.com/1200/800/house,apartment?lock=@seeds[0]" alt="@listing.Title" />
+                    <img id="mainImage" src="https://loremflickr.com/1200/800/house?lock=@seeds[0]" alt="@listing.Title" />
                     <button type="button" class="gallery-nav prev" onclick="stepGallery(-1)" aria-label="Previous photo">‹</button>
                     <button type="button" class="gallery-nav next" onclick="stepGallery(1)" aria-label="Next photo">›</button>
                 </div>
                 <div class="gallery-thumbs">
                     @for (var i = 0; i < seeds.Count; i++)
                     {
-                        <img src="https://loremflickr.com/300/200/house,apartment?lock=@seeds[i]"
-                             data-full="https://loremflickr.com/1200/800/house,apartment?lock=@seeds[i]"
+                        <img src="https://loremflickr.com/300/200/house?lock=@seeds[i]"
+                             data-full="https://loremflickr.com/1200/800/house?lock=@seeds[i]"
                              class="@(i == 0 ? "active" : "")"
                              onclick="selectThumb(this)"
                              alt="thumbnail" loading="lazy" />

@@ -9,10 +9,11 @@ public static class ListingImages
         if (!string.IsNullOrEmpty(coverUrl))
             return coverUrl;
 
-        // LoremFlickr filters by keyword tags (house/apartment); ?lock pins one stable image
-        // per listing so it doesn't change on every reload.
+        // LoremFlickr filters by a keyword tag; ?lock pins one stable image per listing so it
+        // doesn't change on every reload. NOTE: use a SINGLE tag — the comma-separated multi-tag
+        // form (e.g. "house,apartment") currently 500s on LoremFlickr.
         return usePlaceholder
-            ? $"https://loremflickr.com/600/400/house,apartment?lock={listingId}"
+            ? $"https://loremflickr.com/600/400/house?lock={listingId}"
             : null;
     }
 
