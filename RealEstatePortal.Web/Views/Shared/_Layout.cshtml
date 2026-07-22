@@ -19,34 +19,60 @@
 
             <ul class="nav-links">
                 <li><a asp-controller="Listings" asp-action="Index">Browse</a></li>
-                @if (User.Identity is not null && User.Identity.IsAuthenticated)
-                {
-                    <li><a asp-controller="Favorites" asp-action="Mine">Saved</a></li>
-                    <li><a asp-controller="SavedSearches" asp-action="Mine">Alerts</a></li>
-                }
                 @if (User.IsInRole("Agent"))
                 {
-                    <li><a asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
-                    <li><a asp-controller="Listings" asp-action="Mine">My listings</a></li>
                     <li>
-                        <a asp-controller="Inquiries" asp-action="Index">
-                            Inquiries @await Component.InvokeAsync("UnreadInquiries")
+                        <a class="nav-cta" asp-controller="Listings" asp-action="Create">
+                            <span class="nav-cta-plus" aria-hidden="true">+</span> New listing
                         </a>
                     </li>
-                }
-                @if (User.IsInRole("Admin"))
-                {
-                    <li><a asp-controller="Admin" asp-action="Listings">Admin</a></li>
                 }
             </ul>
 
             <div class="nav-actions">
                 @if (User.Identity is not null && User.Identity.IsAuthenticated)
                 {
-                    <a asp-controller="Profile" asp-action="Index" style="font-size:.9rem;color:var(--muted);font-weight:600;">@User.Identity.Name</a>
-                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-ghost btn-sm">Sign out</button>
-                    </form>
+                    var displayName = User.Identity.Name ?? "Account";
+                    var initial = string.IsNullOrWhiteSpace(displayName) ? "?" : displayName.Trim()[..1].ToUpperInvariant();
+                    <div class="user-menu" data-user-menu>
+                        <button type="button" class="user-trigger" data-user-menu-trigger aria-haspopup="true" aria-expanded="false">
+                            <span class="user-avatar" aria-hidden="true">@initial</span>
+                            <span class="user-name">@displayName</span>
+                            <span class="user-caret" aria-hidden="true">▾</span>
+                        </button>
+                        <div class="user-dropdown" data-user-menu-panel role="menu">
+                            <div class="menu-section">
+                                <span class="menu-label">Account</span>
+                                <a role="menuitem" asp-controller="Favorites" asp-action="Mine">Saved</a>
+                                <a role="menuitem" asp-controller="SavedSearches" asp-action="Mine">Alerts</a>
+                                <a role="menuitem" asp-controller="Profile" asp-action="Index">Profile</a>
+                            </div>
+                            @if (User.IsInRole("Agent"))
+                            {
+                                <div class="menu-divider"></div>
+                                <div class="menu-section">
+                                    <span class="menu-label">Workspace</span>
+                                    <a role="menuitem" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                                    <a role="menuitem" asp-controller="Listings" asp-action="Mine">My listings</a>
+                                    <a role="menuitem" asp-controller="Inquiries" asp-action="Index" class="menu-item-badge">
+                                        <span>Inquiries</span> @await Component.InvokeAsync("UnreadInquiries")
+                                    </a>
+                                </div>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="menu-divider"></div>
+                                <div class="menu-section">
+                                    <span class="menu-label">Admin</span>
+                                    <a role="menuitem" asp-controller="Admin" asp-action="Listings">Manage listings</a>
+                                </div>
+                            }
+                            <div class="menu-divider"></div>
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                <button type="submit" class="menu-signout" role="menuitem">Sign out</button>
+                            </form>
+                        </div>
+                    </div>
                 }
                 else
                 {
@@ -98,6 +124,7 @@
     }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/user-menu.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
