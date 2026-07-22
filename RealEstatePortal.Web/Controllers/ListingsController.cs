@@ -23,7 +23,9 @@ using RealEstatePortal.Application.Listings.Queries.GetListings;
 using RealEstatePortal.Application.Listings.Queries.GetMyListings;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
 using RealEstatePortal.Domain.Constants;
+using RealEstatePortal.Domain.Enums;
 using RealEstatePortal.Web.Models.Listings;
+using System.Security.Claims;
 using ValidationException = RealEstatePortal.Application.Common.Exceptions.ValidationException;
 
 namespace RealEstatePortal.Web.Controllers;
@@ -164,14 +166,24 @@ public class ListingsController : Controller
     [HttpGet("listing/{id:int}/{slug?}")]
     public async Task<IActionResult> Details(int id, string? slug)
     {
-        var dto = await _sender.Send(new GetListingDetailQuery(id));
+        // Admins and agents may preview a listing in any status; the public sees only Active.
+        var canPreview = User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Agent);
+        var dto = await _sender.Send(new GetListingDetailQuery(id, IncludeNonPublic: canPreview));
         if (dto is null) return NotFound();
+
+        // A non-public listing is visible only to an administrator or its owner.
+        if (dto.Status != ListingStatus.Active
+            && !User.IsInRole(Roles.Admin)
+            && dto.OwnerId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+            return NotFound();
 
         // Canonicalize: if the slug is missing or wrong, 301 to the correct URL.
         if (!string.Equals(slug, dto.Slug, StringComparison.Ordinal))
             return RedirectToActionPermanent(nameof(Details), new { id, slug = dto.Slug });
 
-        await RecordViewAsync(id);
+        // Only count genuine public views — not admin/owner previews of a non-public listing.
+        if (dto.Status == ListingStatus.Active)
+            await RecordViewAsync(id);
 
         var vm = new ListingDetailViewModel
         {

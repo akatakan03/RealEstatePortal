@@ -7,7 +7,9 @@ using RealEstatePortal.Domain.Enums;
 
 namespace RealEstatePortal.Application.Listings.Queries.GetListingDetail;
 
-public record GetListingDetailQuery(int Id) : IRequest<ListingDetailDto?>;
+// IncludeNonPublic lets a privileged caller (an admin, or the listing's owner) preview a
+// listing that isn't Active yet. Left false for the public site, which only sees Active listings.
+public record GetListingDetailQuery(int Id, bool IncludeNonPublic = false) : IRequest<ListingDetailDto?>;
 
 public class GetListingDetailQueryHandler
     : IRequestHandler<GetListingDetailQuery, ListingDetailDto?>
@@ -29,12 +31,16 @@ public class GetListingDetailQueryHandler
     public async Task<ListingDetailDto?> Handle(
         GetListingDetailQuery request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Listings
+        var query = _context.Listings
             .Include(l => l.Media)
             .Include(l => l.PriceHistory)
-            .FirstOrDefaultAsync(
-                l => l.Id == request.Id && l.Status == ListingStatus.Active,
-                cancellationToken);
+            .Where(l => l.Id == request.Id);
+
+        // The public site sees only Active listings; a privileged caller can preview any status.
+        if (!request.IncludeNonPublic)
+            query = query.Where(l => l.Status == ListingStatus.Active);
+
+        var entity = await query.FirstOrDefaultAsync(cancellationToken);
 
         if (entity is null) return null;
 

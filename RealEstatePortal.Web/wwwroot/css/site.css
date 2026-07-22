@@ -1251,6 +1251,17 @@ img {
     white-space: pre-wrap
 }
 
+.preview-banner {
+    background: var(--brass-soft);
+    border: 1px solid var(--brass);
+    color: var(--brass-dk);
+    border-radius: 10px;
+    padding: .7rem 1rem;
+    font-size: .92rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem
+}
+
 /* ===== price history chart ===== */
 .price-trend-summary {
     display: flex;

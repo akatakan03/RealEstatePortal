@@ -114,10 +114,7 @@
                                                     <button type="submit" class="btn btn-primary btn-sm">Publish</button>
                                                 </form>
                                             }
-                                            @if (l.Status == ListingStatus.Active)
-                                            {
-                                                <a asp-action="Details" asp-route-id="@l.Id" asp-route-slug="@l.Slug" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">View</a>
-                                            }
+                                            <a asp-action="Details" asp-route-id="@l.Id" asp-route-slug="@l.Slug" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">@(l.Status == ListingStatus.Active ? "View" : "Preview")</a>
                                             <a asp-action="Edit" asp-route-id="@l.Id" class="btn btn-ghost btn-sm">Edit</a>
                                             <a asp-action="Delete" asp-route-id="@l.Id" class="btn btn-danger btn-sm">Delete</a>
                                         </div>

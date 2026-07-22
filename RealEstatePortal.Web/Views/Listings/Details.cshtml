@@ -29,6 +29,13 @@
     <div class="container">
         <a class="back-link" asp-action="Index">← Back to listings</a>
 
+        @if (listing.Status != RealEstatePortal.Domain.Enums.ListingStatus.Active)
+        {
+            <div class="preview-banner">
+                👁 Preview — this listing is <strong>@listing.Status</strong> and isn't visible to the public.
+            </div>
+        }
+
         @if (TempData["InquirySuccess"] is string ok)
         {
             <div class="alert alert-success" style="margin-bottom:1.5rem;">@ok</div>

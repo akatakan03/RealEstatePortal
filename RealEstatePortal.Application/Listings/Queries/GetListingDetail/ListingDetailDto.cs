@@ -7,6 +7,7 @@ public class ListingDetailDto
     public int Id { get; init; }
     public string Title { get; init; } = string.Empty;
     public string Slug { get; init; } = string.Empty;
+    public ListingStatus Status { get; init; }
     public string Description { get; init; } = string.Empty;
     public decimal PriceAmount { get; init; }
     public string PriceCurrency { get; init; } = string.Empty;
