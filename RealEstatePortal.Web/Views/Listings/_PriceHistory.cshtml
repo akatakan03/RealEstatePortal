@@ -1,0 +1,97 @@
+@using System.Globalization
+@using RealEstatePortal.Application.Listings.Queries.GetListingDetail
+@model IReadOnlyList<PricePointDto>
+@{
+    var pts = Model;
+}
+@* Nothing meaningful to plot until the price has moved at least once. *@
+@if (pts.Count >= 2)
+{
+    var inv = CultureInfo.InvariantCulture;
+    var currency = pts[pts.Count - 1].Currency;
+
+    // SVG plot geometry (a fixed viewBox scaled responsively by CSS).
+    const double W = 720, H = 240;
+    const double padL = 78, padR = 20, padT = 22, padB = 42;
+    const double plotW = W - padL - padR;
+    const double plotH = H - padT - padB;
+
+    var amounts = pts.Select(p => (double)p.Amount).ToList();
+    double min = amounts.Min(), max = amounts.Max();
+    double range = max - min;
+    if (range <= 0) { min -= 1; max += 1; range = max - min; } // flat series -> centre the line
+
+    var first = pts[0].ChangedAt;
+    var last = pts[pts.Count - 1].ChangedAt;
+    double span = (last - first).TotalSeconds;
+
+    string Fmt(double x) => x.ToString("0.#", inv);
+    var coords = new List<(double x, double y, PricePointDto p)>();
+    for (var i = 0; i < pts.Count; i++)
+    {
+        double tx = span <= 0
+            ? (pts.Count == 1 ? 0 : (double)i / (pts.Count - 1))
+            : (pts[i].ChangedAt - first).TotalSeconds / span;
+        double x = padL + plotW * tx;
+        double y = padT + plotH * (1 - ((double)pts[i].Amount - min) / range);
+        coords.Add((x, y, pts[i]));
+    }
+
+    var linePts = string.Join(" ", coords.Select(c => $"{Fmt(c.x)},{Fmt(c.y)}"));
+    var areaPts = $"{Fmt(padL)},{Fmt(padT + plotH)} {linePts} {Fmt(padL + plotW)},{Fmt(padT + plotH)}";
+
+    // Latest move, for the summary line.
+    var latest = pts[pts.Count - 1];
+    var previous = pts[pts.Count - 2];
+    decimal diff = latest.Amount - previous.Amount;
+    double pct = previous.Amount == 0 ? 0 : (double)(diff / previous.Amount) * 100.0;
+    var dir = diff < 0 ? "down" : diff > 0 ? "up" : "flat";
+    var arrow = diff < 0 ? "↓" : diff > 0 ? "↑" : "→";
+
+    <div class="detail-section">
+        <h3>Price history</h3>
+
+        <div class="price-trend-summary price-trend-@dir">
+            <span class="pts-arrow">@arrow</span>
+            @if (dir == "flat")
+            {
+                <span>Price unchanged in the latest update.</span>
+            }
+            else
+            {
+                <span>
+                    <strong>@Math.Abs(pct).ToString("0.#", inv)% @(dir == "down" ? "lower" : "higher")</strong>
+                    than before — now @latest.Amount.ToString("N0") @currency
+                </span>
+            }
+            <span class="pts-when">Last changed @latest.ChangedAt.ToString("MMM d, yyyy", inv)</span>
+        </div>
+
+        <div class="price-trend">
+            <svg viewBox="0 0 @Fmt(W) @Fmt(H)" role="img"
+                 aria-label="Price history line chart">
+                <!-- top/bottom guide lines -->
+                <line class="ptg" x1="@Fmt(padL)" y1="@Fmt(padT)" x2="@Fmt(padL + plotW)" y2="@Fmt(padT)"></line>
+                <line class="ptg" x1="@Fmt(padL)" y1="@Fmt(padT + plotH)" x2="@Fmt(padL + plotW)" y2="@Fmt(padT + plotH)"></line>
+
+                <!-- y-axis labels: high (top) and low (bottom) -->
+                <text class="ptl" x="@Fmt(padL - 10)" y="@Fmt(padT + 4)" text-anchor="end">@max.ToString("N0", inv)</text>
+                <text class="ptl" x="@Fmt(padL - 10)" y="@Fmt(padT + plotH + 4)" text-anchor="end">@min.ToString("N0", inv)</text>
+
+                <!-- x-axis labels: first and last date -->
+                <text class="ptl" x="@Fmt(padL)" y="@Fmt(H - 14)" text-anchor="start">@first.ToString("MMM yyyy", inv)</text>
+                <text class="ptl" x="@Fmt(padL + plotW)" y="@Fmt(H - 14)" text-anchor="end">@last.ToString("MMM yyyy", inv)</text>
+
+                <polygon class="pt-area" points="@areaPts"></polygon>
+                <polyline class="pt-line" points="@linePts"></polyline>
+
+                @foreach (var c in coords)
+                {
+                    <circle class="pt-dot" cx="@Fmt(c.x)" cy="@Fmt(c.y)" r="4">
+                        <title>@c.p.ChangedAt.ToString("MMM d, yyyy", inv): @c.p.Amount.ToString("N0") @c.p.Currency</title>
+                    </circle>
+                }
+            </svg>
+        </div>
+    </div>
+}

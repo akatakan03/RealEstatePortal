@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MockQueryable.NSubstitute;
@@ -48,7 +49,7 @@ public class UpdateListingCommandTests
     {
         var listing = new Listing { Id = 1, OwnerId = "agent-1", Address = "same address" };
         var (ctx, user, geo) = Deps(new List<Listing> { listing }, currentUserId: "agent-2");
-        var handler = new UpdateListingCommandHandler(ctx, user, geo);
+        var handler = new UpdateListingCommandHandler(ctx, user, geo, TimeProvider.System);
 
         await Should.ThrowAsync<ForbiddenAccessException>(
             () => handler.Handle(EditCommand(1), CancellationToken.None));
@@ -60,7 +61,7 @@ public class UpdateListingCommandTests
     public async Task Handle_WhenListingMissing_ThrowsNotFound()
     {
         var (ctx, user, geo) = Deps(new List<Listing>(), currentUserId: "agent-1");
-        var handler = new UpdateListingCommandHandler(ctx, user, geo);
+        var handler = new UpdateListingCommandHandler(ctx, user, geo, TimeProvider.System);
 
         await Should.ThrowAsync<NotFoundException>(
             () => handler.Handle(EditCommand(99), CancellationToken.None));
@@ -71,7 +72,7 @@ public class UpdateListingCommandTests
     {
         var listing = new Listing { Id = 1, OwnerId = "agent-1", Title = "Old", Address = "same address" };
         var (ctx, user, geo) = Deps(new List<Listing> { listing }, currentUserId: "agent-1");
-        var handler = new UpdateListingCommandHandler(ctx, user, geo);
+        var handler = new UpdateListingCommandHandler(ctx, user, geo, TimeProvider.System);
 
         await handler.Handle(EditCommand(1), CancellationToken.None);
 

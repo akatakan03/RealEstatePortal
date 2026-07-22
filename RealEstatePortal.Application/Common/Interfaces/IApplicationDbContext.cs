@@ -12,6 +12,7 @@ public interface IApplicationDbContext
     DbSet<SavedSearch> SavedSearches { get; }
     DbSet<ListingView> ListingViews { get; }
     DbSet<ListingViewDaily> ListingViewDailies { get; }
+    DbSet<ListingPriceChange> ListingPriceChanges { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

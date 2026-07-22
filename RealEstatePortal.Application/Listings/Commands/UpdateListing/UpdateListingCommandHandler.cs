@@ -13,12 +13,15 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IGeocodingService _geocoding;
+    private readonly TimeProvider _clock;
 
-    public UpdateListingCommandHandler(IApplicationDbContext context, IUser user, IGeocodingService geocoding)
+    public UpdateListingCommandHandler(
+        IApplicationDbContext context, IUser user, IGeocodingService geocoding, TimeProvider clock)
     {
         _context = context;
         _user = user;
         _geocoding = geocoding;
+        _clock = clock;
     }
 
     public async Task Handle(UpdateListingCommand request, CancellationToken cancellationToken)
@@ -32,7 +35,8 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
 
         entity.Title = request.Title;
         entity.Description = request.Description;
-        entity.Price = new Money(request.Price, request.Currency);
+        // Appends a timeline point only when the price actually changes.
+        entity.SetPrice(new Money(request.Price, request.Currency), _clock.GetUtcNow());
         entity.ListingType = request.ListingType;
         entity.PropertyType = request.PropertyType;
         entity.Bedrooms = request.Bedrooms;

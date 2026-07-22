@@ -31,6 +31,7 @@ public class GetListingDetailQueryHandler
     {
         var entity = await _context.Listings
             .Include(l => l.Media)
+            .Include(l => l.PriceHistory)
             .FirstOrDefaultAsync(
                 l => l.Id == request.Id && l.Status == ListingStatus.Active,
                 cancellationToken);
@@ -38,6 +39,11 @@ public class GetListingDetailQueryHandler
         if (entity is null) return null;
 
         var dto = ListingMapper.ToDetail(entity);
+
+        dto.PriceHistory = entity.PriceHistory
+            .OrderBy(p => p.ChangedAt)
+            .Select(p => new PricePointDto(p.Amount, p.Currency, p.ChangedAt))
+            .ToList();
         if (entity.Location is not null)
         {
             dto.Latitude = entity.Location.Latitude;

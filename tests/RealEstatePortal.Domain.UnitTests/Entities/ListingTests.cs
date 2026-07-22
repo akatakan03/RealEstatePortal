@@ -2,6 +2,7 @@
 using RealEstatePortal.Domain.Entities;
 using RealEstatePortal.Domain.Enums;
 using RealEstatePortal.Domain.Events;
+using RealEstatePortal.Domain.ValueObjects;
 
 namespace RealEstatePortal.Domain.UnitTests.Entities;
 
@@ -107,5 +108,43 @@ public class ListingTests
         listing.Publish();   // no longer blocked
 
         listing.Status.ShouldBe(ListingStatus.Active);
+    }
+
+    [Fact]
+    public void SetPrice_RecordsTheInitialPriceOnTheTimeline()
+    {
+        var listing = new Listing();
+        var at = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+        listing.SetPrice(new Money(100_000, "TRY"), at);
+
+        listing.Price.Amount.ShouldBe(100_000);
+        listing.PriceHistory.Count.ShouldBe(1);
+        listing.PriceHistory[0].Amount.ShouldBe(100_000);
+        listing.PriceHistory[0].ChangedAt.ShouldBe(at);
+    }
+
+    [Fact]
+    public void SetPrice_WhenValueChanges_AppendsAPoint()
+    {
+        var listing = new Listing();
+        listing.SetPrice(new Money(100_000, "TRY"), new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
+
+        listing.SetPrice(new Money(90_000, "TRY"), new DateTimeOffset(2026, 2, 1, 0, 0, 0, TimeSpan.Zero));
+
+        listing.Price.Amount.ShouldBe(90_000);
+        listing.PriceHistory.Count.ShouldBe(2);
+        listing.PriceHistory[^1].Amount.ShouldBe(90_000);
+    }
+
+    [Fact]
+    public void SetPrice_WhenValueUnchanged_DoesNotAppend()
+    {
+        var listing = new Listing();
+        listing.SetPrice(new Money(100_000, "TRY"), new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
+
+        listing.SetPrice(new Money(100_000, "TRY"), new DateTimeOffset(2026, 2, 1, 0, 0, 0, TimeSpan.Zero));
+
+        listing.PriceHistory.Count.ShouldBe(1);   // no phantom point for an unchanged price
     }
 }

@@ -22,6 +22,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<SavedSearch> SavedSearches => Set<SavedSearch>();
     public DbSet<ListingView> ListingViews => Set<ListingView>();
     public DbSet<ListingViewDaily> ListingViewDailies => Set<ListingViewDaily>();
+    public DbSet<ListingPriceChange> ListingPriceChanges => Set<ListingPriceChange>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

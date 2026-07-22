@@ -12,13 +12,15 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IGeocodingService _geocoding;
+    private readonly TimeProvider _clock;
 
     public CreateListingCommandHandler(
-        IApplicationDbContext context, IUser user, IGeocodingService geocoding)
+        IApplicationDbContext context, IUser user, IGeocodingService geocoding, TimeProvider clock)
     {
         _context = context;
         _user = user;
         _geocoding = geocoding;
+        _clock = clock;
     }
 
     public async Task<int> Handle(CreateListingCommand request, CancellationToken cancellationToken)
@@ -34,7 +36,6 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
             Title = request.Title,
             Slug = slug,
             Description = request.Description,
-            Price = new Money(request.Price, request.Currency),
             ListingType = request.ListingType,
             PropertyType = request.PropertyType,
             Bedrooms = request.Bedrooms,
@@ -52,6 +53,9 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
             BuildingAge = request.BuildingAge,
             MonthlyDues = request.MonthlyDues
         };
+
+        // Records the initial price as the first point on the timeline.
+        entity.SetPrice(new Money(request.Price, request.Currency), _clock.GetUtcNow());
 
         // Prefer the coordinates the agent set on the map; fall back to geocoding the address.
         if (request.Latitude.HasValue && request.Longitude.HasValue)

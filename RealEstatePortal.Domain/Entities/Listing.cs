@@ -25,6 +25,26 @@ public class Listing : BaseAuditableEntity
     public string Address { get; set; } = string.Empty;
     public GeoLocation? Location { get; set; }
     public List<ListingMedia> Media { get; private set; } = new();
+    public List<ListingPriceChange> PriceHistory { get; private set; } = new();
+
+    // Sets the price and records a point on the price timeline whenever the value actually
+    // changes. A new listing starts at the default 0, so the first real price is captured too.
+    public void SetPrice(Money price, DateTimeOffset at)
+    {
+        var changed = Price is null
+            || Price.Amount != price.Amount
+            || Price.Currency != price.Currency;
+
+        Price = price;
+
+        if (changed)
+            PriceHistory.Add(new ListingPriceChange
+            {
+                Amount = price.Amount,
+                Currency = price.Currency,
+                ChangedAt = at
+            });
+    }
 
     // Points to the Identity user (agent) once auth exists. Null until then.
     public string? OwnerId { get; set; }

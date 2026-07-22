@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MockQueryable.NSubstitute;
@@ -42,7 +43,7 @@ public class CreateListingCommandTests
         geocoding.GeocodeAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new GeoCoordinate(41.0082, 28.9784));
 
-        var handler = new CreateListingCommandHandler(context, user, geocoding);
+        var handler = new CreateListingCommandHandler(context, user, geocoding, TimeProvider.System);
 
         await handler.Handle(SampleCommand(), CancellationToken.None);
 
@@ -75,7 +76,7 @@ public class CreateListingCommandTests
         geocoding.GeocodeAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((GeoCoordinate?)null);
 
-        var handler = new CreateListingCommandHandler(context, user, geocoding);
+        var handler = new CreateListingCommandHandler(context, user, geocoding, TimeProvider.System);
 
         await handler.Handle(SampleCommand("Nice flat"), CancellationToken.None);
 

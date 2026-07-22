@@ -1251,6 +1251,82 @@ img {
     white-space: pre-wrap
 }
 
+/* ===== price history chart ===== */
+.price-trend-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .35rem .6rem;
+    margin-bottom: .9rem;
+    font-size: .95rem;
+    color: #33413C
+}
+
+    .price-trend-summary .pts-arrow {
+        font-weight: 700;
+        font-size: 1.05rem
+    }
+
+    .price-trend-down .pts-arrow {
+        color: #2f8f5b
+    }
+    /* a price drop is good news for buyers */
+    .price-trend-up .pts-arrow {
+        color: #b23b3b
+    }
+
+    .price-trend-summary .pts-when {
+        color: var(--muted);
+        font-size: .85rem;
+        margin-left: auto
+    }
+
+.price-trend {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    padding: .5rem
+}
+
+    .price-trend svg {
+        display: block;
+        width: 100%;
+        height: auto
+    }
+
+.pt-line {
+    fill: none;
+    stroke: var(--brass);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke
+}
+
+.pt-area {
+    fill: var(--brass-soft);
+    opacity: .55
+}
+
+.pt-dot {
+    fill: #fff;
+    stroke: var(--brass);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke
+}
+
+.ptg {
+    stroke: var(--line);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke
+}
+
+.ptl {
+    fill: var(--muted);
+    font-size: 13px;
+    font-family: var(--sans)
+}
+
 #detailMap {
     height: 320px;
     border-radius: 16px;

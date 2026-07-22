@@ -31,4 +31,9 @@ public class ListingDetailDto
     public int? TotalFloors { get; set; }
     public int? BuildingAge { get; set; }
     public decimal? MonthlyDues { get; set; }
+
+    // Price timeline, oldest first. Buyers see how the asking price has moved over time.
+    public List<PricePointDto> PriceHistory { get; set; } = new();
 }
+
+public record PricePointDto(decimal Amount, string Currency, DateTimeOffset ChangedAt);

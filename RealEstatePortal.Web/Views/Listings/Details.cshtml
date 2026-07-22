@@ -147,6 +147,8 @@
                     <p class="detail-desc">@listing.Description</p>
                 </div>
 
+                @await Html.PartialAsync("_PriceHistory", listing.PriceHistory)
+
                 <!-- YENİ: EMLAKÇI PROFİL KARTI BURAYA EKLENDİ -->
                 @if (!string.IsNullOrEmpty(listing.OwnerId))
                 {
