@@ -9,7 +9,6 @@ public class PerformanceBehaviour<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly Stopwatch _timer = new();
     private readonly ILogger<TRequest> _logger;
     private readonly IUser _user;
 
@@ -24,11 +23,12 @@ public class PerformanceBehaviour<TRequest, TResponse>
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        _timer.Start();
+        // Local per-call timer — no shared state, correct regardless of this behaviour's lifetime.
+        var timer = Stopwatch.StartNew();
         var response = await next();
-        _timer.Stop();
+        timer.Stop();
 
-        var elapsedMs = _timer.ElapsedMilliseconds;
+        var elapsedMs = timer.ElapsedMilliseconds;
         if (elapsedMs > 500)
         {
             var requestName = typeof(TRequest).Name;
