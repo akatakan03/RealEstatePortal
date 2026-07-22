@@ -8,6 +8,7 @@ public record AgentDashboardDto
     public int ActiveListings { get; init; }
     public int TotalViews { get; init; }
     public int UniqueVisitors { get; init; }
+    public int Views7d { get; init; }
     public int Views30d { get; init; }
     public int TotalInquiries { get; init; }
     public IReadOnlyList<AgentListingStatDto> Listings { get; init; } = new List<AgentListingStatDto>();

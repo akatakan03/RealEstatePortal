@@ -28,8 +28,11 @@ public class GetAgentDashboardQueryHandler
         GetAgentDashboardQuery request, CancellationToken cancellationToken)
     {
         var now = _clock.GetUtcNow();
-        var since7 = now.AddDays(-7);
-        var since30 = now.AddDays(-TrendDays);
+        var today = DateOnly.FromDateTime(now.UtcDateTime);
+        // Align the count windows to calendar-day starts so the "30 days" KPI matches the
+        // trend chart exactly (both cover today-29 … today), instead of a rolling 30×24h window.
+        var since7 = new DateTimeOffset(today.AddDays(-6).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+        var since30 = new DateTimeOffset(today.AddDays(-(TrendDays - 1)).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
 
         var listings = await _context.Listings
             .Where(l => l.OwnerId == _user.Id)
@@ -118,6 +121,7 @@ public class GetAgentDashboardQueryHandler
             ActiveListings = listings.Count(l => l.Status == ListingStatus.Active),
             TotalViews = rows.Sum(r => r.TotalViews),
             UniqueVisitors = uniqueVisitors,
+            Views7d = rows.Sum(r => r.Views7d),
             Views30d = rows.Sum(r => r.Views30d),
             TotalInquiries = rows.Sum(r => r.Inquiries),
             Listings = rows,

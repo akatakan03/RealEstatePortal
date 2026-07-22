@@ -62,6 +62,32 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
     }
 
     [Fact]
+    public async Task Views30dKpi_MatchesTheTrendChartSum_AtTheWindowBoundary()
+    {
+        Fixture.CurrentUser.Id = "agent-1";
+
+        await Fixture.ExecuteDbAsync(async db =>
+        {
+            var mine = Seed("Mine", "mine", "agent-1");
+            db.Listings.Add(mine);
+            await db.SaveChangesAsync(CancellationToken.None);
+
+            // Two views today, one exactly 30 days ago (just outside the 30-calendar-day window).
+            db.ListingViews.Add(new ListingView { ListingId = mine.Id, ViewerKey = "a", ViewedAt = DateTimeOffset.UtcNow });
+            db.ListingViews.Add(new ListingView { ListingId = mine.Id, ViewerKey = "b", ViewedAt = DateTimeOffset.UtcNow });
+            db.ListingViews.Add(new ListingView { ListingId = mine.Id, ViewerKey = "c", ViewedAt = DateTimeOffset.UtcNow.AddDays(-30) });
+            await db.SaveChangesAsync(CancellationToken.None);
+            return 0;
+        });
+
+        var dash = await Fixture.SendAsync(new GetAgentDashboardQuery());
+
+        // The KPI and the chart must agree — the 30-day-old view is excluded from both.
+        dash.Views30d.ShouldBe(2);
+        dash.ViewTrend.Sum(t => t.Count).ShouldBe(dash.Views30d);
+    }
+
+    [Fact]
     public async Task TotalViews_IncludeRolledUpHistory()
     {
         Fixture.CurrentUser.Id = "agent-1";
