@@ -71,7 +71,8 @@ public class ApplicationDbContextInitialiser
             }
         }
 
-        await BackfillInitialPriceHistoryAsync();
+        // Note: legacy listings get their initial price-history point from a one-time data
+        // migration (BackfillListingPriceHistory), not here — so it runs once, not every startup.
         await SeedDemoPriceHistoryAsync();
 
         // Default administrator — only when explicitly requested (dev convenience or an
@@ -97,26 +98,6 @@ public class ApplicationDbContextInitialiser
             await _userManager.AddToRoleAsync(admin, Roles.Admin);
             _logger.LogInformation("Seeded default admin {Email}", adminEmail);
         }
-    }
-
-    // Listings created before price-history tracking (and any seeded ones) have no timeline.
-    // Give each such listing a single baseline point — its current price at its creation date —
-    // so the first future price change immediately renders a two-point chart. Idempotent:
-    // only touches listings that don't already have a history row.
-    private async Task BackfillInitialPriceHistoryAsync()
-    {
-        var inserted = await _context.Database.ExecuteSqlRawAsync(
-            """
-            INSERT INTO ListingPriceChanges (ListingId, Amount, Currency, ChangedAt)
-            SELECT l.Id, l.PriceAmount, l.PriceCurrency, l.Created
-            FROM Listings l
-            WHERE NOT EXISTS (
-                SELECT 1 FROM ListingPriceChanges p WHERE p.ListingId = l.Id
-            );
-            """);
-
-        if (inserted > 0)
-            _logger.LogInformation("Backfilled initial price history for {Count} listing(s).", inserted);
     }
 
     // Demo-only: give a deterministic sample of listings a realistic multi-point price timeline
