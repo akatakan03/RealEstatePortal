@@ -365,3 +365,5 @@ FodyWeavers.xsd
 # Environment-specific app settings may hold secrets (connection strings, keys) — keep them out of git.
 appsettings.Production.json
 appsettings.*.Local.json
+# Local Claude Code settings (per-machine permissions, etc.)
+.claude/
