@@ -126,8 +126,11 @@ public class GetPublicListingsQueryHandler
                 AreaSqMeters = l.AreaSqMeters,
                 Latitude = l.Location != null ? l.Location.Latitude : (double?)null,
                 Longitude = l.Location != null ? l.Location.Longitude : (double?)null,
+                // Prefer the flagged cover; fall back to the first photo by order so a listing
+                // with images always shows a thumbnail even if none is marked as cover.
                 CoverThumbnailKey = l.Media
-                    .Where(m => m.IsCover)
+                    .OrderByDescending(m => m.IsCover)
+                    .ThenBy(m => m.Order)
                     .Select(m => m.ThumbnailKey)
                     .FirstOrDefault()
             });

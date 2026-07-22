@@ -53,7 +53,11 @@ public class GetAgentPublicProfileQueryHandler
                 Status = l.Status,
                 Bedrooms = l.Bedrooms,
                 AreaSqMeters = l.AreaSqMeters,
-                CoverThumbnailKey = l.Media.Where(m => m.IsCover).Select(m => m.ThumbnailKey).FirstOrDefault()
+                CoverThumbnailKey = l.Media
+                    .OrderByDescending(m => m.IsCover)
+                    .ThenBy(m => m.Order)
+                    .Select(m => m.ThumbnailKey)
+                    .FirstOrDefault()
             }).ToListAsync(cancellationToken);
 
         foreach (var item in listings)
