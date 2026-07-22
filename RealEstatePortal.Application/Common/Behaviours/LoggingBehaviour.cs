@@ -20,9 +20,9 @@ public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest>
     {
         var requestName = typeof(TRequest).Name;
         var userId = _user.Id ?? string.Empty;
-        _logger.LogInformation(
-            "Request: {Name} by {UserId} {@Request}",
-            requestName, userId, request);
+        // Deliberately log only the request type and user — never the request body, which can
+        // hold PII (inquiry contact details, saved-search criteria, notes, etc.).
+        _logger.LogInformation("Request: {Name} by {UserId}", requestName, userId);
         return Task.CompletedTask;
     }
 }

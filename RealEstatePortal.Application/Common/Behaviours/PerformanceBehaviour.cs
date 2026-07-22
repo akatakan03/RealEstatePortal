@@ -33,9 +33,10 @@ public class PerformanceBehaviour<TRequest, TResponse>
         {
             var requestName = typeof(TRequest).Name;
             var userId = _user.Id ?? string.Empty;
+            // Log the request type and timing only — never the body (may contain PII).
             _logger.LogWarning(
-                "Long-running request: {Name} ({ElapsedMs} ms) by {UserId} {@Request}",
-                requestName, elapsedMs, userId, request);
+                "Long-running request: {Name} ({ElapsedMs} ms) by {UserId}",
+                requestName, elapsedMs, userId);
         }
 
         return response;
