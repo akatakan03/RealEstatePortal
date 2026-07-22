@@ -121,5 +121,11 @@ public class IntegrationTestFixture : IAsyncLifetime
         return await action(db);
     }
 
+    public async Task<T> ExecuteScopeAsync<T>(Func<IServiceProvider, Task<T>> action)
+    {
+        using var scope = _provider.CreateScope();
+        return await action(scope.ServiceProvider);
+    }
+
     public Task DisposeAsync() => Task.CompletedTask;
 }

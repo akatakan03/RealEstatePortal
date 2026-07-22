@@ -61,6 +61,32 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         dash.ViewTrend.Sum(t => t.Count).ShouldBe(4);
     }
 
+    [Fact]
+    public async Task TotalViews_IncludeRolledUpHistory()
+    {
+        Fixture.CurrentUser.Id = "agent-1";
+
+        await Fixture.ExecuteDbAsync(async db =>
+        {
+            var mine = Seed("Mine", "mine", "agent-1");
+            db.Listings.Add(mine);
+            await db.SaveChangesAsync(CancellationToken.None);
+
+            // 2 recent raw views + 5 historical views already rolled up.
+            db.ListingViews.Add(new ListingView { ListingId = mine.Id, ViewerKey = "a", ViewedAt = DateTimeOffset.UtcNow });
+            db.ListingViews.Add(new ListingView { ListingId = mine.Id, ViewerKey = "b", ViewedAt = DateTimeOffset.UtcNow });
+            db.ListingViewDailies.Add(new ListingViewDaily { ListingId = mine.Id, Day = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-120)), Views = 5 });
+            await db.SaveChangesAsync(CancellationToken.None);
+            return 0;
+        });
+
+        var dash = await Fixture.SendAsync(new GetAgentDashboardQuery());
+
+        dash.TotalViews.ShouldBe(7);          // 2 raw + 5 rolled up
+        dash.Listings.Single().TotalViews.ShouldBe(7);
+        dash.Views30d.ShouldBe(2);            // recent window is raw-only
+    }
+
     private static Listing Seed(string title, string slug, string ownerId)
     {
         var listing = new Listing

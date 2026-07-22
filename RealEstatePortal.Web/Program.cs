@@ -158,6 +158,8 @@ builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
 
+builder.Services.AddHostedService<ListingViewRollupWorker>();
+
 var app = builder.Build();
 
 // Must run before anything that reads the client IP or scheme (rate limiter, HTTPS redirect, logging).

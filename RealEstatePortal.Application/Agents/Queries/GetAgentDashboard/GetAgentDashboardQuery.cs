@@ -69,6 +69,13 @@ public class GetAgentDashboardQueryHandler
             .Select(g => new { ListingId = g.Key, Count = g.Count() })
             .ToListAsync(cancellationToken);
 
+        // Views older than the raw-retention window live here; fold them into all-time totals.
+        var rolledUp = await _context.ListingViewDailies
+            .Where(d => listingIds.Contains(d.ListingId))
+            .GroupBy(d => d.ListingId)
+            .Select(g => new { ListingId = g.Key, Views = g.Sum(x => x.Views) })
+            .ToListAsync(cancellationToken);
+
         // Daily view totals across all the agent's listings, last 30 days.
         var trendRaw = await _context.ListingViews
             .Where(v => listingIds.Contains(v.ListingId) && v.ViewedAt >= since30)
@@ -78,19 +85,21 @@ public class GetAgentDashboardQueryHandler
 
         var viewsById = viewStats.ToDictionary(v => v.ListingId);
         var inquiriesById = inquiryStats.ToDictionary(i => i.ListingId, i => i.Count);
+        var rolledUpById = rolledUp.ToDictionary(r => r.ListingId, r => r.Views);
 
         var rows = listings
             .Select(l =>
             {
                 viewsById.TryGetValue(l.Id, out var v);
                 inquiriesById.TryGetValue(l.Id, out var inq);
+                rolledUpById.TryGetValue(l.Id, out var rolled);
                 return new AgentListingStatDto
                 {
                     Id = l.Id,
                     Title = l.Title,
                     Slug = l.Slug,
                     Status = l.Status,
-                    TotalViews = v?.Total ?? 0,
+                    TotalViews = (v?.Total ?? 0) + rolled,   // recent (raw) + historical (rolled up)
                     UniqueVisitors = v?.Unique ?? 0,
                     Views7d = v?.Last7 ?? 0,
                     Views30d = v?.Last30 ?? 0,

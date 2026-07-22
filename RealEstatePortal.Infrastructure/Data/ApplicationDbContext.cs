@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<Favorite> Favorites => Set<Favorite>();
     public DbSet<SavedSearch> SavedSearches => Set<SavedSearch>();
     public DbSet<ListingView> ListingViews => Set<ListingView>();
+    public DbSet<ListingViewDaily> ListingViewDailies => Set<ListingViewDaily>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
