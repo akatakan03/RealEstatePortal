@@ -1,11 +1,12 @@
 ﻿@using RealEstatePortal.Domain.Enums
-@model List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
+@model RealEstatePortal.Application.Common.Models.PaginatedList<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
 @{
     ViewData["Title"] = "Moderation";
     var current = ViewBag.StatusFilter as ListingStatus?;
     var pending = ViewBag.PendingUnlockRequests as List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
         ?? new List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>();
     var requestsView = ViewBag.RequestsView == true;
+    var search = ViewBag.Search as string;
 }
 
 <div class="dash">
@@ -74,7 +75,9 @@
         }
         else
         {
-            <form asp-action="Listings" method="get" class="admin-status-filter">
+            <form asp-action="Listings" method="get" class="admin-toolbar">
+                <input type="search" name="search" value="@search" class="listing-search"
+                       placeholder="Search by title or address…" autocomplete="off" />
                 <label style="font-weight:600;font-size:.9rem;">Status</label>
                 <select name="status" class="form-select select-inline" onchange="this.form.submit()">
                     <option value="">All</option>
@@ -83,9 +86,10 @@
                         <option value="@s" selected="@(current == s)">@s</option>
                     }
                 </select>
+                <button type="submit" class="btn btn-ghost btn-sm">Search</button>
             </form>
 
-            if (!Model.Any())
+            if (!Model.Items.Any())
             {
                 <div class="form-card" style="text-align:center;color:var(--muted);">No listings@(current is null ? "" : $" with status {current}").</div>
             }
@@ -97,7 +101,7 @@
                         <tr><th>Title</th><th>Owner</th><th>Status</th><th>Price</th><th></th></tr>
                     </thead>
                     <tbody>
-                        @foreach (var l in Model)
+                        @foreach (var l in Model.Items)
                         {
                             <tr>
                                 <td class="row-title"><a asp-controller="Listings" asp-action="Details" asp-route-id="@l.Id">@l.Title</a></td>
@@ -168,6 +172,29 @@
                     </tbody>
                 </table>
             </div>
+
+            if (Model.TotalPages > 1)
+            {
+                <nav class="pager">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a asp-action="Listings" asp-route-status="@current" asp-route-search="@search" asp-route-page="@(Model.PageNumber - 1)">← Prev</a>
+                    }
+                    else
+                    {
+                        <span class="disabled">← Prev</span>
+                    }
+                    <span class="current">@Model.PageNumber of @Model.TotalPages</span>
+                    @if (Model.HasNextPage)
+                    {
+                        <a asp-action="Listings" asp-route-status="@current" asp-route-search="@search" asp-route-page="@(Model.PageNumber + 1)">Next →</a>
+                    }
+                    else
+                    {
+                        <span class="disabled">Next →</span>
+                    }
+                </nav>
+            }
             }
         }
     </div>

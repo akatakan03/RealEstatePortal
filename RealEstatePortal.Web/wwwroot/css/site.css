@@ -2217,6 +2217,18 @@ textarea.form-control {
         font-style: italic
     }
 
+.admin-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-bottom: 1.25rem
+}
+
+    .admin-toolbar .listing-search {
+        flex: 1 1 16rem
+    }
+
 /* ===== admin re-review queue ===== */
 .review-queue {
     background: var(--brass-soft);

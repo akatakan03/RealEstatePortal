@@ -7,6 +7,7 @@ using RealEstatePortal.Application.Admin.Commands.LockListing;
 using RealEstatePortal.Application.Admin.Commands.RestoreListing;
 using RealEstatePortal.Application.Admin.Commands.UnlockListing;
 using RealEstatePortal.Application.Admin.Queries.GetListingsForModeration;
+using RealEstatePortal.Application.Common.Models;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
 
@@ -19,18 +20,19 @@ public class AdminController : Controller
 
     public AdminController(ISender sender) => _sender = sender;
 
-    public async Task<IActionResult> Listings(ListingStatus? status, bool requests = false)
+    public async Task<IActionResult> Listings(ListingStatus? status, string? search, bool requests = false, int page = 1)
     {
         // Always load pending re-review requests — the tab shows a live count either way.
         var pending = await _sender.Send(new GetPendingUnlockRequestsQuery());
         ViewBag.PendingUnlockRequests = pending;
         ViewBag.RequestsView = requests;
         ViewBag.StatusFilter = status;
+        ViewBag.Search = search;
 
-        // The "Re-review requests" tab has its own list; the table isn't used there.
+        // The "Re-review requests" tab has its own list; the paged table isn't used there.
         var items = requests
-            ? new List<AdminListingDto>()
-            : await _sender.Send(new GetListingsForModerationQuery(status));
+            ? new PaginatedList<AdminListingDto>(Array.Empty<AdminListingDto>(), 0, 1, 25)
+            : await _sender.Send(new GetListingsForModerationQuery(status, search, page));
 
         return View(items);
     }
