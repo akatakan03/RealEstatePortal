@@ -1,5 +1,5 @@
-﻿@using RealEstatePortal.Domain.Enums
-@model List<RealEstatePortal.Application.Listings.Queries.GetListings.ListingBriefDto>
+@using RealEstatePortal.Domain.Enums
+@model List<RealEstatePortal.Application.Listings.Queries.GetMyListings.MyListingDto>
 @{
     ViewData["Title"] = "My Listings";
 }
@@ -22,21 +22,50 @@
         }
         else
         {
+            <div class="listing-toolbar">
+                <div class="filter-tabs" role="tablist">
+                    <button type="button" class="filter-tab is-active" data-filter="all">All <span class="ft-count">@Model.Count</span></button>
+                    <button type="button" class="filter-tab" data-filter="active">Active <span class="ft-count">@Model.Count(l => !l.IsLocked && l.Status == ListingStatus.Active)</span></button>
+                    <button type="button" class="filter-tab" data-filter="draft">Draft <span class="ft-count">@Model.Count(l => !l.IsLocked && l.Status == ListingStatus.Draft)</span></button>
+                    <button type="button" class="filter-tab" data-filter="archived">Archived <span class="ft-count">@Model.Count(l => !l.IsLocked && l.Status == ListingStatus.Archived)</span></button>
+                    <button type="button" class="filter-tab" data-filter="locked">Locked <span class="ft-count">@Model.Count(l => l.IsLocked)</span></button>
+                </div>
+                <input type="search" id="listingSearch" class="listing-search" placeholder="Search by title…" autocomplete="off" />
+            </div>
+
             <div class="table-card">
-                <table class="table">
+                <table class="table" id="myListingsTable">
                     <thead>
-                        <tr><th>Title</th><th>Type</th><th>Price</th><th>Status</th><th></th></tr>
+                        <tr>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th class="num">Views</th>
+                            <th class="num">Inquiries</th>
+                            <th></th>
+                        </tr>
                     </thead>
                     <tbody>
                         @foreach (var l in Model)
                         {
-                            <tr>
-                                <td class="row-title">@l.Title</td>
+                            var rowStatus = l.IsLocked ? "locked" : l.Status.ToString().ToLower();
+                            <tr data-status="@rowStatus" data-title="@l.Title.ToLowerInvariant()">
+                                <td class="row-title">
+                                    <div class="listing-cell">
+                                        @if (!string.IsNullOrEmpty(l.CoverThumbnailUrl))
+                                        {
+                                            <img class="listing-thumb" src="@l.CoverThumbnailUrl" alt="" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <span class="listing-thumb listing-thumb-empty" aria-hidden="true">⌂</span>
+                                        }
+                                        <span class="listing-cell-title">@l.Title</span>
+                                    </div>
+                                </td>
                                 <td>@l.ListingType</td>
                                 <td><span class="value">@l.PriceAmount.ToString("N0") @l.PriceCurrency</span></td>
-                                <td>
-                                    <span class="badge-status badge-@l.Status.ToString().ToLower()">@l.Status</span>
-                                </td>
                                 <td>
                                     @if (l.IsLocked)
                                     {
@@ -47,6 +76,8 @@
                                         <span class="badge-status badge-@l.Status.ToString().ToLower()">@l.Status</span>
                                     }
                                 </td>
+                                <td class="num">@l.Views.ToString("N0")</td>
+                                <td class="num">@l.Inquiries.ToString("N0")</td>
                                 <td>
                                     @if (l.IsLocked)
                                     {
@@ -65,6 +96,10 @@
                                                     <button type="submit" class="btn btn-primary btn-sm">Publish</button>
                                                 </form>
                                             }
+                                            @if (l.Status == ListingStatus.Active)
+                                            {
+                                                <a asp-action="Details" asp-route-id="@l.Id" asp-route-slug="@l.Slug" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">View</a>
+                                            }
                                             <a asp-action="Edit" asp-route-id="@l.Id" class="btn btn-ghost btn-sm">Edit</a>
                                             <a asp-action="Delete" asp-route-id="@l.Id" class="btn btn-danger btn-sm">Delete</a>
                                         </div>
@@ -74,7 +109,12 @@
                         }
                     </tbody>
                 </table>
+                <p id="noListingMatch" class="no-match" hidden>No listings match your filters.</p>
             </div>
         }
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/my-listings.js" asp-append-version="true"></script>
+}

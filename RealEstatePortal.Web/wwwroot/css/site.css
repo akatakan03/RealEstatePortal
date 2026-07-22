@@ -1540,8 +1540,119 @@ textarea.form-control {
     color: var(--ink)
 }
 
+.table th.num, .table td.num {
+    text-align: right;
+    white-space: nowrap
+}
+
 .unread-row {
     background: #FBFAF6
+}
+
+/* ===== my-listings toolbar (status tabs + search) ===== */
+.listing-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    margin-bottom: 1rem
+}
+
+.filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem
+}
+
+.filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .38rem .8rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s
+}
+
+    .filter-tab:hover {
+        border-color: var(--ink)
+    }
+
+    .filter-tab.is-active {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: #fff
+    }
+
+.ft-count {
+    font-size: .75rem;
+    font-weight: 700;
+    padding: .02rem .4rem;
+    border-radius: 999px;
+    background: rgba(0,0,0,.08)
+}
+
+.filter-tab.is-active .ft-count {
+    background: rgba(255,255,255,.22)
+}
+
+.listing-search {
+    flex: 0 1 16rem;
+    min-width: 10rem;
+    padding: .5rem .85rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font: inherit;
+    font-size: .9rem;
+    background: var(--surface)
+}
+
+    .listing-search:focus {
+        outline: none;
+        border-color: var(--brass)
+    }
+
+.listing-cell {
+    display: flex;
+    align-items: center;
+    gap: .75rem
+}
+
+.listing-thumb {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex: none;
+    border: 1px solid var(--line)
+}
+
+.listing-thumb-empty {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brass-soft);
+    color: var(--brass-dk);
+    font-size: 1.2rem
+}
+
+.listing-cell-title {
+    font-weight: 600;
+    color: var(--ink)
+}
+
+.no-match {
+    text-align: center;
+    color: var(--muted);
+    padding: 2rem 1rem;
+    margin: 0
 }
 
 /* auth pages */
