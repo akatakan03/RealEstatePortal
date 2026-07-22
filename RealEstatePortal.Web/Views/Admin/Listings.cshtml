@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Moderation";
     var current = ViewBag.StatusFilter as ListingStatus?;
+    var pending = ViewBag.PendingUnlockRequests as List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
+        ?? new List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>();
+    var requestsView = ViewBag.RequestsView == true;
 }
 
 <div class="dash">
@@ -12,7 +15,66 @@
                 <span class="eyebrow">Admin</span>
                 <h1 class="page-title">Listing moderation</h1>
             </div>
-            <form asp-action="Listings" method="get" style="display:flex;align-items:center;gap:.6rem;">
+        </div>
+
+        <div class="filter-tabs" role="tablist" style="margin-bottom:1.25rem;">
+            <a class="filter-tab @(requestsView ? "" : "is-active")" asp-action="Listings">All listings</a>
+            <a class="filter-tab @(requestsView ? "is-active" : "")" asp-action="Listings" asp-route-requests="true">
+                ⏳ Re-review requests
+                @if (pending.Any())
+                {
+                    <span class="ft-count">@pending.Count</span>
+                }
+            </a>
+        </div>
+
+        @if (requestsView)
+        {
+            if (!pending.Any())
+            {
+                <div class="form-card" style="text-align:center;color:var(--muted);">No re-review requests right now.</div>
+            }
+            else
+            {
+                <div class="review-queue">
+                    <div class="review-queue-head">
+                        <span class="review-queue-sub">Agents who addressed a lock and asked for another look. Oldest first.</span>
+                    </div>
+                    @foreach (var p in pending)
+                    {
+                        <div class="review-queue-item">
+                            <div class="rq-main">
+                                <a class="rq-title" asp-controller="Listings" asp-action="Details" asp-route-id="@p.Id" target="_blank" rel="noopener">@p.Title</a>
+                                <div class="rq-meta">
+                                    @(p.OwnerEmail ?? "—")
+                                    @if (p.UnlockRequestedAt is not null)
+                                    {
+                                        <span> · requested @p.UnlockRequestedAt.Value.ToString("MMM d, yyyy")</span>
+                                    }
+                                </div>
+                                <div class="rq-reason"><strong>Locked for:</strong> @p.LockReason</div>
+                                @if (!string.IsNullOrWhiteSpace(p.UnlockRequestNote))
+                                {
+                                    <div class="rq-note">“@p.UnlockRequestNote”</div>
+                                }
+                                else
+                                {
+                                    <div class="rq-note rq-note-empty">The agent didn't leave a note.</div>
+                                }
+                            </div>
+                            <form asp-action="Unlock" method="post" class="rq-action">
+                                <input type="hidden" name="id" value="@p.Id" />
+                                <input type="hidden" name="requests" value="true" />
+                                <button type="submit" class="btn btn-primary btn-sm">🔓 Unlock</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <form asp-action="Listings" method="get" class="admin-status-filter">
                 <label style="font-weight:600;font-size:.9rem;">Status</label>
                 <select name="status" class="form-select select-inline" onchange="this.form.submit()">
                     <option value="">All</option>
@@ -22,15 +84,14 @@
                     }
                 </select>
             </form>
-        </div>
 
-        @if (!Model.Any())
-        {
-            <div class="form-card" style="text-align:center;color:var(--muted);">No listings@(current is null ? "" : $" with status {current}").</div>
-        }
-        else
-        {
-            <div class="table-card">
+            if (!Model.Any())
+            {
+                <div class="form-card" style="text-align:center;color:var(--muted);">No listings@(current is null ? "" : $" with status {current}").</div>
+            }
+            else
+            {
+                <div class="table-card">
                 <table class="table">
                     <thead>
                         <tr><th>Title</th><th>Owner</th><th>Status</th><th>Price</th><th></th></tr>
@@ -87,7 +148,19 @@
                                     }
                                     else
                                     {
-                                        <div class="lock-note">🔒 Locked — @l.LockReason</div>
+                                        <div class="lock-note">
+                                            🔒 Locked — @l.LockReason
+                                            @if (l.UnlockRequested)
+                                            {
+                                                <div class="review-requested-admin">
+                                                    ⏳ Re-review requested@(l.UnlockRequestedAt is null ? "" : $" · {l.UnlockRequestedAt:MMM d, yyyy}")
+                                                    @if (!string.IsNullOrWhiteSpace(l.UnlockRequestNote))
+                                                    {
+                                                        <span class="rr-note">“@l.UnlockRequestNote”</span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
                                     }
                                 </td>
                             </tr>
@@ -95,6 +168,7 @@
                     </tbody>
                 </table>
             </div>
+            }
         }
     </div>
 </div>

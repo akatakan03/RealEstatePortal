@@ -71,6 +71,7 @@ public class Listing : BaseAuditableEntity
         LockReason = reason.Trim();
         LockedAt = DateTimeOffset.UtcNow;
         Status = ListingStatus.Draft;
+        ClearUnlockRequest();   // a fresh lock supersedes any earlier appeal
 
         AddDomainEvent(new ListingLockedEvent(this, LockReason));   // ← notify via the dispatcher
     }
@@ -80,7 +81,26 @@ public class Listing : BaseAuditableEntity
         IsLocked = false;
         LockReason = null;
         LockedAt = null;
+        ClearUnlockRequest();
         // Stays Draft — the agent must deliberately re-publish.
+    }
+
+    // The agent, having addressed the reason, asks an administrator to review and unlock.
+    public void RequestUnlock(string? note, DateTimeOffset at)
+    {
+        if (!IsLocked)
+            throw new DomainException("Only a locked listing can be submitted for re-review.");
+
+        UnlockRequested = true;
+        UnlockRequestNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+        UnlockRequestedAt = at;
+    }
+
+    private void ClearUnlockRequest()
+    {
+        UnlockRequested = false;
+        UnlockRequestNote = null;
+        UnlockRequestedAt = null;
     }
 
     // Structured attributes
@@ -96,4 +116,9 @@ public class Listing : BaseAuditableEntity
     public bool IsLocked { get; private set; }
     public string? LockReason { get; private set; }
     public DateTimeOffset? LockedAt { get; private set; }
+
+    // Set when the agent asks for a locked listing to be reviewed again.
+    public bool UnlockRequested { get; private set; }
+    public string? UnlockRequestNote { get; private set; }
+    public DateTimeOffset? UnlockRequestedAt { get; private set; }
 }

@@ -2150,6 +2150,146 @@ textarea.form-control {
         font-size: .78rem
     }
 
+/* agent-side re-review appeal */
+.unlock-appeal {
+    margin-top: .45rem
+}
+
+    .unlock-appeal > summary {
+        cursor: pointer;
+        color: #9A3B30;
+        font-weight: 600;
+        font-size: .82rem;
+        list-style: none
+    }
+
+    .unlock-appeal > summary::-webkit-details-marker {
+        display: none
+    }
+
+    .unlock-appeal[open] > summary {
+        margin-bottom: .45rem
+    }
+
+    .unlock-appeal textarea {
+        width: 100%;
+        border: 1px solid #E6C4BF;
+        border-radius: 8px;
+        padding: .45rem .55rem;
+        font: inherit;
+        font-size: .82rem;
+        resize: vertical;
+        margin-bottom: .45rem;
+        background: #fff
+    }
+
+.review-requested {
+    display: block;
+    margin-top: .3rem;
+    color: #7A3129;
+    font-weight: 600
+}
+
+/* admin-side request badge + note */
+.review-requested-admin {
+    margin-top: .35rem;
+    color: var(--brass-dk);
+    font-weight: 700;
+    font-size: .8rem
+}
+
+    .review-requested-admin .rr-note {
+        display: block;
+        margin-top: .15rem;
+        color: var(--muted);
+        font-weight: 500;
+        font-style: italic
+    }
+
+/* ===== admin re-review queue ===== */
+.review-queue {
+    background: var(--brass-soft);
+    border: 1px solid var(--brass);
+    border-radius: 16px;
+    padding: 1.1rem 1.3rem;
+    margin-bottom: 1.5rem
+}
+
+.review-queue-head {
+    display: flex;
+    align-items: baseline;
+    gap: .7rem;
+    flex-wrap: wrap;
+    margin-bottom: .8rem
+}
+
+    .review-queue-head h2 {
+        font-family: var(--serif);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem
+    }
+
+.rq-count {
+    font-family: var(--sans);
+    font-size: .8rem;
+    font-weight: 700;
+    background: var(--brass);
+    color: #fff;
+    border-radius: 999px;
+    padding: .05rem .5rem
+}
+
+.review-queue-sub {
+    color: var(--brass-dk);
+    font-size: .88rem
+}
+
+.review-queue-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .8rem 0;
+    border-top: 1px solid rgba(176,138,79,.35)
+}
+
+.rq-title {
+    font-weight: 700;
+    color: var(--ink)
+}
+
+.rq-meta {
+    color: var(--muted);
+    font-size: .82rem;
+    margin: .15rem 0
+}
+
+.rq-reason {
+    font-size: .86rem;
+    color: #7A3129;
+    margin-top: .2rem
+}
+
+.rq-note {
+    font-size: .88rem;
+    color: var(--ink);
+    font-style: italic;
+    margin-top: .25rem
+}
+
+    .rq-note-empty {
+        color: var(--muted);
+        font-style: normal
+    }
+
+.rq-action {
+    flex: none
+}
+
 /* ===== lock dialog ===== */
 .lock-dialog {
     border: none;

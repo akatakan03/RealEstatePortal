@@ -11,6 +11,7 @@ using RealEstatePortal.Application.Listings.Commands.CreateListing;
 using RealEstatePortal.Application.Listings.Commands.DeleteListing;
 using RealEstatePortal.Application.Listings.Commands.DeleteListingImage;
 using RealEstatePortal.Application.Listings.Commands.PublishListing;
+using RealEstatePortal.Application.Listings.Commands.RequestListingUnlock;
 using RealEstatePortal.Application.Listings.Commands.RecordListingView;
 using RealEstatePortal.Application.Listings.Commands.SetCoverImage;
 using RealEstatePortal.Application.Listings.Commands.UpdateListing;
@@ -214,6 +215,16 @@ public class ListingsController : Controller
     public async Task<IActionResult> Publish(int id)
     {
         await _sender.Send(new PublishListingCommand(id));
+        return RedirectToAction(nameof(Mine));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Agent)]
+    public async Task<IActionResult> RequestUnlock(int id, string? note)
+    {
+        await _sender.Send(new RequestListingUnlockCommand(id, note));
+        TempData["UnlockRequested"] = "Your re-review request has been sent to the administrators.";
         return RedirectToAction(nameof(Mine));
     }
 

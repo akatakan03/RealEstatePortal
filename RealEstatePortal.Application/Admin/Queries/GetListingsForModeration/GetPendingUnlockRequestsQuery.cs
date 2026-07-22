@@ -1,35 +1,31 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Interfaces;
-using RealEstatePortal.Domain.Enums;
 
 namespace RealEstatePortal.Application.Admin.Queries.GetListingsForModeration;
 
-public record GetListingsForModerationQuery(ListingStatus? Status = null)
-    : IRequest<List<AdminListingDto>>;
+// Locked listings whose owners have asked for another review — surfaced at the top of the
+// moderation page so an admin never has to hunt for them.
+public record GetPendingUnlockRequestsQuery : IRequest<List<AdminListingDto>>;
 
-public class GetListingsForModerationQueryHandler
-    : IRequestHandler<GetListingsForModerationQuery, List<AdminListingDto>>
+public class GetPendingUnlockRequestsQueryHandler
+    : IRequestHandler<GetPendingUnlockRequestsQuery, List<AdminListingDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IIdentityService _identity;
 
-    public GetListingsForModerationQueryHandler(IApplicationDbContext context, IIdentityService identity)
+    public GetPendingUnlockRequestsQueryHandler(IApplicationDbContext context, IIdentityService identity)
     {
         _context = context;
         _identity = identity;
     }
 
     public async Task<List<AdminListingDto>> Handle(
-        GetListingsForModerationQuery request, CancellationToken cancellationToken)
+        GetPendingUnlockRequestsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Listings.AsQueryable();
-
-        if (request.Status.HasValue)
-            query = query.Where(l => l.Status == request.Status.Value);
-
-        var items = await query
-            .OrderByDescending(l => l.Created)
+        var items = await _context.Listings
+            .Where(l => l.UnlockRequested)
+            .OrderBy(l => l.UnlockRequestedAt)     // oldest waiting first
             .Select(l => new AdminListingDto
             {
                 Id = l.Id,
@@ -47,7 +43,6 @@ public class GetListingsForModerationQueryHandler
             })
             .ToListAsync(cancellationToken);
 
-        // Resolve owner emails — one lookup per distinct owner (not per listing).
         var ownerIds = items.Where(i => i.OwnerId != null)
             .Select(i => i.OwnerId!).Distinct().ToList();
 

@@ -19,10 +19,19 @@ public class AdminController : Controller
 
     public AdminController(ISender sender) => _sender = sender;
 
-    public async Task<IActionResult> Listings(ListingStatus? status)
+    public async Task<IActionResult> Listings(ListingStatus? status, bool requests = false)
     {
-        var items = await _sender.Send(new GetListingsForModerationQuery(status));
+        // Always load pending re-review requests — the tab shows a live count either way.
+        var pending = await _sender.Send(new GetPendingUnlockRequestsQuery());
+        ViewBag.PendingUnlockRequests = pending;
+        ViewBag.RequestsView = requests;
         ViewBag.StatusFilter = status;
+
+        // The "Re-review requests" tab has its own list; the table isn't used there.
+        var items = requests
+            ? new List<AdminListingDto>()
+            : await _sender.Send(new GetListingsForModerationQuery(status));
+
         return View(items);
     }
 
@@ -59,9 +68,9 @@ public class AdminController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Unlock(int id, ListingStatus? status)
+    public async Task<IActionResult> Unlock(int id, ListingStatus? status, bool requests = false)
     {
         await _sender.Send(new UnlockListingCommand(id));
-        return RedirectToAction(nameof(Listings), new { status });
+        return RedirectToAction(nameof(Listings), new { status, requests });
     }
 }

@@ -14,4 +14,7 @@ public class AdminListingDto
     public DateTimeOffset Created { get; init; }
     public bool IsLocked { get; init; }
     public string? LockReason { get; init; }
+    public bool UnlockRequested { get; init; }
+    public string? UnlockRequestNote { get; init; }
+    public DateTimeOffset? UnlockRequestedAt { get; init; }
 }

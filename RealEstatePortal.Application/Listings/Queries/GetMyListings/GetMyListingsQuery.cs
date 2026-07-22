@@ -38,6 +38,8 @@ public class GetMyListingsQueryHandler
                 Status = l.Status,
                 IsLocked = l.IsLocked,
                 LockReason = l.LockReason,
+                UnlockRequested = l.UnlockRequested,
+                UnlockRequestedAt = l.UnlockRequestedAt,
                 // First cover photo (or first by order) as the thumbnail key.
                 CoverThumbnailUrl = l.Media
                     .OrderByDescending(m => m.IsCover)

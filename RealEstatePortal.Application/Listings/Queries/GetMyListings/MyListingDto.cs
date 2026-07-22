@@ -15,6 +15,8 @@ public class MyListingDto
     public ListingStatus Status { get; init; }
     public bool IsLocked { get; init; }
     public string? LockReason { get; init; }
+    public bool UnlockRequested { get; init; }
+    public DateTimeOffset? UnlockRequestedAt { get; init; }
     public string? CoverThumbnailUrl { get; set; }
     public int Views { get; init; }
     public int Inquiries { get; init; }

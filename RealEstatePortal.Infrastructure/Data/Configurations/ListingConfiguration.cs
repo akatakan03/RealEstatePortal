@@ -57,5 +57,6 @@ public class ListingConfiguration : IEntityTypeConfiguration<Listing>
         builder.Property(l => l.MonthlyDues).HasPrecision(18, 2);
 
         builder.Property(l => l.LockReason).HasMaxLength(500);
+        builder.Property(l => l.UnlockRequestNote).HasMaxLength(1000);
     }
 }

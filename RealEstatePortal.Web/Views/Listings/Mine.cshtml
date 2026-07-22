@@ -14,6 +14,11 @@
             <a class="btn btn-primary" asp-action="Create">+ New listing</a>
         </div>
 
+        @if (TempData["UnlockRequested"] is string sent)
+        {
+            <div class="alert alert-success" style="margin-bottom:1.5rem;">@sent</div>
+        }
+
         @if (!Model.Any())
         {
             <div class="form-card" style="text-align:center;color:var(--muted);">
@@ -84,7 +89,20 @@
                                         <div class="locked-msg">
                                             <strong>Locked by an administrator.</strong>
                                             <span>@l.LockReason</span>
-                                            <small>Contact support once resolved.</small>
+                                            @if (l.UnlockRequested)
+                                            {
+                                                <small class="review-requested">⏳ Re-review requested@(l.UnlockRequestedAt is null ? "" : $" on {l.UnlockRequestedAt:MMM d, yyyy}"). An admin will take another look.</small>
+                                            }
+                                            else
+                                            {
+                                                <details class="unlock-appeal">
+                                                    <summary>Fixed it — request re-review</summary>
+                                                    <form asp-action="RequestUnlock" asp-route-id="@l.Id" method="post">
+                                                        <textarea name="note" maxlength="1000" rows="3" placeholder="Optional: tell the admin what you changed (e.g. replaced the photos)."></textarea>
+                                                        <button type="submit" class="btn btn-primary btn-sm">Send request</button>
+                                                    </form>
+                                                </details>
+                                            }
                                         </div>
                                     }
                                     else

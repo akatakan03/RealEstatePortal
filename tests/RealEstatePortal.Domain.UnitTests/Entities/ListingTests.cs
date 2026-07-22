@@ -147,4 +147,64 @@ public class ListingTests
 
         listing.PriceHistory.Count.ShouldBe(1);   // no phantom point for an unchanged price
     }
+
+    [Fact]
+    public void RequestUnlock_WhenLocked_RecordsTheRequestAndNote()
+    {
+        var listing = new Listing();
+        listing.Lock("Bad photos");
+        var at = new DateTimeOffset(2026, 3, 1, 0, 0, 0, TimeSpan.Zero);
+
+        listing.RequestUnlock("  Replaced the photos  ", at);
+
+        listing.UnlockRequested.ShouldBeTrue();
+        listing.UnlockRequestNote.ShouldBe("Replaced the photos");   // trimmed
+        listing.UnlockRequestedAt.ShouldBe(at);
+    }
+
+    [Fact]
+    public void RequestUnlock_WhenNotLocked_Throws()
+    {
+        var listing = new Listing();
+        Should.Throw<Exception>(() => listing.RequestUnlock("note", DateTimeOffset.UtcNow));
+    }
+
+    [Fact]
+    public void RequestUnlock_WithBlankNote_LeavesNoteNull()
+    {
+        var listing = new Listing();
+        listing.Lock("Reason");
+
+        listing.RequestUnlock("   ", DateTimeOffset.UtcNow);
+
+        listing.UnlockRequested.ShouldBeTrue();
+        listing.UnlockRequestNote.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Unlock_ClearsAnyPendingUnlockRequest()
+    {
+        var listing = new Listing();
+        listing.Lock("Reason");
+        listing.RequestUnlock("Fixed it", DateTimeOffset.UtcNow);
+
+        listing.Unlock();
+
+        listing.UnlockRequested.ShouldBeFalse();
+        listing.UnlockRequestNote.ShouldBeNull();
+        listing.UnlockRequestedAt.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Lock_ClearsAPriorUnlockRequest()
+    {
+        var listing = new Listing();
+        listing.Lock("First reason");
+        listing.RequestUnlock("Fixed it", DateTimeOffset.UtcNow);
+
+        listing.Lock("Locked again for a new reason");   // supersedes the old appeal
+
+        listing.UnlockRequested.ShouldBeFalse();
+        listing.UnlockRequestNote.ShouldBeNull();
+    }
 }
