@@ -7,6 +7,7 @@ using RealEstatePortal.Application.Favorites.Queries.IsListingFavorited;
 using RealEstatePortal.Application.Geocoding.Queries.GeocodeAddress;
 using RealEstatePortal.Application.Inquiries.Commands.CreateInquiry;
 using RealEstatePortal.Application.Listings.Commands.AddListingImages;
+using RealEstatePortal.Application.Listings.Commands.ArchiveListing;
 using RealEstatePortal.Application.Listings.Commands.CreateListing;
 using RealEstatePortal.Application.Listings.Commands.DeleteListing;
 using RealEstatePortal.Application.Listings.Commands.DeleteListingImage;
@@ -224,6 +225,15 @@ public class ListingsController : Controller
     public async Task<IActionResult> Publish(int id)
     {
         await _sender.Send(new PublishListingCommand(id));
+        return RedirectToAction("Index", "Dashboard");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Agent)]
+    public async Task<IActionResult> Archive(int id)
+    {
+        await _sender.Send(new ArchiveListingCommand(id));
         return RedirectToAction("Index", "Dashboard");
     }
 

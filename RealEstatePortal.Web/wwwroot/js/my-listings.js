@@ -1,7 +1,6 @@
-// The agent's listing table on the dashboard: status tabs, title search, and click-to-sort
-// on the numeric columns. A locked listing carries a second, full-width row underneath it
-// (the re-review appeal), so rows are handled in pairs — filtering or sorting must never
-// separate an appeal form from the listing it belongs to.
+// The agent's listing table on the dashboard: status tabs and title search. A locked listing
+// carries a second, full-width row underneath it (the re-review appeal), so rows are handled
+// in pairs — filtering must never leave an appeal form behind without its listing.
 (function () {
     var table = document.getElementById('myListingsTable');
     if (!table) return;
@@ -52,54 +51,4 @@
 
     if (search) search.addEventListener('input', apply);
 
-    // --- Sorting -----------------------------------------------------------
-    var headers = Array.prototype.slice.call(table.querySelectorAll('th.sortable'));
-    var sortKey = null;
-    var descending = true;
-
-    headers.forEach(function (th) {
-        th.setAttribute('role', 'button');
-        th.setAttribute('tabindex', '0');
-
-        function sort() {
-            var key = th.dataset.sort;
-            // Same column toggles direction; a new column starts at "biggest first",
-            // which is what someone ranking their listings is looking for.
-            descending = key === sortKey ? !descending : true;
-            sortKey = key;
-
-            items.sort(function (a, b) {
-                var av = parseInt(a.row.dataset[key], 10) || 0;
-                var bv = parseInt(b.row.dataset[key], 10) || 0;
-                return descending ? bv - av : av - bv;
-            });
-
-            // Reorder with the tbody detached from the document. Moving rows inside a live
-            // table makes the auto-layout engine recompute every column width on each move,
-            // which on a real portfolio is hundreds of full relayouts and locks the tab up.
-            // Offline the mutations cost nothing and reattaching costs one reflow.
-            var parent = body.parentNode;
-            var marker = document.createComment('sorting');
-            parent.replaceChild(marker, body);
-
-            items.forEach(function (item) {
-                body.appendChild(item.row);
-                if (item.extra) body.appendChild(item.extra);
-            });
-
-            parent.replaceChild(body, marker);
-
-            headers.forEach(function (h) {
-                h.classList.remove('sorted-asc', 'sorted-desc');
-                h.removeAttribute('aria-sort');
-            });
-            th.classList.add(descending ? 'sorted-desc' : 'sorted-asc');
-            th.setAttribute('aria-sort', descending ? 'descending' : 'ascending');
-        }
-
-        th.addEventListener('click', sort);
-        th.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sort(); }
-        });
-    });
 })();

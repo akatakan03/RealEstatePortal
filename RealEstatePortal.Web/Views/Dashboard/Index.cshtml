@@ -120,7 +120,7 @@
             <div class="dash-card">
                 <div class="dash-card-head">
                     <h2>My listings</h2>
-                    <span class="dash-card-sub">newest first — click a number column to rank by it</span>
+                    <span class="dash-card-sub">newest first — open Stats for a listing's own numbers</span>
                 </div>
 
                 <div class="listing-toolbar">
@@ -142,10 +142,6 @@
                                 <th>Type</th>
                                 <th class="num">Price</th>
                                 <th>Status</th>
-                                <th class="num sortable" data-sort="v7">Views · 7d</th>
-                                <th class="num sortable" data-sort="vt">Total views</th>
-                                <th class="num sortable" data-sort="fav">Saves</th>
-                                <th class="num sortable" data-sort="inq">Inquiries</th>
                                 <th class="col-actions"></th>
                             </tr>
                         </thead>
@@ -153,8 +149,7 @@
                             @foreach (var row in Model.Listings)
                             {
                                 var rowStatus = row.IsLocked ? "locked" : row.Status.ToString().ToLowerInvariant();
-                                <tr data-status="@rowStatus" data-title="@row.Title.ToLowerInvariant()"
-                                    data-v7="@row.Views7d" data-vt="@row.TotalViews" data-fav="@row.Favorites" data-inq="@row.Inquiries">
+                                <tr data-status="@rowStatus" data-title="@row.Title.ToLowerInvariant()">
                                     <td>
                                         <div class="listing-cell">
                                             @if (!string.IsNullOrEmpty(row.CoverThumbnailUrl))
@@ -180,25 +175,30 @@
                                             <span class="status-pill status-@row.Status.ToString().ToLowerInvariant()">@row.Status</span>
                                         }
                                     </td>
-                                    <td class="num">@row.Views7d.ToString("N0")</td>
-                                    <td class="num">@row.TotalViews.ToString("N0")</td>
-                                    <td class="num">@row.Favorites.ToString("N0")</td>
-                                    <td class="num">@row.Inquiries.ToString("N0")</td>
                                     <td class="col-actions">
-                                        @if (!row.IsLocked)
-                                        {
-                                            <div class="row-actions">
-                                                @if (row.Status == ListingStatus.Draft)
+                                        <div class="row-actions">
+                                            @* Stats stay available on a locked listing — the agent
+                                               still needs to see what it did before it was pulled. *@
+                                            <button type="button" class="btn btn-ghost btn-sm" data-stats-for="@row.Id"
+                                                    data-stats-title="@row.Title">Stats</button>
+                                            @if (!row.IsLocked)
+                                            {
+                                                @if (row.Status == ListingStatus.Active)
+                                                {
+                                                    <form asp-controller="Listings" asp-action="Archive" asp-route-id="@row.Id" method="post">
+                                                        <button type="submit" class="btn btn-ghost btn-sm">Archive</button>
+                                                    </form>
+                                                }
+                                                else
                                                 {
                                                     <form asp-controller="Listings" asp-action="Publish" asp-route-id="@row.Id" method="post">
                                                         <button type="submit" class="btn btn-primary btn-sm">Publish</button>
                                                     </form>
                                                 }
-                                                <a asp-controller="Listings" asp-action="Details" asp-route-id="@row.Id" asp-route-slug="@row.Slug" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">@(row.Status == ListingStatus.Active ? "View" : "Preview")</a>
                                                 <a asp-controller="Listings" asp-action="Edit" asp-route-id="@row.Id" class="btn btn-ghost btn-sm">Edit</a>
                                                 <a asp-controller="Listings" asp-action="Delete" asp-route-id="@row.Id" class="btn btn-danger btn-sm">Delete</a>
-                                            </div>
-                                        }
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
 
@@ -207,7 +207,7 @@
                                 if (row.IsLocked)
                                 {
                                     <tr class="locked-row" data-status="@rowStatus" data-title="@row.Title.ToLowerInvariant()" data-follows="@row.Id">
-                                        <td colspan="9">
+                                        <td colspan="5">
                                             <div class="locked-msg">
                                                 <strong>Locked by an administrator.</strong>
                                                 <span>@row.LockReason</span>
@@ -239,6 +239,19 @@
     </div>
 </section>
 
+@* One dialog, reused for whichever listing the agent asks about. The body is fetched on
+   demand — rendering 76 sets of charts up front would cost far more than it's worth. *@
+<dialog id="statsModal" class="stats-modal" aria-labelledby="statsModalTitle">
+    <div class="stats-modal-head">
+        <h2 id="statsModalTitle">Listing stats</h2>
+        <button type="button" class="stats-modal-close" data-stats-close aria-label="Close">✕</button>
+    </div>
+    <div class="stats-modal-body" id="statsModalBody">
+        <p class="stats-modal-status">Loading…</p>
+    </div>
+</dialog>
+
 @section Scripts {
     <script src="~/js/my-listings.js" asp-append-version="true"></script>
+    <script src="~/js/listing-stats.js" asp-append-version="true"></script>
 }

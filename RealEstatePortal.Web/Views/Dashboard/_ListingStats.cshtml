@@ -1,0 +1,145 @@
+@using System.Globalization
+@model RealEstatePortal.Application.Agents.Queries.GetListingStats.ListingStatsDto
+@{
+    var inv = CultureInfo.InvariantCulture;
+
+    // Same rule as the dashboard KPIs: the arrow and the wording carry the direction,
+    // colour only reinforces it.
+    (string Arrow, string Css, string Text) Delta(int current, int previous)
+    {
+        if (previous == 0)
+            return current == 0 ? ("→", "flat", "no change") : ("▲", "up", "new this week");
+
+        var pct = (current - previous) * 100.0 / previous;
+        if (Math.Abs(pct) < 0.5) return ("→", "flat", "level");
+        return pct > 0
+            ? ("▲", "up", $"{pct.ToString("0.#", inv)}%")
+            : ("▼", "down", $"{Math.Abs(pct).ToString("0.#", inv)}%");
+    }
+
+    var viewsDelta = Delta(Model.Views7d, Model.ViewsPrev7d);
+    var favDelta = Delta(Model.Favorites7d, Model.FavoritesPrev7d);
+    var inqDelta = Delta(Model.Inquiries7d, Model.InquiriesPrev7d);
+
+    var saves30 = Model.Favorites30dEquivalent;
+
+    string Ago(DateTimeOffset? when) =>
+        when is null ? "never" : when.Value.ToString("MMM d, yyyy", inv);
+}
+
+<div class="ls-head">
+    <div>
+        <h2 id="listingStatsTitle">@Model.Title</h2>
+        <div class="ls-meta">
+            @if (Model.IsLocked)
+            {
+                <span class="status-pill status-locked">🔒 Locked</span>
+            }
+            else
+            {
+                <span class="status-pill status-@Model.Status.ToString().ToLowerInvariant()">@Model.Status</span>
+            }
+            <span>@Model.PriceAmount.ToString("N0") @Model.PriceCurrency</span>
+            <span>Listed @Model.DaysListed day@(Model.DaysListed == 1 ? "" : "s") ago</span>
+        </div>
+    </div>
+    <a class="btn btn-ghost btn-sm" asp-controller="Listings" asp-action="Details"
+       asp-route-id="@Model.Id" asp-route-slug="@Model.Slug" target="_blank" rel="noopener">Open listing ↗</a>
+</div>
+
+@* The funnel is the story: of everyone who looked, how many cared enough to save, and how
+   many actually made contact. Counts alone can't answer that — the rates can. *@
+<div class="ls-funnel">
+    <div class="fn-step">
+        <span class="fn-value">@Model.Views30d.ToString("N0")</span>
+        <span class="fn-label">views · 30 days</span>
+        <span class="fn-rate">@Model.ViewsPerDay.ToString("0.#", inv) per day</span>
+    </div>
+    <span class="fn-arrow" aria-hidden="true">→</span>
+    <div class="fn-step">
+        <span class="fn-value">@saves30.ToString("N0")</span>
+        <span class="fn-label">saved it</span>
+        <span class="fn-rate">@Model.SavesPer100Views.ToString("0.0", inv) per 100 views</span>
+    </div>
+    <span class="fn-arrow" aria-hidden="true">→</span>
+    <div class="fn-step">
+        <span class="fn-value">@Model.Inquiries30d.ToString("N0")</span>
+        <span class="fn-label">got in touch</span>
+        <span class="fn-rate">@Model.InquiriesPer100Views.ToString("0.0", inv) per 100 views</span>
+    </div>
+</div>
+
+<div class="kpi-row ls-kpis">
+    <div class="kpi">
+        <div class="kpi-label">Views · 7 days</div>
+        <div class="kpi-value">@Model.Views7d.ToString("N0")</div>
+        <div class="kpi-delta @viewsDelta.Css">
+            <span aria-hidden="true">@viewsDelta.Arrow</span> @viewsDelta.Text
+            <span class="kpi-delta-note">vs previous 7 days</span>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-label">Saves · 7 days</div>
+        <div class="kpi-value">@Model.Favorites7d.ToString("N0")</div>
+        <div class="kpi-delta @favDelta.Css">
+            <span aria-hidden="true">@favDelta.Arrow</span> @favDelta.Text
+            <span class="kpi-delta-note">@Model.TotalFavorites.ToString("N0") all time</span>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-label">Inquiries · 7 days</div>
+        <div class="kpi-value">@Model.Inquiries7d.ToString("N0")</div>
+        <div class="kpi-delta @inqDelta.Css">
+            <span aria-hidden="true">@inqDelta.Arrow</span> @inqDelta.Text
+            <span class="kpi-delta-note">@Model.TotalInquiries.ToString("N0") all time</span>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-label" title="All-time views, including the older activity that has been rolled up into daily totals.">Total views</div>
+        <div class="kpi-value">@Model.TotalViews.ToString("N0")</div>
+        <div class="kpi-delta flat"><span class="kpi-delta-note">@Model.UniqueVisitors.ToString("N0") unique · recent</span></div>
+    </div>
+</div>
+
+@* A raw count means nothing on its own — the agent's own average is the only honest yardstick. *@
+@if (Model.PortfolioListingCount > 1 && Model.PortfolioAvgViews30d > 0)
+{
+    var ratio = Model.VsPortfolio;
+    var pct = Math.Abs(ratio - 1) * 100;
+    var verdict = Math.Abs(ratio - 1) < 0.05
+        ? "about average for your portfolio"
+        : ratio > 1
+            ? $"{pct.ToString("0", inv)}% above your portfolio average"
+            : $"{pct.ToString("0", inv)}% below your portfolio average";
+
+    <p class="ls-benchmark">
+        Over the last 30 days this listing is <strong>@verdict</strong>
+        (@Model.PortfolioAvgViews30d.ToString("0.#", inv) views on average across your
+        @Model.PortfolioListingCount listings).
+    </p>
+}
+
+<div class="chart-pair">
+    @await Html.PartialAsync("_TrendChart", (Model.ViewTrend, "Views", "views", "views", "view"))
+    @await Html.PartialAsync("_TrendChart", (Model.FavoriteTrend, "Saves", "saves", "saves", "save"))
+</div>
+
+<div class="chart-pair ls-charts-lower">
+    @await Html.PartialAsync("_TrendChart", (Model.InquiryTrend, "Inquiries", "inquiries", "inquiries", "inquiry"))
+
+    <div class="dash-card">
+        <div class="dash-card-head">
+            <h2>Activity</h2>
+            <span class="dash-card-sub">the last time anything happened</span>
+        </div>
+        <dl class="ls-facts">
+            <div><dt>Last view</dt><dd>@Ago(Model.LastViewAt)</dd></div>
+            <div><dt>Last inquiry</dt><dd>@Ago(Model.LastInquiryAt)</dd></div>
+            <div><dt>Published</dt><dd>@Model.CreatedAt.ToString("MMM d, yyyy", inv)</dd></div>
+            <div><dt>Price changes</dt><dd>@Math.Max(Model.PriceHistory.Count - 1, 0)</dd></div>
+        </dl>
+    </div>
+</div>
+
+@* Only drawn once the price has actually moved — a single point is not a history. *@
+@await Html.PartialAsync("~/Views/Listings/_PriceHistory.cshtml", Model.PriceHistory)

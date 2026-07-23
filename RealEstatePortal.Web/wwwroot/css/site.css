@@ -2442,7 +2442,8 @@ textarea.form-control {
 /* ===== data-viz tokens =====
    Validated as a categorical set against the white card surface (lightness band,
    chroma floor, CVD separation, normal-vision floor, 3:1 contrast — all pass). */
-.dash-sec {
+.dash-sec,
+.stats-modal {   /* the modal sits outside the section but draws the same charts */
     --viz-1: #C08A1E; /* brass/gold — views, first segment */
     --viz-2: #2A78D6; /* blue — inquiries, second segment */
     --viz-3: #B4483C; /* terracotta — third segment */
@@ -2537,6 +2538,10 @@ textarea.form-control {
 
 .trend-inquiries .trend-bar {
     background: var(--viz-2)
+}
+
+.trend-saves .trend-bar {
+    background: var(--viz-3)
 }
 
 .chart-table {
@@ -2715,27 +2720,6 @@ textarea.form-control {
         text-decoration: underline
     }
 
-.listing-table th.sortable {
-    cursor: pointer;
-    user-select: none
-}
-
-    .listing-table th.sortable:hover {
-        color: var(--ink)
-    }
-
-    /* The arrow only appears on the column actually being sorted, so it reads as state
-       rather than decoration. */
-    .listing-table th.sorted-desc::after {
-        content: " ▾";
-        color: var(--brass-dk)
-    }
-
-    .listing-table th.sorted-asc::after {
-        content: " ▴";
-        color: var(--brass-dk)
-    }
-
 .listing-table td.col-actions {
     white-space: nowrap;
     text-align: right
@@ -2749,8 +2733,194 @@ textarea.form-control {
     white-space: normal
 }
 
+/* ===== per-listing stats modal ===== */
+.stats-modal {
+    width: min(1040px, calc(100vw - 2rem));
+    max-height: calc(100vh - 3rem);
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface, #fff);
+    color: var(--ink);
+    overflow: hidden
+}
+
+    .stats-modal::backdrop {
+        background: rgba(22, 26, 24, .45)
+    }
+
+.stats-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid var(--line);
+    /* stays put while the panel scrolls, so "close" is never hunted for */
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 1
+}
+
+    .stats-modal-head h2 {
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 0
+    }
+
+.stats-modal-close {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    border-radius: 8px;
+    width: 2rem;
+    height: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    flex: none
+}
+
+    .stats-modal-close:hover {
+        color: var(--ink);
+        border-color: var(--ink)
+    }
+
+.stats-modal-body {
+    padding: 1.4rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 8rem)
+}
+
+.stats-modal-status {
+    color: var(--muted);
+    margin: 0;
+    padding: 2rem 0;
+    text-align: center
+}
+
+    .stats-modal-status.is-error {
+        color: var(--danger)
+    }
+
+.ls-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem
+}
+
+    .ls-head h2 {
+        font-family: var(--serif);
+        font-size: 1.35rem;
+        font-weight: 600;
+        margin: 0 0 .35rem
+    }
+
+.ls-meta {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: .88rem
+}
+
+/* The funnel is read left to right as a sequence, so the steps are laid out as one. */
+.ls-funnel {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 1.4rem
+}
+
+.fn-step {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+    min-width: 8rem
+}
+
+.fn-value {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums
+}
+
+.fn-label {
+    font-size: .8rem;
+    color: var(--muted)
+}
+
+.fn-rate {
+    font-size: .78rem;
+    color: var(--brass-dk);
+    font-weight: 600
+}
+
+.fn-arrow {
+    color: var(--muted);
+    font-size: 1.2rem
+}
+
+.ls-kpis {
+    margin-bottom: 1.2rem
+}
+
+.ls-benchmark {
+    color: var(--muted);
+    font-size: .9rem;
+    margin: 0 0 1.4rem
+}
+
+.ls-charts-lower {
+    margin-top: 1.6rem
+}
+
+.ls-facts {
+    margin: 0;
+    display: grid;
+    gap: .55rem
+}
+
+    .ls-facts > div {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: .55rem
+    }
+
+        .ls-facts > div:last-child {
+            border-bottom: none;
+            padding-bottom: 0
+        }
+
+    .ls-facts dt {
+        color: var(--muted);
+        font-size: .85rem
+    }
+
+    .ls-facts dd {
+        margin: 0;
+        font-weight: 600;
+        font-size: .9rem
+    }
+
 @media (max-width: 720px) {
     .kpi-row {
         grid-template-columns: repeat(2, 1fr)
+    }
+
+    .ls-funnel .fn-arrow {
+        display: none
     }
 }
