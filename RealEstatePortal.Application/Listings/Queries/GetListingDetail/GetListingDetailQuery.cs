@@ -36,9 +36,12 @@ public class GetListingDetailQueryHandler
     public async Task<ListingDetailDto?> Handle(
         GetListingDetailQuery request, CancellationToken cancellationToken)
     {
+        // Only Media is included here. Pulling the price history in the same statement would
+        // make the database answer with every (photo × price point) pairing — up to 20 photos
+        // times however many price changes — repeating the 4000-character description in each
+        // of those rows. It is fetched separately below instead.
         var query = _context.Listings
             .Include(l => l.Media)
-            .Include(l => l.PriceHistory)
             .Where(l => l.Id == request.Id);
 
         // The public site sees only Active listings; a privileged caller can preview any status.
@@ -51,10 +54,14 @@ public class GetListingDetailQueryHandler
 
         var dto = ListingMapper.ToDetail(entity);
 
-        dto.PriceHistory = entity.PriceHistory
+        // Its own statement, projected to the three columns the chart actually plots — lighter
+        // than materialising the entities, and it keeps the listing row out of the result.
+        dto.PriceHistory = await _context.Listings
+            .Where(l => l.Id == entity.Id)
+            .SelectMany(l => l.PriceHistory)
             .OrderBy(p => p.ChangedAt)
             .Select(p => new PricePointDto(p.Amount, p.Currency, p.ChangedAt))
-            .ToList();
+            .ToListAsync(cancellationToken);
         if (entity.Location is not null)
         {
             dto.Latitude = entity.Location.Latitude;
