@@ -1,0 +1,34 @@
+@using System.Globalization
+@using RealEstatePortal.Application.Agents.Queries.GetAgentDashboard
+@model (IReadOnlyList<BreakdownItemDto> Items, string Title)
+@{
+    var inv = CultureInfo.InvariantCulture;
+    // Only three validated series colours exist — anything past them folds into "Other".
+    var items = Model.Items.Take(3).ToList();
+    var rest = Model.Items.Skip(3).Sum(i => i.Count);
+    if (rest > 0) items.Add(new BreakdownItemDto("Other", rest));
+    var total = Math.Max(items.Sum(i => i.Count), 1);
+}
+
+<div class="breakdown">
+    <h3 class="breakdown-title">@Model.Title</h3>
+    <div class="stack" role="img" aria-label="@Model.Title breakdown">
+        @for (var i = 0; i < items.Count; i++)
+        {
+            var pct = (items[i].Count * 100.0 / total).ToString("0.##", inv);
+            <div class="stack-seg seg-@(i + 1)" style="width:@pct%"
+                 title="@items[i].Label: @items[i].Count (@(((items[i].Count * 100.0) / total).ToString("0.#", inv))%)"></div>
+        }
+    </div>
+    @* Legend carries identity and the values — never colour alone, never a clipped inline label. *@
+    <ul class="stack-legend">
+        @for (var i = 0; i < items.Count; i++)
+        {
+            <li>
+                <span class="swatch seg-@(i + 1)" aria-hidden="true"></span>
+                <span class="lg-label">@items[i].Label</span>
+                <span class="lg-value">@items[i].Count.ToString("N0")</span>
+            </li>
+        }
+    </ul>
+</div>

@@ -88,6 +88,49 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
     }
 
     [Fact]
+    public async Task ComputesWeekOverWeek_InquiryTrend_Conversion_AndBreakdowns()
+    {
+        Fixture.CurrentUser.Id = "agent-1";
+
+        await Fixture.ExecuteDbAsync(async db =>
+        {
+            var active = Seed("Active one", "active-one", "agent-1");           // Active + Sale
+            var draft = Seed("Draft one", "draft-one", "agent-1", publish: false); // Draft + Rent
+            draft.ListingType = ListingType.Rent;
+            db.Listings.AddRange(active, draft);
+            await db.SaveChangesAsync(CancellationToken.None);
+
+            // 3 views this week, 1 in the previous week -> +200% week over week.
+            db.ListingViews.Add(new ListingView { ListingId = active.Id, ViewerKey = "a", ViewedAt = DateTimeOffset.UtcNow });
+            db.ListingViews.Add(new ListingView { ListingId = active.Id, ViewerKey = "b", ViewedAt = DateTimeOffset.UtcNow });
+            db.ListingViews.Add(new ListingView { ListingId = active.Id, ViewerKey = "c", ViewedAt = DateTimeOffset.UtcNow });
+            db.ListingViews.Add(new ListingView { ListingId = active.Id, ViewerKey = "d", ViewedAt = DateTimeOffset.UtcNow.AddDays(-9) });
+
+            db.Inquiries.Add(Inquiry.Create(active.Id, "Buyer", "b@x.com", null, "Interested"));
+            await db.SaveChangesAsync(CancellationToken.None);
+            return 0;
+        });
+
+        var dash = await Fixture.SendAsync(new GetAgentDashboardQuery());
+
+        dash.Views7d.ShouldBe(3);
+        dash.ViewsPrev7d.ShouldBe(1);              // the 9-day-old view sits in the previous week
+        dash.Inquiries7d.ShouldBe(1);
+        dash.Inquiries30d.ShouldBe(1);
+        dash.ConversionPer100.ShouldBe(100.0 / 4); // 1 inquiry per 4 views in the 30-day window
+
+        // The inquiry trend spans the same window as the view trend and totals the same count.
+        dash.InquiryTrend.Count.ShouldBe(dash.ViewTrend.Count);
+        dash.InquiryTrend.Sum(t => t.Count).ShouldBe(dash.Inquiries30d);
+
+        dash.StatusBreakdown.Sum(b => b.Count).ShouldBe(2);
+        dash.StatusBreakdown.ShouldContain(b => b.Label == "Active" && b.Count == 1);
+        dash.StatusBreakdown.ShouldContain(b => b.Label == "Draft" && b.Count == 1);
+        dash.TypeBreakdown.ShouldContain(b => b.Label == "Sale" && b.Count == 1);
+        dash.TypeBreakdown.ShouldContain(b => b.Label == "Rent" && b.Count == 1);
+    }
+
+    [Fact]
     public async Task TotalViews_IncludeRolledUpHistory()
     {
         Fixture.CurrentUser.Id = "agent-1";
@@ -113,7 +156,7 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         dash.Views30d.ShouldBe(2);            // recent window is raw-only
     }
 
-    private static Listing Seed(string title, string slug, string ownerId)
+    private static Listing Seed(string title, string slug, string ownerId, bool publish = true)
     {
         var listing = new Listing
         {
@@ -127,7 +170,7 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
             PropertyType = PropertyType.Apartment,
             AreaSqMeters = 90
         };
-        listing.Publish();
+        if (publish) listing.Publish();
         return listing;
     }
 }

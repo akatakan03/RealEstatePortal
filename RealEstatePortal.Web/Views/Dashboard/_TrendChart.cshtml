@@ -1,0 +1,58 @@
+@using System.Globalization
+@using RealEstatePortal.Application.Agents.Queries.GetAgentDashboard
+@model (IReadOnlyList<DailyCountDto> Points, string Title, string Sub, string Series, string Noun)
+@{
+    var inv = CultureInfo.InvariantCulture;
+    var pts = Model.Points;
+    var peak = pts.Count > 0 ? pts.Max(p => p.Count) : 0;
+    var scale = Math.Max(peak, 1);
+    var total = pts.Sum(p => p.Count);
+}
+
+<div class="dash-card">
+    <div class="dash-card-head">
+        <h2>@Model.Title</h2>
+        <span class="dash-card-sub">@Model.Sub</span>
+    </div>
+
+    <div class="chart">
+        @* y-axis carries the peak; every other value is in the tooltip and the table view *@
+        <div class="chart-y">
+            <span>@peak.ToString("N0")</span>
+            <span>0</span>
+        </div>
+        <div class="chart-plot">
+            <div class="trend trend-@Model.Series" role="img"
+                 aria-label="Daily @Model.Noun over the last @pts.Count days, @total in total">
+                @foreach (var d in pts)
+                {
+                    var pct = (d.Count * 100.0 / scale).ToString("0.##", inv);
+                    <div class="trend-bar" style="height:@pct%"
+                         title="@d.Date.ToString("MMM d", inv): @d.Count @(d.Count == 1 ? Model.Noun.TrimEnd('s') : Model.Noun)"></div>
+                }
+            </div>
+            <div class="chart-x">
+                <span>@(pts.Count > 0 ? pts[0].Date.ToString("MMM d", inv) : "")</span>
+                <span>@(pts.Count > 0 ? pts[pts.Count - 1].Date.ToString("MMM d", inv) : "")</span>
+            </div>
+        </div>
+    </div>
+
+    <details class="chart-table">
+        <summary>Table view</summary>
+        <div class="table-scroll">
+            <table class="stats-table">
+                <thead><tr><th>Day</th><th class="num">@Model.Noun</th></tr></thead>
+                <tbody>
+                    @foreach (var d in pts)
+                    {
+                        <tr>
+                            <td>@d.Date.ToString("MMM d, yyyy", inv)</td>
+                            <td class="num">@d.Count.ToString("N0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </details>
+</div>

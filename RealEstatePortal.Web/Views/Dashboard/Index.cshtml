@@ -4,8 +4,22 @@
 @{
     ViewData["Title"] = "Dashboard";
     var inv = CultureInfo.InvariantCulture;
-    var trend = Model.ViewTrend;
-    var chartMax = Math.Max(trend.Count > 0 ? trend.Max(t => t.Count) : 0, 1);
+
+    // Week-over-week delta. The arrow + wording carry the direction, never colour alone.
+    (string Arrow, string Css, string Text) Delta(int current, int previous)
+    {
+        if (previous == 0)
+            return current == 0 ? ("→", "flat", "no change") : ("▲", "up", "new this week");
+
+        var pct = (current - previous) * 100.0 / previous;
+        if (Math.Abs(pct) < 0.5) return ("→", "flat", "level");
+        return pct > 0
+            ? ("▲", "up", $"{pct.ToString("0.#", inv)}%")
+            : ("▼", "down", $"{Math.Abs(pct).ToString("0.#", inv)}%");
+    }
+
+    var viewsDelta = Delta(Model.Views7d, Model.ViewsPrev7d);
+    var inqDelta = Delta(Model.Inquiries7d, Model.InquiriesPrev7d);
 }
 
 <section class="dash-sec">
@@ -37,16 +51,29 @@
                 <div class="kpi">
                     <div class="kpi-label">Views · 7 days</div>
                     <div class="kpi-value">@Model.Views7d.ToString("N0")</div>
+                    <div class="kpi-delta @viewsDelta.Css">
+                        <span aria-hidden="true">@viewsDelta.Arrow</span> @viewsDelta.Text
+                        <span class="kpi-delta-note">vs previous 7 days</span>
+                    </div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Views · 30 days</div>
                     <div class="kpi-value">@Model.Views30d.ToString("N0")</div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-label">Inquiries</div>
+                    <div class="kpi-label">Inquiries · 7 days</div>
                     <div class="kpi-value">
-                        <a asp-controller="Inquiries" asp-action="Index" style="color:inherit;">@Model.TotalInquiries.ToString("N0")</a>
+                        <a asp-controller="Inquiries" asp-action="Index" style="color:inherit;">@Model.Inquiries7d.ToString("N0")</a>
                     </div>
+                    <div class="kpi-delta @inqDelta.Css">
+                        <span aria-hidden="true">@inqDelta.Arrow</span> @inqDelta.Text
+                        <span class="kpi-delta-note">vs previous 7 days</span>
+                    </div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label" title="How many inquiries each 100 views produced over the last 30 days.">Inquiries / 100 views</div>
+                    <div class="kpi-value">@Model.ConversionPer100.ToString("0.0", inv)</div>
+                    <div class="kpi-delta flat"><span class="kpi-delta-note">last 30 days</span></div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Active listings</div>
@@ -54,18 +81,22 @@
                 </div>
             </div>
 
+            @* Two measures on very different scales get two charts — never one plot with two y-axes. *@
+            <div class="chart-pair">
+                @await Html.PartialAsync("_TrendChart",
+                    (Model.ViewTrend, "Views", $"last 30 days · {Model.Views30d.ToString("N0")} total", "views", "views"))
+                @await Html.PartialAsync("_TrendChart",
+                    (Model.InquiryTrend, "Inquiries", $"last 30 days · {Model.Inquiries30d.ToString("N0")} total", "inquiries", "inquiries"))
+            </div>
+
             <div class="dash-card">
                 <div class="dash-card-head">
-                    <h2>Views</h2>
-                    <span class="dash-card-sub">last 30 days</span>
+                    <h2>Portfolio</h2>
+                    <span class="dash-card-sub">how your @Model.TotalListings listing@(Model.TotalListings == 1 ? "" : "s") break down</span>
                 </div>
-                <div class="trend" role="img" aria-label="Daily views over the last 30 days">
-                    @foreach (var d in trend)
-                    {
-                        var pct = (d.Count * 100.0 / chartMax).ToString("0.##", inv);
-                        <div class="trend-bar" style="height:@pct%"
-                             title="@d.Date.ToString("MMM d"): @d.Count view@(d.Count == 1 ? "" : "s")"></div>
-                    }
+                <div class="breakdown-row">
+                    @await Html.PartialAsync("_Breakdown", (Model.StatusBreakdown, "By status"))
+                    @await Html.PartialAsync("_Breakdown", (Model.TypeBreakdown, "By listing type"))
                 </div>
             </div>
 

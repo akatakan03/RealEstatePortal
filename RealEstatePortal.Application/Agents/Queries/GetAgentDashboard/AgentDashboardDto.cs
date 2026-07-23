@@ -9,11 +9,23 @@ public record AgentDashboardDto
     public int TotalViews { get; init; }
     public int UniqueVisitors { get; init; }
     public int Views7d { get; init; }
+    public int ViewsPrev7d { get; init; }
     public int Views30d { get; init; }
     public int TotalInquiries { get; init; }
+    public int Inquiries7d { get; init; }
+    public int InquiriesPrev7d { get; init; }
+    public int Inquiries30d { get; init; }
     public IReadOnlyList<AgentListingStatDto> Listings { get; init; } = new List<AgentListingStatDto>();
     public IReadOnlyList<DailyCountDto> ViewTrend { get; init; } = new List<DailyCountDto>();
+    public IReadOnlyList<DailyCountDto> InquiryTrend { get; init; } = new List<DailyCountDto>();
+    public IReadOnlyList<BreakdownItemDto> StatusBreakdown { get; init; } = new List<BreakdownItemDto>();
+    public IReadOnlyList<BreakdownItemDto> TypeBreakdown { get; init; } = new List<BreakdownItemDto>();
+
+    // Inquiries per 100 views over the last 30 days — 0 when there's nothing to divide by.
+    public double ConversionPer100 => Views30d == 0 ? 0 : Inquiries30d * 100.0 / Views30d;
 }
+
+public record BreakdownItemDto(string Label, int Count);
 
 public record AgentListingStatDto
 {

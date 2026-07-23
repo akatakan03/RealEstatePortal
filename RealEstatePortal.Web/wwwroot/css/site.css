@@ -2434,11 +2434,85 @@ textarea.form-control {
     font-size: .85rem
 }
 
-/* single-series magnitude-over-time: one brand hue, thin bars, rounded tops */
+/* ===== data-viz tokens =====
+   Validated as a categorical set against the white card surface (lightness band,
+   chroma floor, CVD separation, normal-vision floor, 3:1 contrast — all pass). */
+.dash-sec {
+    --viz-1: #C08A1E; /* brass/gold — views, first segment */
+    --viz-2: #2A78D6; /* blue — inquiries, second segment */
+    --viz-3: #B4483C; /* terracotta — third segment */
+    --viz-other: #5C6B65; /* neutral — folded "Other" */
+    --viz-up: #006300;
+    --viz-down: var(--danger)
+}
+
+/* stat-tile delta: arrow + wording carry direction, colour only reinforces */
+.kpi-delta {
+    margin-top: .45rem;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .3rem
+}
+
+    .kpi-delta.up {
+        color: var(--viz-up)
+    }
+
+    .kpi-delta.down {
+        color: var(--viz-down)
+    }
+
+.kpi-delta-note {
+    color: var(--muted);
+    font-weight: 500
+}
+
+/* two measures, two plots — never one chart with two y-scales */
+.chart-pair {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.6rem
+}
+
+.chart {
+    display: flex;
+    gap: .6rem
+}
+
+.chart-y {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 150px;
+    font-size: .72rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    flex: none
+}
+
+.chart-plot {
+    flex: 1;
+    min-width: 0
+}
+
+.chart-x {
+    display: flex;
+    justify-content: space-between;
+    font-size: .72rem;
+    color: var(--muted);
+    margin-top: .35rem
+}
+
+/* single-series magnitude-over-time: one hue, thin bars, 2px surface gap, rounded data-end */
 .trend {
     display: flex;
     align-items: flex-end;
-    gap: 3px;
+    gap: 2px;
     height: 150px;
     border-bottom: 1px solid var(--line)
 }
@@ -2446,14 +2520,117 @@ textarea.form-control {
 .trend-bar {
     flex: 1 1 0;
     min-width: 0;
-    background: var(--brass);
+    max-width: 24px;
     border-radius: 4px 4px 0 0;
-    transition: background .15s
+    background: var(--viz-1);
+    transition: opacity .15s
 }
 
     .trend-bar:hover {
-        background: var(--brass-dk)
+        opacity: .72
     }
+
+.trend-inquiries .trend-bar {
+    background: var(--viz-2)
+}
+
+.chart-table {
+    margin-top: .9rem
+}
+
+    .chart-table > summary {
+        cursor: pointer;
+        font-size: .8rem;
+        font-weight: 600;
+        color: var(--muted)
+    }
+
+    .chart-table[open] > summary {
+        margin-bottom: .6rem
+    }
+
+    .chart-table .table-scroll {
+        max-height: 240px;
+        overflow-y: auto
+    }
+
+/* part-to-whole: one horizontal stack, identity from the legend (no clipped inline labels) */
+.breakdown-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.6rem
+}
+
+.breakdown-title {
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    margin: 0 0 .6rem
+}
+
+.stack {
+    display: flex;
+    gap: 2px; /* the surface gap does the separating — never a border */
+    height: 14px;
+    border-radius: 7px;
+    overflow: hidden
+}
+
+.stack-seg {
+    min-width: 2px
+}
+
+.seg-1 {
+    background: var(--viz-1)
+}
+
+.seg-2 {
+    background: var(--viz-2)
+}
+
+.seg-3 {
+    background: var(--viz-3)
+}
+
+.seg-4 {
+    background: var(--viz-other)
+}
+
+.stack-legend {
+    list-style: none;
+    margin: .8rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .35rem
+}
+
+    .stack-legend li {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        font-size: .88rem
+    }
+
+.swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex: none
+}
+
+.lg-label {
+    color: var(--ink)
+}
+
+.lg-value {
+    margin-left: auto;
+    font-weight: 700;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums
+}
 
 .table-scroll {
     overflow-x: auto
@@ -2484,6 +2661,11 @@ textarea.form-control {
     .stats-table th.num,
     .stats-table td.num {
         text-align: right
+    }
+
+    /* numbers that stack vertically get equal-width digits so columns line up */
+    .stats-table td.num {
+        font-variant-numeric: tabular-nums
     }
 
     .stats-table tbody tr:last-child td {
