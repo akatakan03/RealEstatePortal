@@ -1,3 +1,4 @@
+using RealEstatePortal.Application.Common.Models;
 using RealEstatePortal.Domain.Enums;
 
 namespace RealEstatePortal.Application.Agents.Queries.GetAgentDashboard;
@@ -19,7 +20,10 @@ public record AgentDashboardDto
     public int TotalFavorites { get; init; }
     public int Favorites7d { get; init; }
     public int FavoritesPrev7d { get; init; }
-    public IReadOnlyList<AgentListingStatDto> Listings { get; init; } = new List<AgentListingStatDto>();
+    // Only the table is paged; every number above it covers the whole portfolio.
+    public PaginatedList<AgentListingStatDto> Listings { get; init; } =
+        new(Array.Empty<AgentListingStatDto>(), 0, 1, 20);
+    public ListingTabCountsDto TabCounts { get; init; } = new(0, 0, 0, 0, 0);
     public IReadOnlyList<DailyCountDto> ViewTrend { get; init; } = new List<DailyCountDto>();
     public IReadOnlyList<DailyCountDto> InquiryTrend { get; init; } = new List<DailyCountDto>();
     public IReadOnlyList<BreakdownItemDto> StatusBreakdown { get; init; } = new List<BreakdownItemDto>();
@@ -30,6 +34,9 @@ public record AgentDashboardDto
 }
 
 public record BreakdownItemDto(string Label, int Count);
+
+// How many listings sit behind each filter tab, whatever the table is currently showing.
+public record ListingTabCountsDto(int All, int Active, int Draft, int Archived, int Locked);
 
 // One row of the agent's listing table: what the listing *is* (so it can be managed) plus how
 // it is doing (so it can be judged). Both halves live here because the dashboard shows one table.

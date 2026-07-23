@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstatePortal.Application.Agents.Queries.GetAgentDashboard;
 using RealEstatePortal.Application.Agents.Queries.GetListingStats;
 using RealEstatePortal.Domain.Constants;
+using RealEstatePortal.Domain.Enums;
 
 namespace RealEstatePortal.Web.Controllers;
 
@@ -14,10 +15,18 @@ public class DashboardController : Controller
 
     public DashboardController(ISender sender) => _sender = sender;
 
+    // The filter arguments narrow the listing table only — the KPIs and charts above it always
+    // describe the whole portfolio.
     [HttpGet("/dashboard")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(
+        ListingStatus? status, bool locked = false, string? search = null, int page = 1)
     {
-        var dashboard = await _sender.Send(new GetAgentDashboardQuery());
+        var dashboard = await _sender.Send(
+            new GetAgentDashboardQuery(status, locked, search, page));
+
+        ViewBag.Status = status;
+        ViewBag.Locked = locked;
+        ViewBag.Search = search;
         return View(dashboard);
     }
 

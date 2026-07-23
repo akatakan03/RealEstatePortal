@@ -1,11 +1,19 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Interfaces;
+using RealEstatePortal.Application.Common.Models;
 using RealEstatePortal.Domain.Enums;
 
 namespace RealEstatePortal.Application.Agents.Queries.GetAgentDashboard;
 
-public record GetAgentDashboardQuery : IRequest<AgentDashboardDto>;
+// The KPIs and charts always cover the whole portfolio; the filter/search/page arguments
+// narrow only the listing table underneath them.
+public record GetAgentDashboardQuery(
+    ListingStatus? Status = null,
+    bool LockedOnly = false,
+    string? Search = null,
+    int PageNumber = 1,
+    int PageSize = 20) : IRequest<AgentDashboardDto>;
 
 public class GetAgentDashboardQueryHandler
     : IRequestHandler<GetAgentDashboardQuery, AgentDashboardDto>
@@ -59,10 +67,12 @@ public class GetAgentDashboardQueryHandler
                 l.UnlockRequested,
                 l.UnlockRequestedAt,
                 // First cover photo (or first by order) as the thumbnail.
+                // The thumbnail, not the display image — a 46px cell has no use for the full
+                // photo, and every other listing query resolves the same key.
                 CoverKey = l.Media
                     .OrderByDescending(m => m.IsCover)
                     .ThenBy(m => m.Order)
-                    .Select(m => m.ObjectKey)
+                    .Select(m => m.ThumbnailKey)
                     .FirstOrDefault()
             })
             .ToListAsync(cancellationToken);
@@ -152,8 +162,8 @@ public class GetAgentDashboardQueryHandler
         var favouritesById = favouriteStats.ToDictionary(f => f.ListingId, f => f.Count);
 
         // Newest first: this table is where the agent manages listings, so recency is the more
-        // useful default than performance. Any numeric column can be sorted on from its header.
-        var rows = listings
+        // useful default than performance.
+        var allRows = listings
             .OrderByDescending(l => l.Created)
             .ThenByDescending(l => l.Id)
             .Select(l =>
@@ -187,6 +197,31 @@ public class GetAgentDashboardQueryHandler
             })
             .ToList();
 
+        // Only the table is filtered and paged. Rendering a whole portfolio at once is what
+        // makes the page heavy to scroll, and no KPI is computed off `page` — they all come
+        // from the full set above, so narrowing the table can never move a headline number.
+        var filtered = allRows.AsEnumerable();
+
+        if (request.LockedOnly)
+            filtered = filtered.Where(r => r.IsLocked);
+        else if (request.Status is { } status)
+            filtered = filtered.Where(r => !r.IsLocked && r.Status == status);
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var term = request.Search.Trim();
+            filtered = filtered.Where(r => r.Title.Contains(term, StringComparison.OrdinalIgnoreCase));
+        }
+
+        var matched = filtered.ToList();
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+        var pageNumber = Math.Max(request.PageNumber, 1);
+        var page = new PaginatedList<AgentListingStatDto>(
+            matched.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList(),
+            matched.Count,
+            pageNumber,
+            pageSize);
+
         var byDay = trendRaw.ToDictionary(x => DateOnly.FromDateTime(x.Day), x => x.Count);
         var inquiriesByDay = inquiryTrendRaw.ToDictionary(x => DateOnly.FromDateTime(x.Day), x => x.Count);
         var inquiryTrend = BuildTrend(now, inquiriesByDay);
@@ -197,7 +232,7 @@ public class GetAgentDashboardQueryHandler
         {
             TotalListings = listings.Count,
             ActiveListings = listings.Count(l => l.Status == ListingStatus.Active),
-            TotalViews = rows.Sum(r => r.TotalViews),   // the only KPI that folds in rolled-up history
+            TotalViews = allRows.Sum(r => r.TotalViews),   // the only KPI that folds in rolled-up history
             UniqueVisitors = uniqueVisitors,
             Views7d = viewStats.Sum(v => v.Last7),
             ViewsPrev7d = viewStats.Sum(v => v.Prev7),
@@ -209,7 +244,15 @@ public class GetAgentDashboardQueryHandler
             TotalFavorites = favouriteStats.Sum(f => f.Count),
             Favorites7d = favouriteStats.Sum(f => f.Last7),
             FavoritesPrev7d = favouriteStats.Sum(f => f.Prev7),
-            Listings = rows,
+            Listings = page,
+            // Tab counts come off the whole portfolio, so they keep saying how many there are
+            // rather than how many survived the current filter.
+            TabCounts = new ListingTabCountsDto(
+                All: allRows.Count,
+                Active: allRows.Count(r => !r.IsLocked && r.Status == ListingStatus.Active),
+                Draft: allRows.Count(r => !r.IsLocked && r.Status == ListingStatus.Draft),
+                Archived: allRows.Count(r => !r.IsLocked && r.Status == ListingStatus.Archived),
+                Locked: allRows.Count(r => r.IsLocked)),
             ViewTrend = BuildTrend(now, byDay),
             InquiryTrend = inquiryTrend,
             StatusBreakdown = listings

@@ -1614,6 +1614,12 @@ textarea.form-control {
     background: rgba(255,255,255,.22)
 }
 
+.listing-search-form {
+    display: flex;
+    gap: .4rem;
+    align-items: center
+}
+
 .listing-search {
     flex: 0 1 16rem;
     min-width: 10rem;

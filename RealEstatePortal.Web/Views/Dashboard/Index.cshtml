@@ -18,6 +18,11 @@
             : ("▼", "down", $"{Math.Abs(pct).ToString("0.#", inv)}%");
     }
 
+    var status = ViewBag.Status as ListingStatus?;
+    var locked = ViewBag.Locked is true;
+    var search = ViewBag.Search as string;
+    var noFilter = status is null && !locked;
+
     var viewsDelta = Delta(Model.Views7d, Model.ViewsPrev7d);
     var inqDelta = Delta(Model.Inquiries7d, Model.InquiriesPrev7d);
     var favDelta = Delta(Model.Favorites7d, Model.FavoritesPrev7d);
@@ -123,15 +128,28 @@
                     <span class="dash-card-sub">newest first — open Stats for a listing's own numbers</span>
                 </div>
 
+                @* Filtering and paging happen on the server: a portfolio of any size renders
+                   one page of rows, so the page stays light no matter how many listings exist. *@
                 <div class="listing-toolbar">
                     <div class="filter-tabs" role="tablist">
-                        <button type="button" class="filter-tab is-active" data-filter="all">All <span class="ft-count">@Model.Listings.Count</span></button>
-                        <button type="button" class="filter-tab" data-filter="active">Active <span class="ft-count">@Model.Listings.Count(l => !l.IsLocked && l.Status == ListingStatus.Active)</span></button>
-                        <button type="button" class="filter-tab" data-filter="draft">Draft <span class="ft-count">@Model.Listings.Count(l => !l.IsLocked && l.Status == ListingStatus.Draft)</span></button>
-                        <button type="button" class="filter-tab" data-filter="archived">Archived <span class="ft-count">@Model.Listings.Count(l => !l.IsLocked && l.Status == ListingStatus.Archived)</span></button>
-                        <button type="button" class="filter-tab" data-filter="locked">Locked <span class="ft-count">@Model.Listings.Count(l => l.IsLocked)</span></button>
+                        <a class="filter-tab @(noFilter ? "is-active" : "")"
+                           asp-action="Index" asp-route-search="@search">All <span class="ft-count">@Model.TabCounts.All</span></a>
+                        <a class="filter-tab @(!locked && status == ListingStatus.Active ? "is-active" : "")"
+                           asp-action="Index" asp-route-status="@ListingStatus.Active" asp-route-search="@search">Active <span class="ft-count">@Model.TabCounts.Active</span></a>
+                        <a class="filter-tab @(!locked && status == ListingStatus.Draft ? "is-active" : "")"
+                           asp-action="Index" asp-route-status="@ListingStatus.Draft" asp-route-search="@search">Draft <span class="ft-count">@Model.TabCounts.Draft</span></a>
+                        <a class="filter-tab @(!locked && status == ListingStatus.Archived ? "is-active" : "")"
+                           asp-action="Index" asp-route-status="@ListingStatus.Archived" asp-route-search="@search">Archived <span class="ft-count">@Model.TabCounts.Archived</span></a>
+                        <a class="filter-tab @(locked ? "is-active" : "")"
+                           asp-action="Index" asp-route-locked="true" asp-route-search="@search">Locked <span class="ft-count">@Model.TabCounts.Locked</span></a>
                     </div>
-                    <input type="search" id="listingSearch" class="listing-search" placeholder="Search by title…" autocomplete="off" />
+                    <form method="get" asp-action="Index" class="listing-search-form">
+                        <input type="hidden" name="status" value="@(status?.ToString())" />
+                        <input type="hidden" name="locked" value="@locked.ToString().ToLowerInvariant()" />
+                        <input type="search" name="search" value="@search" class="listing-search"
+                               placeholder="Search by title…" autocomplete="off" aria-label="Search your listings by title" />
+                        <button type="submit" class="btn btn-ghost btn-sm">Search</button>
+                    </form>
                 </div>
 
                 <div class="table-scroll">
@@ -146,15 +164,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var row in Model.Listings)
+                            @foreach (var row in Model.Listings.Items)
                             {
                                 var rowStatus = row.IsLocked ? "locked" : row.Status.ToString().ToLowerInvariant();
-                                <tr data-status="@rowStatus" data-title="@row.Title.ToLowerInvariant()">
+                                <tr>
                                     <td>
                                         <div class="listing-cell">
                                             @if (!string.IsNullOrEmpty(row.CoverThumbnailUrl))
                                             {
-                                                <img class="listing-thumb" src="@row.CoverThumbnailUrl" alt="" loading="lazy" />
+                                                <img class="listing-thumb" src="@row.CoverThumbnailUrl" alt=""
+                                                     width="46" height="46" loading="lazy" decoding="async" />
                                             }
                                             else
                                             {
@@ -206,7 +225,7 @@
                                    under its listing instead of being crushed into the action cell. *@
                                 if (row.IsLocked)
                                 {
-                                    <tr class="locked-row" data-status="@rowStatus" data-title="@row.Title.ToLowerInvariant()" data-follows="@row.Id">
+                                    <tr class="locked-row">
                                         <td colspan="5">
                                             <div class="locked-msg">
                                                 <strong>Locked by an administrator.</strong>
@@ -232,8 +251,36 @@
                             }
                         </tbody>
                     </table>
-                    <p id="noListingMatch" class="no-match" hidden>No listings match your filters.</p>
+                    @if (Model.Listings.TotalCount == 0)
+                    {
+                        <p class="no-match">No listings match your filters.</p>
+                    }
                 </div>
+
+                @if (Model.Listings.TotalPages > 1)
+                {
+                    <nav class="pager">
+                        @if (Model.Listings.HasPreviousPage)
+                        {
+                            <a asp-action="Index" asp-route-status="@status" asp-route-locked="@locked"
+                               asp-route-search="@search" asp-route-page="@(Model.Listings.PageNumber - 1)">← Prev</a>
+                        }
+                        else
+                        {
+                            <span class="disabled">← Prev</span>
+                        }
+                        <span class="current">@Model.Listings.PageNumber of @Model.Listings.TotalPages</span>
+                        @if (Model.Listings.HasNextPage)
+                        {
+                            <a asp-action="Index" asp-route-status="@status" asp-route-locked="@locked"
+                               asp-route-search="@search" asp-route-page="@(Model.Listings.PageNumber + 1)">Next →</a>
+                        }
+                        else
+                        {
+                            <span class="disabled">Next →</span>
+                        }
+                    </nav>
+                }
             </div>
         }
     </div>
@@ -252,6 +299,5 @@
 </dialog>
 
 @section Scripts {
-    <script src="~/js/my-listings.js" asp-append-version="true"></script>
     <script src="~/js/listing-stats.js" asp-append-version="true"></script>
 }

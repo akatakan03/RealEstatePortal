@@ -50,7 +50,7 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         dash.Views30d.ShouldBe(4);
         dash.TotalInquiries.ShouldBe(1);
 
-        var row = dash.Listings.Single();
+        var row = dash.Listings.Items.Single();
         row.Title.ShouldBe("Mine");
         row.TotalViews.ShouldBe(4);
         row.UniqueVisitors.ShouldBe(3);
@@ -130,7 +130,7 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         dash.TypeBreakdown.ShouldContain(b => b.Label == "Sale" && b.Count == 1);
         dash.TypeBreakdown.ShouldContain(b => b.Label == "Rent" && b.Count == 1);
 
-        dash.Listings.Single(r => r.Title == "Active one").Inquiries7d.ShouldBe(1);
+        dash.Listings.Items.Single(r => r.Title == "Active one").Inquiries7d.ShouldBe(1);
     }
 
     // The current week runs from midnight 6 days ago up to *now*, so today is only partly
@@ -215,7 +215,7 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         var dash = await Fixture.SendAsync(new GetAgentDashboardQuery());
 
         dash.TotalFavorites.ShouldBe(2);                 // the rival's save doesn't leak in
-        dash.Listings.Single().Favorites.ShouldBe(2);
+        dash.Listings.Items.Single().Favorites.ShouldBe(2);
         dash.Favorites7d.ShouldBe(1);                    // buyer-1 saved this week
         dash.FavoritesPrev7d.ShouldBe(1);                // buyer-2 sits in the previous week
     }
@@ -242,7 +242,7 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         var dash = await Fixture.SendAsync(new GetAgentDashboardQuery());
 
         dash.TotalViews.ShouldBe(7);          // 2 raw + 5 rolled up
-        dash.Listings.Single().TotalViews.ShouldBe(7);
+        dash.Listings.Items.Single().TotalViews.ShouldBe(7);
         dash.Views30d.ShouldBe(2);            // recent window is raw-only
     }
 
@@ -270,9 +270,9 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         var dash = await Fixture.SendAsync(new GetAgentDashboardQuery());
 
         // Newest first — the management default, not "ranked by views".
-        dash.Listings.Select(r => r.Title).ShouldBe(new[] { "Locked", "Older" });
+        dash.Listings.Items.Select(r => r.Title).ShouldBe(new[] { "Locked", "Older" });
 
-        var row = dash.Listings.First();
+        var row = dash.Listings.Items.First();
         row.PriceAmount.ShouldBe(100_000m);
         row.PriceCurrency.ShouldBe("TRY");
         row.ListingType.ShouldBe(ListingType.Sale);
@@ -280,6 +280,53 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         row.LockReason.ShouldBe("Photos don't match the address");
         row.UnlockRequested.ShouldBeTrue();
         row.UnlockRequestedAt.ShouldNotBeNull();
+    }
+
+    // Filtering and paging must touch the table and nothing else. If a KPI ever started
+    // reading off the current page, the headline numbers would change as the agent browsed.
+    [Fact]
+    public async Task FilteringAndPaging_NarrowTheTable_ButNotTheKpis()
+    {
+        Fixture.CurrentUser.Id = "agent-1";
+
+        await Fixture.ExecuteDbAsync(async db =>
+        {
+            for (var i = 0; i < 5; i++)
+                db.Listings.Add(Seed($"Active {i}", $"active-{i}", "agent-1"));
+
+            db.Listings.Add(Seed("Quiet draft", "quiet-draft", "agent-1", publish: false));
+            await db.SaveChangesAsync(CancellationToken.None);
+
+            var first = await db.Listings.FirstAsync(l => l.Slug == "active-0");
+            db.ListingViews.Add(new ListingView { ListingId = first.Id, ViewerKey = "a", ViewedAt = DateTimeOffset.UtcNow });
+            await db.SaveChangesAsync(CancellationToken.None);
+            return 0;
+        });
+
+        var page1 = await Fixture.SendAsync(new GetAgentDashboardQuery(PageSize: 2));
+
+        page1.Listings.Items.Count.ShouldBe(2);
+        page1.Listings.TotalCount.ShouldBe(6);
+        page1.Listings.TotalPages.ShouldBe(3);
+        page1.TabCounts.All.ShouldBe(6);
+        page1.TabCounts.Active.ShouldBe(5);
+        page1.TabCounts.Draft.ShouldBe(1);
+
+        var page3 = await Fixture.SendAsync(new GetAgentDashboardQuery(PageNumber: 3, PageSize: 2));
+        page3.Listings.Items.Count.ShouldBe(2);
+        page3.Listings.Items.ShouldNotContain(r => page1.Listings.Items.Any(p => p.Id == r.Id));
+
+        // The whole-portfolio numbers are identical however the table is sliced.
+        page3.TotalListings.ShouldBe(page1.TotalListings);
+        page3.TotalViews.ShouldBe(page1.TotalViews);
+
+        var drafts = await Fixture.SendAsync(new GetAgentDashboardQuery(Status: ListingStatus.Draft));
+        drafts.Listings.Items.Single().Title.ShouldBe("Quiet draft");
+        drafts.TotalListings.ShouldBe(6);          // the KPI still covers everything
+        drafts.TabCounts.All.ShouldBe(6);          // and so do the tab counts
+
+        var found = await Fixture.SendAsync(new GetAgentDashboardQuery(Search: "quiet"));
+        found.Listings.Items.Single().Title.ShouldBe("Quiet draft");
     }
 
     private static Listing Seed(string title, string slug, string ownerId, bool publish = true)
