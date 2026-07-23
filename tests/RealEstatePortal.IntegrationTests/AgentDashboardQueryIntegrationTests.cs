@@ -128,6 +128,62 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         dash.StatusBreakdown.ShouldContain(b => b.Label == "Draft" && b.Count == 1);
         dash.TypeBreakdown.ShouldContain(b => b.Label == "Sale" && b.Count == 1);
         dash.TypeBreakdown.ShouldContain(b => b.Label == "Rent" && b.Count == 1);
+
+        dash.Listings.Single(r => r.Title == "Active one").Inquiries7d.ShouldBe(1);
+    }
+
+    // The current week runs from midnight 6 days ago up to *now*, so today is only partly
+    // elapsed. The previous window therefore has to be that same window shifted one week back
+    // — if it ran to midnight instead, seven whole days would be compared against six-and-a-bit
+    // and a flat week would report a drop that shrinks as the day goes on.
+    [Fact]
+    public async Task PreviousWeekWindow_MirrorsTheCurrentOne_SoFlatTrafficReadsFlat()
+    {
+        Fixture.CurrentUser.Id = "agent-1";
+        var now = DateTimeOffset.UtcNow;
+        var midnight = new DateTimeOffset(now.UtcDateTime.Date, TimeSpan.Zero);
+
+        await Fixture.ExecuteDbAsync(async db =>
+        {
+            var listing = Seed("Mine", "mine", "agent-1");
+            db.Listings.Add(listing);
+            await db.SaveChangesAsync(CancellationToken.None);
+
+            // Each view this week gets an exact counterpart seven days earlier.
+            foreach (var daysAgo in new[] { 1, 3, 6 })
+            {
+                db.ListingViews.Add(new ListingView
+                {
+                    ListingId = listing.Id,
+                    ViewerKey = $"cur-{daysAgo}",
+                    ViewedAt = now.AddDays(-daysAgo)
+                });
+                db.ListingViews.Add(new ListingView
+                {
+                    ListingId = listing.Id,
+                    ViewerKey = $"prev-{daysAgo}",
+                    ViewedAt = now.AddDays(-daysAgo - 7)
+                });
+            }
+
+            // Late on the day that falls just outside the mirrored window. It has no counterpart
+            // in the current week (that stretch of today hasn't happened yet), so counting it
+            // would make the previous week the longer of the two.
+            db.ListingViews.Add(new ListingView
+            {
+                ListingId = listing.Id,
+                ViewerKey = "tail",
+                ViewedAt = midnight.AddDays(-6).AddMinutes(-1)
+            });
+
+            await db.SaveChangesAsync(CancellationToken.None);
+            return 0;
+        });
+
+        var dash = await Fixture.SendAsync(new GetAgentDashboardQuery());
+
+        dash.Views7d.ShouldBe(3);
+        dash.ViewsPrev7d.ShouldBe(3);   // the tail view is outside the mirrored window
     }
 
     [Fact]

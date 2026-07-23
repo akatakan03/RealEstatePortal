@@ -1,18 +1,23 @@
 @using System.Globalization
 @using RealEstatePortal.Application.Agents.Queries.GetAgentDashboard
-@model (IReadOnlyList<DailyCountDto> Points, string Title, string Sub, string Series, string Noun)
+@model (IReadOnlyList<DailyCountDto> Points, string Title, string Series, string Plural, string Singular)
 @{
     var inv = CultureInfo.InvariantCulture;
     var pts = Model.Points;
     var peak = pts.Count > 0 ? pts.Max(p => p.Count) : 0;
     var scale = Math.Max(peak, 1);
+    // The window and its total both come off the points, so the heading, the screen-reader
+    // label and the bars can never quote different numbers for the same chart.
     var total = pts.Sum(p => p.Count);
+    var sub = $"last {pts.Count} days · {total.ToString("N0", inv)} total";
+
+    string Noun(int n) => n == 1 ? Model.Singular : Model.Plural;
 }
 
 <div class="dash-card">
     <div class="dash-card-head">
         <h2>@Model.Title</h2>
-        <span class="dash-card-sub">@Model.Sub</span>
+        <span class="dash-card-sub">@sub</span>
     </div>
 
     <div class="chart">
@@ -23,12 +28,12 @@
         </div>
         <div class="chart-plot">
             <div class="trend trend-@Model.Series" role="img"
-                 aria-label="Daily @Model.Noun over the last @pts.Count days, @total in total">
+                 aria-label="Daily @Model.Plural over the last @pts.Count days, @total in total">
                 @foreach (var d in pts)
                 {
                     var pct = (d.Count * 100.0 / scale).ToString("0.##", inv);
                     <div class="trend-bar" style="height:@pct%"
-                         title="@d.Date.ToString("MMM d", inv): @d.Count @(d.Count == 1 ? Model.Noun.TrimEnd('s') : Model.Noun)"></div>
+                         title="@d.Date.ToString("MMM d", inv): @d.Count @Noun(d.Count)"></div>
                 }
             </div>
             <div class="chart-x">
@@ -42,7 +47,7 @@
         <summary>Table view</summary>
         <div class="table-scroll">
             <table class="stats-table">
-                <thead><tr><th>Day</th><th class="num">@Model.Noun</th></tr></thead>
+                <thead><tr><th>Day</th><th class="num">@Model.Plural</th></tr></thead>
                 <tbody>
                     @foreach (var d in pts)
                     {

@@ -37,6 +37,7 @@ public record AgentListingStatDto
     public int Views30d { get; init; }
     public int TotalViews { get; init; }
     public int UniqueVisitors { get; init; }
+    public int Inquiries7d { get; init; }
     public int Inquiries { get; init; }
 }
 

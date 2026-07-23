@@ -67,7 +67,7 @@
                     </div>
                     <div class="kpi-delta @inqDelta.Css">
                         <span aria-hidden="true">@inqDelta.Arrow</span> @inqDelta.Text
-                        <span class="kpi-delta-note">vs previous 7 days</span>
+                        <span class="kpi-delta-note">vs previous 7 days · @Model.TotalInquiries.ToString("N0") all time</span>
                     </div>
                 </div>
                 <div class="kpi">
@@ -84,9 +84,9 @@
             @* Two measures on very different scales get two charts — never one plot with two y-axes. *@
             <div class="chart-pair">
                 @await Html.PartialAsync("_TrendChart",
-                    (Model.ViewTrend, "Views", $"last 30 days · {Model.Views30d.ToString("N0")} total", "views", "views"))
+                    (Model.ViewTrend, "Views", "views", "views", "view"))
                 @await Html.PartialAsync("_TrendChart",
-                    (Model.InquiryTrend, "Inquiries", $"last 30 days · {Model.Inquiries30d.ToString("N0")} total", "inquiries", "inquiries"))
+                    (Model.InquiryTrend, "Inquiries", "inquiries", "inquiries", "inquiry"))
             </div>
 
             <div class="dash-card">
@@ -115,7 +115,8 @@
                                 <th class="num">30 days</th>
                                 <th class="num">Total views</th>
                                 <th class="num">Unique</th>
-                                <th class="num">Inquiries</th>
+                                <th class="num">Inquiries · 7 days</th>
+                                <th class="num">Total inquiries</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -130,6 +131,7 @@
                                     <td class="num">@row.Views30d.ToString("N0")</td>
                                     <td class="num">@row.TotalViews.ToString("N0")</td>
                                     <td class="num">@row.UniqueVisitors.ToString("N0")</td>
+                                    <td class="num">@row.Inquiries7d.ToString("N0")</td>
                                     <td class="num">@row.Inquiries.ToString("N0")</td>
                                 </tr>
                             }

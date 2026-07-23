@@ -3,10 +3,14 @@
 @model (IReadOnlyList<BreakdownItemDto> Items, string Title)
 @{
     var inv = CultureInfo.InvariantCulture;
-    // Only three validated series colours exist — anything past them folds into "Other".
-    var items = Model.Items.Take(3).ToList();
-    var rest = Model.Items.Skip(3).Sum(i => i.Count);
-    if (rest > 0) items.Add(new BreakdownItemDto("Other", rest));
+    // Three validated series colours plus a neutral fourth. A single leftover category keeps
+    // its own label in that neutral slot — folding one item into "Other" would drop a real
+    // name for nothing. Two or more leftovers fold, since there is no fifth colour.
+    var items = Model.Items.Count <= 4
+        ? Model.Items.ToList()
+        : Model.Items.Take(3)
+            .Append(new BreakdownItemDto("Other", Model.Items.Skip(3).Sum(i => i.Count)))
+            .ToList();
     var total = Math.Max(items.Sum(i => i.Count), 1);
 }
 
@@ -15,9 +19,9 @@
     <div class="stack" role="img" aria-label="@Model.Title breakdown">
         @for (var i = 0; i < items.Count; i++)
         {
-            var pct = (items[i].Count * 100.0 / total).ToString("0.##", inv);
-            <div class="stack-seg seg-@(i + 1)" style="width:@pct%"
-                 title="@items[i].Label: @items[i].Count (@(((items[i].Count * 100.0) / total).ToString("0.#", inv))%)"></div>
+            var share = items[i].Count * 100.0 / total;
+            <div class="stack-seg seg-@(i + 1)" style="width:@share.ToString("0.##", inv)%"
+                 title="@items[i].Label: @items[i].Count (@share.ToString("0.#", inv)%)"></div>
         }
     </div>
     @* Legend carries identity and the values — never colour alone, never a clipped inline label. *@
