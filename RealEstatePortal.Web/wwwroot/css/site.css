@@ -1639,7 +1639,8 @@ textarea.form-control {
 .listing-cell {
     display: flex;
     align-items: center;
-    gap: .75rem
+    gap: .75rem;
+    min-width: 0   /* lets the title shrink instead of widening the column */
 }
 
 .listing-thumb {
@@ -2726,9 +2727,95 @@ textarea.form-control {
         text-decoration: underline
     }
 
+/* The whole row has to fit the page width — a management table you have to scroll sideways
+   to reach the buttons is worse than one with a shortened title. Everything except the
+   title is a fixed, small width, so the title column absorbs whatever is left over. */
+.listing-table {
+    table-layout: fixed;
+    width: 100%
+}
+
+    .listing-table th:nth-child(2),
+    .listing-table td:nth-child(2) {
+        width: 5.5rem
+    }
+
+    .listing-table th:nth-child(3),
+    .listing-table td:nth-child(3) {
+        width: 9.5rem
+    }
+
+    .listing-table th:nth-child(4),
+    .listing-table td:nth-child(4) {
+        width: 7rem
+    }
+
+    .listing-table th.col-actions,
+    .listing-table td.col-actions {
+        width: 19rem
+    }
+
+    .listing-table th,
+    .listing-table td {
+        padding-left: .7rem;
+        padding-right: .7rem
+    }
+
+        .listing-table th:first-child,
+        .listing-table td:first-child {
+            padding-left: 0
+        }
+
+        .listing-table th:last-child,
+        .listing-table td:last-child {
+            padding-right: 0
+        }
+
 .listing-table td.col-actions {
     white-space: nowrap;
     text-align: right
+}
+
+    /* Buttons sit tight so four of them fit without pushing the row wider. */
+    .listing-table .row-actions .btn {
+        padding: .3rem .55rem;
+        font-size: .78rem
+    }
+
+.listing-table .listing-cell-title {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+/* On narrower screens the buttons are what must survive, so the columns the agent can get
+   from the listing itself drop out one at a time rather than the row scrolling sideways. */
+@media (max-width: 1080px) {
+    .listing-table th:nth-child(2),
+    .listing-table td:nth-child(2) {
+        display: none
+    }
+}
+
+@media (max-width: 880px) {
+    .listing-table th:nth-child(3),
+    .listing-table td:nth-child(3) {
+        display: none
+    }
+}
+
+/* Status stays to the end — it is the one column that changes what the buttons do. */
+@media (max-width: 700px) {
+    .listing-table .listing-thumb {
+        display: none
+    }
+
+    .listing-table th.col-actions,
+    .listing-table td.col-actions {
+        width: 17rem
+    }
 }
 
 /* The appeal row belongs to the listing above it: no top border, tinted so the pairing

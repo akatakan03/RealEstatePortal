@@ -179,7 +179,10 @@
                                             {
                                                 <span class="listing-thumb listing-thumb-empty" aria-hidden="true">⌂</span>
                                             }
-                                            <a class="listing-cell-title" asp-controller="Listings" asp-action="Details" asp-route-id="@row.Id" asp-route-slug="@row.Slug">@row.Title</a>
+                                            @* Truncated to keep the row within the page width; the
+                                               full title stays available on hover and to a reader. *@
+                                            <a class="listing-cell-title" title="@row.Title"
+                                               asp-controller="Listings" asp-action="Details" asp-route-id="@row.Id" asp-route-slug="@row.Slug">@row.Title</a>
                                         </div>
                                     </td>
                                     <td>@row.ListingType</td>
