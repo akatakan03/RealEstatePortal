@@ -31,12 +31,23 @@ public record AgentDashboardDto
 
 public record BreakdownItemDto(string Label, int Count);
 
+// One row of the agent's listing table: what the listing *is* (so it can be managed) plus how
+// it is doing (so it can be judged). Both halves live here because the dashboard shows one table.
 public record AgentListingStatDto
 {
     public int Id { get; init; }
     public string Title { get; init; } = string.Empty;
     public string Slug { get; init; } = string.Empty;
     public ListingStatus Status { get; init; }
+    public decimal PriceAmount { get; init; }
+    public string PriceCurrency { get; init; } = string.Empty;
+    public ListingType ListingType { get; init; }
+    public bool IsLocked { get; init; }
+    public string? LockReason { get; init; }
+    public bool UnlockRequested { get; init; }
+    public DateTimeOffset? UnlockRequestedAt { get; init; }
+    // Resolved to a public URL after the query runs — the raw object key isn't renderable.
+    public string? CoverThumbnailUrl { get; set; }
     public int Views7d { get; init; }
     public int Views30d { get; init; }
     public int TotalViews { get; init; }

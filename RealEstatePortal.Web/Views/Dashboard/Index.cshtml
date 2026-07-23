@@ -26,9 +26,17 @@
 <section class="dash-sec">
     <div class="container">
         <div class="dash-hero">
-            <h1>Dashboard</h1>
-            <p class="lead">How your listings are performing.</p>
+            <div>
+                <h1>Dashboard</h1>
+                <p class="lead">How your listings are performing.</p>
+            </div>
+            <a class="btn btn-primary" asp-controller="Listings" asp-action="Create">+ New listing</a>
         </div>
+
+        @if (TempData["UnlockRequested"] is string sent)
+        {
+            <div class="alert alert-success" style="margin-bottom:1.5rem;">@sent</div>
+        }
 
         @if (Model.TotalListings == 0)
         {
@@ -111,45 +119,126 @@
 
             <div class="dash-card">
                 <div class="dash-card-head">
-                    <h2>By listing</h2>
-                    <span class="dash-card-sub">ranked by total views</span>
+                    <h2>My listings</h2>
+                    <span class="dash-card-sub">newest first — click a number column to rank by it</span>
                 </div>
+
+                <div class="listing-toolbar">
+                    <div class="filter-tabs" role="tablist">
+                        <button type="button" class="filter-tab is-active" data-filter="all">All <span class="ft-count">@Model.Listings.Count</span></button>
+                        <button type="button" class="filter-tab" data-filter="active">Active <span class="ft-count">@Model.Listings.Count(l => !l.IsLocked && l.Status == ListingStatus.Active)</span></button>
+                        <button type="button" class="filter-tab" data-filter="draft">Draft <span class="ft-count">@Model.Listings.Count(l => !l.IsLocked && l.Status == ListingStatus.Draft)</span></button>
+                        <button type="button" class="filter-tab" data-filter="archived">Archived <span class="ft-count">@Model.Listings.Count(l => !l.IsLocked && l.Status == ListingStatus.Archived)</span></button>
+                        <button type="button" class="filter-tab" data-filter="locked">Locked <span class="ft-count">@Model.Listings.Count(l => l.IsLocked)</span></button>
+                    </div>
+                    <input type="search" id="listingSearch" class="listing-search" placeholder="Search by title…" autocomplete="off" />
+                </div>
+
                 <div class="table-scroll">
-                    <table class="stats-table">
+                    <table class="stats-table listing-table" id="myListingsTable">
                         <thead>
                             <tr>
                                 <th>Listing</th>
+                                <th>Type</th>
+                                <th class="num">Price</th>
                                 <th>Status</th>
-                                <th class="num">7 days</th>
-                                <th class="num">30 days</th>
-                                <th class="num">Total views</th>
-                                <th class="num">Unique</th>
-                                <th class="num">Saves</th>
-                                <th class="num">Inquiries · 7 days</th>
-                                <th class="num">Total inquiries</th>
+                                <th class="num sortable" data-sort="v7">Views · 7d</th>
+                                <th class="num sortable" data-sort="vt">Total views</th>
+                                <th class="num sortable" data-sort="fav">Saves</th>
+                                <th class="num sortable" data-sort="inq">Inquiries</th>
+                                <th class="col-actions"></th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var row in Model.Listings)
                             {
-                                <tr>
+                                var rowStatus = row.IsLocked ? "locked" : row.Status.ToString().ToLowerInvariant();
+                                <tr data-status="@rowStatus" data-title="@row.Title.ToLowerInvariant()"
+                                    data-v7="@row.Views7d" data-vt="@row.TotalViews" data-fav="@row.Favorites" data-inq="@row.Inquiries">
                                     <td>
-                                        <a asp-controller="Listings" asp-action="Details" asp-route-id="@row.Id" asp-route-slug="@row.Slug">@row.Title</a>
+                                        <div class="listing-cell">
+                                            @if (!string.IsNullOrEmpty(row.CoverThumbnailUrl))
+                                            {
+                                                <img class="listing-thumb" src="@row.CoverThumbnailUrl" alt="" loading="lazy" />
+                                            }
+                                            else
+                                            {
+                                                <span class="listing-thumb listing-thumb-empty" aria-hidden="true">⌂</span>
+                                            }
+                                            <a class="listing-cell-title" asp-controller="Listings" asp-action="Details" asp-route-id="@row.Id" asp-route-slug="@row.Slug">@row.Title</a>
+                                        </div>
                                     </td>
-                                    <td><span class="status-pill status-@row.Status.ToString().ToLowerInvariant()">@row.Status</span></td>
+                                    <td>@row.ListingType</td>
+                                    <td class="num">@row.PriceAmount.ToString("N0") @row.PriceCurrency</td>
+                                    <td>
+                                        @if (row.IsLocked)
+                                        {
+                                            <span class="status-pill status-locked">🔒 Locked</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-pill status-@row.Status.ToString().ToLowerInvariant()">@row.Status</span>
+                                        }
+                                    </td>
                                     <td class="num">@row.Views7d.ToString("N0")</td>
-                                    <td class="num">@row.Views30d.ToString("N0")</td>
                                     <td class="num">@row.TotalViews.ToString("N0")</td>
-                                    <td class="num">@row.UniqueVisitors.ToString("N0")</td>
                                     <td class="num">@row.Favorites.ToString("N0")</td>
-                                    <td class="num">@row.Inquiries7d.ToString("N0")</td>
                                     <td class="num">@row.Inquiries.ToString("N0")</td>
+                                    <td class="col-actions">
+                                        @if (!row.IsLocked)
+                                        {
+                                            <div class="row-actions">
+                                                @if (row.Status == ListingStatus.Draft)
+                                                {
+                                                    <form asp-controller="Listings" asp-action="Publish" asp-route-id="@row.Id" method="post">
+                                                        <button type="submit" class="btn btn-primary btn-sm">Publish</button>
+                                                    </form>
+                                                }
+                                                <a asp-controller="Listings" asp-action="Details" asp-route-id="@row.Id" asp-route-slug="@row.Slug" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">@(row.Status == ListingStatus.Active ? "View" : "Preview")</a>
+                                                <a asp-controller="Listings" asp-action="Edit" asp-route-id="@row.Id" class="btn btn-ghost btn-sm">Edit</a>
+                                                <a asp-controller="Listings" asp-action="Delete" asp-route-id="@row.Id" class="btn btn-danger btn-sm">Delete</a>
+                                            </div>
+                                        }
+                                    </td>
                                 </tr>
+
+                                @* The appeal form needs room to breathe, so it gets the full width
+                                   under its listing instead of being crushed into the action cell. *@
+                                if (row.IsLocked)
+                                {
+                                    <tr class="locked-row" data-status="@rowStatus" data-title="@row.Title.ToLowerInvariant()" data-follows="@row.Id">
+                                        <td colspan="9">
+                                            <div class="locked-msg">
+                                                <strong>Locked by an administrator.</strong>
+                                                <span>@row.LockReason</span>
+                                                @if (row.UnlockRequested)
+                                                {
+                                                    <small class="review-requested">⏳ Re-review requested@(row.UnlockRequestedAt is null ? "" : $" on {row.UnlockRequestedAt:MMM d, yyyy}"). An admin will take another look.</small>
+                                                }
+                                                else
+                                                {
+                                                    <details class="unlock-appeal">
+                                                        <summary>Fixed it — request re-review</summary>
+                                                        <form asp-controller="Listings" asp-action="RequestUnlock" asp-route-id="@row.Id" method="post">
+                                                            <textarea name="note" maxlength="1000" rows="3" placeholder="Optional: tell the admin what you changed (e.g. replaced the photos)."></textarea>
+                                                            <button type="submit" class="btn btn-primary btn-sm">Send request</button>
+                                                        </form>
+                                                    </details>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                     </table>
+                    <p id="noListingMatch" class="no-match" hidden>No listings match your filters.</p>
                 </div>
             </div>
         }
     </div>
 </section>
+
+@section Scripts {
+    <script src="~/js/my-listings.js" asp-append-version="true"></script>
+}

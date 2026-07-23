@@ -20,7 +20,6 @@ using RealEstatePortal.Application.Listings.Queries.GetListingForEdit;
 using RealEstatePortal.Application.Listings.Queries.GetListingImages;
 using RealEstatePortal.Application.Listings.Queries.GetListingMapPoints;
 using RealEstatePortal.Application.Listings.Queries.GetListings;
-using RealEstatePortal.Application.Listings.Queries.GetMyListings;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
@@ -80,13 +79,11 @@ public class ListingsController : Controller
         }
     }
 
+    // The agent's listing table now lives on the dashboard, next to the numbers it belongs
+    // with. Kept as a redirect so old links and bookmarks still land somewhere useful.
     [HttpGet]
     [Authorize(Roles = Roles.Agent)]
-    public async Task<IActionResult> Mine()
-    {
-        var listings = await _sender.Send(new GetMyListingsQuery());
-        return View(listings);
-    }
+    public IActionResult Mine() => RedirectToAction("Index", "Dashboard");
 
     [HttpGet]
     [Authorize(Roles = Roles.Agent)]
@@ -160,7 +157,7 @@ public class ListingsController : Controller
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         await _sender.Send(new DeleteListingCommand(id));
-        return RedirectToAction(nameof(Mine));
+        return RedirectToAction("Index", "Dashboard");
     }
 
     [HttpGet("listing/{id:int}/{slug?}")]
@@ -227,7 +224,7 @@ public class ListingsController : Controller
     public async Task<IActionResult> Publish(int id)
     {
         await _sender.Send(new PublishListingCommand(id));
-        return RedirectToAction(nameof(Mine));
+        return RedirectToAction("Index", "Dashboard");
     }
 
     [HttpPost]
@@ -237,7 +234,7 @@ public class ListingsController : Controller
     {
         await _sender.Send(new RequestListingUnlockCommand(id, note));
         TempData["UnlockRequested"] = "Your re-review request has been sent to the administrators.";
-        return RedirectToAction(nameof(Mine));
+        return RedirectToAction("Index", "Dashboard");
     }
 
     private async Task LoadPhotosAsync(int listingId)

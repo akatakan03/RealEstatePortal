@@ -15,13 +15,15 @@ public class GetAgentDashboardQueryHandler
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly TimeProvider _clock;
+    private readonly IFileStorageService _storage;
 
     public GetAgentDashboardQueryHandler(
-        IApplicationDbContext context, IUser user, TimeProvider clock)
+        IApplicationDbContext context, IUser user, TimeProvider clock, IFileStorageService storage)
     {
         _context = context;
         _user = user;
         _clock = clock;
+        _storage = storage;
     }
 
     public async Task<AgentDashboardDto> Handle(
@@ -42,7 +44,27 @@ public class GetAgentDashboardQueryHandler
 
         var listings = await _context.Listings
             .Where(l => l.OwnerId == _user.Id)
-            .Select(l => new { l.Id, l.Title, l.Slug, l.Status, l.ListingType })
+            .Select(l => new
+            {
+                l.Id,
+                l.Title,
+                l.Slug,
+                l.Status,
+                l.ListingType,
+                l.Created,
+                PriceAmount = l.Price.Amount,
+                PriceCurrency = l.Price.Currency,
+                l.IsLocked,
+                l.LockReason,
+                l.UnlockRequested,
+                l.UnlockRequestedAt,
+                // First cover photo (or first by order) as the thumbnail.
+                CoverKey = l.Media
+                    .OrderByDescending(m => m.IsCover)
+                    .ThenBy(m => m.Order)
+                    .Select(m => m.ObjectKey)
+                    .FirstOrDefault()
+            })
             .ToListAsync(cancellationToken);
 
         if (listings.Count == 0)
@@ -98,7 +120,7 @@ public class GetAgentDashboardQueryHandler
                 ListingId = g.Key,
                 Count = g.Count(),
                 Last7 = g.Sum(f => f.Created >= since7 ? 1 : 0),
-                Prev7 = g.Sum(f => f.Created >= prev7 && f.Created < since7 ? 1 : 0)
+                Prev7 = g.Sum(f => f.Created >= prev7 && f.Created < prev7End ? 1 : 0)
             })
             .ToListAsync(cancellationToken);
 
@@ -129,7 +151,11 @@ public class GetAgentDashboardQueryHandler
         var rolledUpById = rolledUp.ToDictionary(r => r.ListingId, r => r.Views);
         var favouritesById = favouriteStats.ToDictionary(f => f.ListingId, f => f.Count);
 
+        // Newest first: this table is where the agent manages listings, so recency is the more
+        // useful default than performance. Any numeric column can be sorted on from its header.
         var rows = listings
+            .OrderByDescending(l => l.Created)
+            .ThenByDescending(l => l.Id)
             .Select(l =>
             {
                 viewsById.TryGetValue(l.Id, out var v);
@@ -142,6 +168,14 @@ public class GetAgentDashboardQueryHandler
                     Title = l.Title,
                     Slug = l.Slug,
                     Status = l.Status,
+                    PriceAmount = l.PriceAmount,
+                    PriceCurrency = l.PriceCurrency,
+                    ListingType = l.ListingType,
+                    IsLocked = l.IsLocked,
+                    LockReason = l.LockReason,
+                    UnlockRequested = l.UnlockRequested,
+                    UnlockRequestedAt = l.UnlockRequestedAt,
+                    CoverThumbnailUrl = string.IsNullOrEmpty(l.CoverKey) ? null : _storage.GetPublicUrl(l.CoverKey),
                     TotalViews = (v?.Total ?? 0) + rolled,   // recent (raw) + historical (rolled up)
                     UniqueVisitors = v?.Unique ?? 0,
                     Views7d = v?.Last7 ?? 0,
@@ -151,8 +185,6 @@ public class GetAgentDashboardQueryHandler
                     Favorites = favs
                 };
             })
-            .OrderByDescending(r => r.TotalViews)
-            .ThenByDescending(r => r.Id)
             .ToList();
 
         var byDay = trendRaw.ToDictionary(x => DateOnly.FromDateTime(x.Day), x => x.Count);

@@ -246,6 +246,42 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         dash.Views30d.ShouldBe(2);            // recent window is raw-only
     }
 
+    // The dashboard table is also the agent's management table, so each row has to carry what
+    // the Edit/Publish/Delete controls and the lock notice need — not just the numbers.
+    [Fact]
+    public async Task Rows_CarryTheManagementFields_NewestFirst()
+    {
+        Fixture.CurrentUser.Id = "agent-1";
+
+        await Fixture.ExecuteDbAsync(async db =>
+        {
+            var older = Seed("Older", "older", "agent-1");
+            var locked = Seed("Locked", "locked", "agent-1");
+            locked.Lock("Photos don't match the address");
+            locked.RequestUnlock("Replaced them", DateTimeOffset.UtcNow);
+
+            db.Listings.Add(older);
+            await db.SaveChangesAsync(CancellationToken.None);
+            db.Listings.Add(locked);
+            await db.SaveChangesAsync(CancellationToken.None);
+            return 0;
+        });
+
+        var dash = await Fixture.SendAsync(new GetAgentDashboardQuery());
+
+        // Newest first — the management default, not "ranked by views".
+        dash.Listings.Select(r => r.Title).ShouldBe(new[] { "Locked", "Older" });
+
+        var row = dash.Listings.First();
+        row.PriceAmount.ShouldBe(100_000m);
+        row.PriceCurrency.ShouldBe("TRY");
+        row.ListingType.ShouldBe(ListingType.Sale);
+        row.IsLocked.ShouldBeTrue();
+        row.LockReason.ShouldBe("Photos don't match the address");
+        row.UnlockRequested.ShouldBeTrue();
+        row.UnlockRequestedAt.ShouldNotBeNull();
+    }
+
     private static Listing Seed(string title, string slug, string ownerId, bool publish = true)
     {
         var listing = new Listing

@@ -59,7 +59,7 @@
                         <a class="btn btn-ghost" asp-controller="SavedSearches" asp-action="Mine">🔔 Alerts</a>
                         @if (Model.IsAgent)
                         {
-                            <a class="btn btn-ghost" asp-controller="Listings" asp-action="Mine">My listings</a>
+                            <a class="btn btn-ghost" asp-controller="Dashboard" asp-action="Index">My listings</a>
                             <a class="btn btn-ghost" asp-controller="Inquiries" asp-action="Index">Inquiries</a>
                         }
                         @if (Model.IsAdmin)

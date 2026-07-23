@@ -2358,6 +2358,11 @@ textarea.form-control {
 }
 
 .dash-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
     margin-bottom: 2rem
 }
 
@@ -2687,10 +2692,62 @@ textarea.form-control {
         color: #2F6B45
     }
 
-    .status-pill.status-draft {
+    .status-pill.status-draft,
+    .status-pill.status-archived {
         background: var(--line);
         color: var(--muted)
     }
+
+    .status-pill.status-locked {
+        background: #F6E4E2;
+        color: #8A342B
+    }
+
+/* ===== the agent's listing table (management + stats in one) ===== */
+.listing-table .listing-cell-title {
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none
+}
+
+    .listing-table .listing-cell-title:hover {
+        color: var(--brass-dk);
+        text-decoration: underline
+    }
+
+.listing-table th.sortable {
+    cursor: pointer;
+    user-select: none
+}
+
+    .listing-table th.sortable:hover {
+        color: var(--ink)
+    }
+
+    /* The arrow only appears on the column actually being sorted, so it reads as state
+       rather than decoration. */
+    .listing-table th.sorted-desc::after {
+        content: " ▾";
+        color: var(--brass-dk)
+    }
+
+    .listing-table th.sorted-asc::after {
+        content: " ▴";
+        color: var(--brass-dk)
+    }
+
+.listing-table td.col-actions {
+    white-space: nowrap;
+    text-align: right
+}
+
+/* The appeal row belongs to the listing above it: no top border, tinted so the pairing
+   is visible even after sorting moves them around. */
+.listing-table tr.locked-row td {
+    background: var(--bg-soft, #FAF8F4);
+    padding-top: 0;
+    white-space: normal
+}
 
 @media (max-width: 720px) {
     .kpi-row {
