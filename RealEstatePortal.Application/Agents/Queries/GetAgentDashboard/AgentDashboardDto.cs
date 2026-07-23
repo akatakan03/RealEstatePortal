@@ -15,8 +15,10 @@ public record AgentDashboardDto
     public int Inquiries7d { get; init; }
     public int InquiriesPrev7d { get; init; }
     public int Inquiries30d { get; init; }
-    // One row per (user, listing) — so this counts people, not repeat clicks.
+    // One row per (user, listing) — so these count people, not repeat clicks.
     public int TotalFavorites { get; init; }
+    public int Favorites7d { get; init; }
+    public int FavoritesPrev7d { get; init; }
     public IReadOnlyList<AgentListingStatDto> Listings { get; init; } = new List<AgentListingStatDto>();
     public IReadOnlyList<DailyCountDto> ViewTrend { get; init; } = new List<DailyCountDto>();
     public IReadOnlyList<DailyCountDto> InquiryTrend { get; init; } = new List<DailyCountDto>();

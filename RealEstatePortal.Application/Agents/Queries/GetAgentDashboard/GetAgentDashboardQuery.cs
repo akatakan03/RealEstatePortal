@@ -93,7 +93,13 @@ public class GetAgentDashboardQueryHandler
         var favouriteStats = await _context.Favorites
             .Where(f => listingIds.Contains(f.ListingId))
             .GroupBy(f => f.ListingId)
-            .Select(g => new { ListingId = g.Key, Count = g.Count() })
+            .Select(g => new
+            {
+                ListingId = g.Key,
+                Count = g.Count(),
+                Last7 = g.Sum(f => f.Created >= since7 ? 1 : 0),
+                Prev7 = g.Sum(f => f.Created >= prev7 && f.Created < since7 ? 1 : 0)
+            })
             .ToListAsync(cancellationToken);
 
         // Daily inquiry totals over the same 30-day window as the view trend. The 30-day KPI is
@@ -169,6 +175,8 @@ public class GetAgentDashboardQueryHandler
             InquiriesPrev7d = inquiryStats.Sum(i => i.Prev7),
             Inquiries30d = inquiryTrend.Sum(t => t.Count),
             TotalFavorites = favouriteStats.Sum(f => f.Count),
+            Favorites7d = favouriteStats.Sum(f => f.Last7),
+            FavoritesPrev7d = favouriteStats.Sum(f => f.Prev7),
             Listings = rows,
             ViewTrend = BuildTrend(now, byDay),
             InquiryTrend = inquiryTrend,

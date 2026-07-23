@@ -20,6 +20,7 @@
 
     var viewsDelta = Delta(Model.Views7d, Model.ViewsPrev7d);
     var inqDelta = Delta(Model.Inquiries7d, Model.InquiriesPrev7d);
+    var favDelta = Delta(Model.Favorites7d, Model.FavoritesPrev7d);
 }
 
 <section class="dash-sec">
@@ -71,9 +72,12 @@
                     </div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-label" title="Distinct people who saved one of your listings. Each person counts once per listing.">Saved by</div>
-                    <div class="kpi-value">@Model.TotalFavorites.ToString("N0")</div>
-                    <div class="kpi-delta flat"><span class="kpi-delta-note">people, all time</span></div>
+                    <div class="kpi-label" title="People who saved one of your listings. Each person counts once per listing.">Saves · 7 days</div>
+                    <div class="kpi-value">@Model.Favorites7d.ToString("N0")</div>
+                    <div class="kpi-delta @favDelta.Css">
+                        <span aria-hidden="true">@favDelta.Arrow</span> @favDelta.Text
+                        <span class="kpi-delta-note">vs previous 7 days · @Model.TotalFavorites.ToString("N0") all time</span>
+                    </div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label" title="How many inquiries each 100 views produced over the last 30 days.">Inquiries / 100 views</div>

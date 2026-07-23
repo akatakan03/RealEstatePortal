@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Agents.Queries.GetAgentDashboard;
 using RealEstatePortal.Domain.Entities;
 using RealEstatePortal.Domain.Enums;
@@ -203,6 +204,11 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
             db.Favorites.Add(new Favorite { ListingId = mine.Id, UserId = "buyer-2" });
             db.Favorites.Add(new Favorite { ListingId = other.Id, UserId = "buyer-1" });
             await db.SaveChangesAsync(CancellationToken.None);
+
+            // Backdate one of mine into the previous week so the delta has both sides.
+            var older = await db.Favorites.FirstAsync(f => f.ListingId == mine.Id && f.UserId == "buyer-2");
+            older.Created = DateTimeOffset.UtcNow.AddDays(-9);
+            await db.SaveChangesAsync(CancellationToken.None);
             return 0;
         });
 
@@ -210,6 +216,8 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
 
         dash.TotalFavorites.ShouldBe(2);                 // the rival's save doesn't leak in
         dash.Listings.Single().Favorites.ShouldBe(2);
+        dash.Favorites7d.ShouldBe(1);                    // buyer-1 saved this week
+        dash.FavoritesPrev7d.ShouldBe(1);                // buyer-2 sits in the previous week
     }
 
     [Fact]
