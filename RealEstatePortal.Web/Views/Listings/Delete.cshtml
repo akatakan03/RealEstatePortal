@@ -1,4 +1,5 @@
-﻿@model RealEstatePortal.Application.Listings.Commands.UpdateListing.UpdateListingCommand
+﻿@using RealEstatePortal.Domain.Constants
+@model RealEstatePortal.Application.Listings.Commands.UpdateListing.UpdateListingCommand
 @{
     ViewData["Title"] = "Delete Listing";
 }
@@ -11,8 +12,15 @@
 
             <div class="form-card">
                 <div class="alert alert-danger">
-                    This will permanently delete the listing and its photos. This can't be undone.
+                    This takes the listing off the site straight away — visitors won't find it and
+                    it leaves your dashboard.
                 </div>
+
+                <p class="muted delete-note">
+                    Nothing is erased yet. The listing, its photos, and every inquiry you've received
+                    about it are kept for @ListingDeletion.RetentionDays days, so a mistake can be put
+                    right — ask an administrator to restore it. After that it's erased for good.
+                </p>
 
                 <dl class="summary-grid">
                     <dt>Title</dt>
@@ -28,7 +36,7 @@
                 <form asp-action="Delete" method="post">
                     <input type="hidden" asp-for="Id" />
                     <div class="form-actions bare">
-                        <button type="submit" class="btn btn-danger">Delete permanently</button>
+                        <button type="submit" class="btn btn-danger">Delete listing</button>
                         <a asp-controller="Dashboard" asp-action="Index" class="btn btn-ghost">Cancel</a>
                     </div>
                 </form>

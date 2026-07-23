@@ -83,7 +83,10 @@ public class ListingsWriteApiController : ApiControllerBase
         return NoContent();
     }
 
-    /// <summary>Delete a listing you own.</summary>
+    /// <summary>
+    /// Delete a listing you own. It leaves the site immediately but stays restorable by an
+    /// administrator for a grace period before it is erased.
+    /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

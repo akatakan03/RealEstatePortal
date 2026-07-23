@@ -58,5 +58,18 @@ public class ListingConfiguration : IEntityTypeConfiguration<Listing>
 
         builder.Property(l => l.LockReason).HasMaxLength(500);
         builder.Property(l => l.UnlockRequestNote).HasMaxLength(1000);
+
+        builder.Property(l => l.DeletedBy).HasMaxLength(450);   // matches Identity's key length
+        builder.Ignore(l => l.IsDeleted);                       // derived from DeletedAt, not a column
+
+        // Deleted listings are invisible to the whole application. Every query gets this
+        // predicate for free, so nothing has to remember to exclude them — the two places
+        // that must see them (the moderation trash and the purge sweep) opt out explicitly
+        // with IgnoreQueryFilters().
+        builder.HasQueryFilter(l => l.DeletedAt == null);
+
+        // Only the purge sweep and the trash view read this, and both want the same tiny
+        // slice of the table, so the index carries only the deleted rows.
+        builder.HasIndex(l => l.DeletedAt).HasFilter("[DeletedAt] IS NOT NULL");
     }
 }

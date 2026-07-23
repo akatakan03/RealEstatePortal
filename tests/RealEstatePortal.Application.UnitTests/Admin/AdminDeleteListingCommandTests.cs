@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MockQueryable.NSubstitute;
@@ -15,28 +15,28 @@ namespace RealEstatePortal.Application.UnitTests.Admin;
 public class AdminDeleteListingCommandTests
 {
     [Fact]
-    public async Task Handle_DeletesEveryPhotoFromStorage_ThenRemovesListing()
+    public async Task Handle_MarksTheListingDeleted_WithoutRemovingTheRow()
     {
         var listing = new Listing { Id = 1, OwnerId = "agent-1" };
         listing.Media.Add(new ListingMedia { ObjectKey = "k1", ThumbnailKey = "t1" });
-        listing.Media.Add(new ListingMedia { ObjectKey = "k2", ThumbnailKey = "t2" });
 
         var set = new List<Listing> { listing }.BuildMockDbSet();
         var ctx = Substitute.For<IApplicationDbContext>();
         ctx.Listings.Returns(set);
 
-        var storage = Substitute.For<IFileStorageService>();
-        var handler = new AdminDeleteListingCommandHandler(ctx, storage);
+        var user = Substitute.For<IUser>();
+        user.Id.Returns("admin-1");
+
+        var handler = new AdminDeleteListingCommandHandler(ctx, TimeProvider.System, user);
 
         await handler.Handle(new AdminDeleteListingCommand(1), CancellationToken.None);
 
-        // Both objects for both photos are cleaned from R2 — no orphans.
-        await storage.Received(1).DeleteAsync("k1", Arg.Any<CancellationToken>());
-        await storage.Received(1).DeleteAsync("t1", Arg.Any<CancellationToken>());
-        await storage.Received(1).DeleteAsync("k2", Arg.Any<CancellationToken>());
-        await storage.Received(1).DeleteAsync("t2", Arg.Any<CancellationToken>());
+        listing.IsDeleted.ShouldBeTrue();
+        listing.DeletedBy.ShouldBe("admin-1");
 
-        ctx.Listings.Received(1).Remove(listing);
+        // The photos stay in storage: they are what makes a restore worth having, and the
+        // purge sweep is what eventually removes them.
+        ctx.Listings.DidNotReceive().Remove(Arg.Any<Listing>());
         await ctx.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
@@ -47,7 +47,8 @@ public class AdminDeleteListingCommandTests
         var ctx = Substitute.For<IApplicationDbContext>();
         ctx.Listings.Returns(set);
 
-        var handler = new AdminDeleteListingCommandHandler(ctx, Substitute.For<IFileStorageService>());
+        var handler = new AdminDeleteListingCommandHandler(
+            ctx, TimeProvider.System, Substitute.For<IUser>());
 
         await Should.ThrowAsync<NotFoundException>(
             () => handler.Handle(new AdminDeleteListingCommand(9), CancellationToken.None));

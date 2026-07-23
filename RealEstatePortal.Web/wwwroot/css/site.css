@@ -1533,6 +1533,21 @@ textarea.form-control {
     color: var(--muted)
 }
 
+/* What actually happens when you delete, under the warning on the confirm screen. */
+.delete-note {
+    margin: -.5rem 0 1.5rem;
+    font-size: .92rem;
+    line-height: 1.55
+}
+
+/* The line above the trash table that explains what the trash is. */
+.trash-note {
+    max-width: 62ch;
+    margin: 0 0 1.25rem;
+    font-size: .92rem;
+    line-height: 1.55
+}
+
 /* An empty result, stated in the middle of the card that would have held it. */
 .card-empty {
     text-align: center;

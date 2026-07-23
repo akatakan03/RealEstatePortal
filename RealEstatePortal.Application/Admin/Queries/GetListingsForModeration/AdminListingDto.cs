@@ -17,4 +17,8 @@ public class AdminListingDto
     public bool UnlockRequested { get; init; }
     public string? UnlockRequestNote { get; init; }
     public DateTimeOffset? UnlockRequestedAt { get; init; }
+
+    // Set only on rows from the trash view; null everywhere else, since the query filter
+    // keeps deleted listings out of every other list.
+    public DateTimeOffset? DeletedAt { get; init; }
 }

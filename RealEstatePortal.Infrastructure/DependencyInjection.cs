@@ -88,6 +88,7 @@ public static class DependencyInjection
 
         services.AddScoped<IListingSpatialSearch, ListingSpatialSearch>();
         services.AddScoped<IListingViewRollupService, ListingViewRollupService>();
+        services.AddScoped<IListingPurgeService, ListingPurgeService>();
 
         services.AddMemoryCache();
         services.AddHttpClient<NominatimGeocodingService>(client =>

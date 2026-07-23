@@ -207,4 +207,74 @@ public class ListingTests
         listing.UnlockRequested.ShouldBeFalse();
         listing.UnlockRequestNote.ShouldBeNull();
     }
+
+    [Fact]
+    public void Delete_StampsWhoAndWhen()
+    {
+        var at = new DateTimeOffset(2026, 7, 23, 10, 0, 0, TimeSpan.Zero);
+        var listing = new Listing();
+
+        listing.Delete(at, "agent-1");
+
+        listing.IsDeleted.ShouldBeTrue();
+        listing.DeletedAt.ShouldBe(at);
+        listing.DeletedBy.ShouldBe("agent-1");
+    }
+
+    [Fact]
+    public void Delete_WhenAlreadyDeleted_KeepsTheOriginalStamp()
+    {
+        var first = new DateTimeOffset(2026, 7, 1, 0, 0, 0, TimeSpan.Zero);
+        var listing = new Listing();
+        listing.Delete(first, "agent-1");
+
+        listing.Delete(first.AddDays(20), "admin-1");
+
+        // Deleting twice must not restart the grace period — otherwise a listing could be
+        // kept out of reach of the purge sweep indefinitely.
+        listing.DeletedAt.ShouldBe(first);
+        listing.DeletedBy.ShouldBe("agent-1");
+    }
+
+    [Fact]
+    public void Restore_ClearsTheStamp_AndComesBackAsADraft()
+    {
+        var listing = new Listing();
+        listing.Publish();
+        listing.Delete(DateTimeOffset.UtcNow, "agent-1");
+
+        listing.Restore();
+
+        listing.IsDeleted.ShouldBeFalse();
+        listing.DeletedAt.ShouldBeNull();
+        listing.DeletedBy.ShouldBeNull();
+
+        // Never straight back onto the public site — republishing stays a deliberate act.
+        listing.Status.ShouldBe(ListingStatus.Draft);
+    }
+
+    [Fact]
+    public void Restore_KeepsAnAdministratorsLockInPlace()
+    {
+        var listing = new Listing();
+        listing.Lock("Photos don't match the property");
+        listing.Delete(DateTimeOffset.UtcNow, "agent-1");
+
+        listing.Restore();
+
+        // Deleting and restoring must not be a way around moderation.
+        listing.IsLocked.ShouldBeTrue();
+        listing.LockReason.ShouldBe("Photos don't match the property");
+    }
+
+    [Fact]
+    public void Restore_OnAListingThatWasNeverDeleted_ChangesNothing()
+    {
+        var listing = new Listing();
+        listing.Publish();
+
+        listing.Restore();
+
+        listing.Status.ShouldBe(ListingStatus.Active);
+    }
 }

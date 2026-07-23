@@ -159,6 +159,7 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
 
 builder.Services.AddHostedService<ListingViewRollupWorker>();
+builder.Services.AddHostedService<DeletedListingPurgeWorker>();
 
 var app = builder.Build();
 

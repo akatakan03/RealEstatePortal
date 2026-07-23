@@ -1,12 +1,17 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Application.Common.Models;
 using RealEstatePortal.Domain.Enums;
 
 namespace RealEstatePortal.Application.Admin.Queries.GetListingsForModeration;
 
+// Deleted = true swaps the list over to the trash: listings that have been deleted but not
+// yet purged. The status filter doesn't apply there — what a deleted listing's status was is
+// not how anyone looks for it.
 public record GetListingsForModerationQuery(
-    ListingStatus? Status = null, string? Search = null, int PageNumber = 1, int PageSize = 25)
+    ListingStatus? Status = null, string? Search = null, int PageNumber = 1, int PageSize = 25,
+    bool Deleted = false)
     : IRequest<PaginatedList<AdminListingDto>>;
 
 public class GetListingsForModerationQueryHandler
@@ -24,9 +29,11 @@ public class GetListingsForModerationQueryHandler
     public async Task<PaginatedList<AdminListingDto>> Handle(
         GetListingsForModerationQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Listings.AsQueryable();
+        var query = request.Deleted
+            ? _context.Listings.IgnoreQueryFilters().Where(l => l.DeletedAt != null)
+            : _context.Listings.AsQueryable();
 
-        if (request.Status.HasValue)
+        if (!request.Deleted && request.Status.HasValue)
             query = query.Where(l => l.Status == request.Status.Value);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
@@ -38,8 +45,12 @@ public class GetListingsForModerationQueryHandler
         var pageSize = Math.Clamp(request.PageSize, 1, 100);
         var pageNumber = Math.Max(request.PageNumber, 1);
 
-        var projected = query
-            .OrderByDescending(l => l.Created)
+        // The trash is read to act on it, so it leads with what is closest to being purged.
+        var ordered = request.Deleted
+            ? query.OrderBy(l => l.DeletedAt)
+            : query.OrderByDescending(l => l.Created);
+
+        var projected = ordered
             .Select(l => new AdminListingDto
             {
                 Id = l.Id,
@@ -53,7 +64,8 @@ public class GetListingsForModerationQueryHandler
                 LockReason = l.LockReason,
                 UnlockRequested = l.UnlockRequested,
                 UnlockRequestNote = l.UnlockRequestNote,
-                UnlockRequestedAt = l.UnlockRequestedAt
+                UnlockRequestedAt = l.UnlockRequestedAt,
+                DeletedAt = l.DeletedAt
             });
 
         var page = await PaginatedList<AdminListingDto>

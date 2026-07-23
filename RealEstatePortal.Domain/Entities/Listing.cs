@@ -103,6 +103,37 @@ public class Listing : BaseAuditableEntity
         UnlockRequestedAt = null;
     }
 
+    // Deleting a listing marks it instead of removing the row. Everything hanging off it —
+    // the inquiries buyers sent, who saved it, its price history — survives, and a mistake
+    // stays recoverable. A background sweep does the irreversible part once the grace
+    // period is up (see IListingPurgeService).
+    public DateTimeOffset? DeletedAt { get; private set; }
+    public string? DeletedBy { get; private set; }
+    public bool IsDeleted => DeletedAt.HasValue;
+
+    public void Delete(DateTimeOffset at, string? by)
+    {
+        if (IsDeleted)
+            return;
+
+        DeletedAt = at;
+        DeletedBy = by;
+    }
+
+    public void Restore()
+    {
+        if (!IsDeleted)
+            return;
+
+        DeletedAt = null;
+        DeletedBy = null;
+
+        // Comes back as a draft rather than straight to whatever it was. A listing must not
+        // reappear on the public site as a side effect of being un-deleted — the same rule
+        // Unlock() follows.
+        ReturnToDraft();
+    }
+
     // Structured attributes
     public HeatingType? Heating { get; set; }
     public InternetInfrastructure? Internet { get; set; }

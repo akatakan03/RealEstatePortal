@@ -1,4 +1,5 @@
-﻿@using RealEstatePortal.Domain.Enums
+﻿@using RealEstatePortal.Domain.Constants
+@using RealEstatePortal.Domain.Enums
 @model RealEstatePortal.Application.Common.Models.PaginatedList<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
 @{
     ViewData["Title"] = "Moderation";
@@ -6,6 +7,9 @@
     var pending = ViewBag.PendingUnlockRequests as List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
         ?? new List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>();
     var requestsView = ViewBag.RequestsView == true;
+    var deletedView = ViewBag.DeletedView == true;
+    var deletedCount = ViewBag.DeletedCount as int? ?? 0;
+    var listView = !requestsView && !deletedView;
     var search = ViewBag.Search as string;
 }
 
@@ -18,13 +22,25 @@
             </div>
         </div>
 
+        @if (TempData["AdminNotice"] is string notice)
+        {
+            <div class="alert alert-success">@notice</div>
+        }
+
         <div class="filter-tabs" role="tablist" style="margin-bottom:1.25rem;">
-            <a class="filter-tab @(requestsView ? "" : "is-active")" asp-action="Listings">All listings</a>
+            <a class="filter-tab @(listView ? "is-active" : "")" asp-action="Listings">All listings</a>
             <a class="filter-tab @(requestsView ? "is-active" : "")" asp-action="Listings" asp-route-requests="true">
                 ⏳ Re-review requests
                 @if (pending.Any())
                 {
                     <span class="ft-count">@pending.Count</span>
+                }
+            </a>
+            <a class="filter-tab @(deletedView ? "is-active" : "")" asp-action="Listings" asp-route-deleted="true">
+                🗑 Trash
+                @if (deletedCount > 0)
+                {
+                    <span class="ft-count">@deletedCount</span>
                 }
             </a>
         </div>
@@ -71,6 +87,89 @@
                         </div>
                     }
                 </div>
+            }
+        }
+        else if (deletedView)
+        {
+            if (!Model.Items.Any())
+            {
+                <div class="form-card card-empty">Nothing in the trash.</div>
+            }
+            else
+            {
+                <p class="muted trash-note">
+                    Deleted listings stay here for @ListingDeletion.RetentionDays days with their photos,
+                    inquiries and saves intact, then are erased automatically. Restoring one brings it
+                    back as a draft.
+                </p>
+
+                <div class="table-card">
+                    <table class="table">
+                        <thead>
+                            <tr><th>Title</th><th>Owner</th><th>Deleted</th><th>Erased in</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var l in Model.Items)
+                            {
+                                var daysLeft = l.DeletedAt is null
+                                    ? ListingDeletion.RetentionDays
+                                    : Math.Max(0, (int)Math.Ceiling(
+                                        ListingDeletion.RetentionDays - (DateTimeOffset.UtcNow - l.DeletedAt.Value).TotalDays));
+                                var soon = daysLeft <= 3;
+                                var daysLabel = daysLeft == 0
+                                    ? "any moment"
+                                    : daysLeft == 1 ? "1 day" : daysLeft + " days";
+                                <tr>
+                                    <td class="row-title">@l.Title</td>
+                                    <td class="muted">@(l.OwnerEmail ?? "—")</td>
+                                    <td class="muted">@(l.DeletedAt?.ToString("MMM d, yyyy") ?? "—")</td>
+                                    <td>
+                                        <span class="badge-status @(soon ? "badge-archived" : "badge-sold")">@daysLabel</span>
+                                    </td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <form asp-action="Undelete" method="post">
+                                                <input type="hidden" name="id" value="@l.Id" />
+                                                <button type="submit" class="btn btn-primary btn-sm">Restore</button>
+                                            </form>
+                                            @* The title deliberately stays out of the message: it would
+                                               land inside a JavaScript string literal, where an
+                                               apostrophe in an agent's title breaks out of it. *@
+                                            <form asp-action="Purge" method="post"
+                                                  onsubmit="return confirm('Erase this listing now? Its photos, inquiries and saves go with it. This cannot be undone.');">
+                                                <input type="hidden" name="id" value="@l.Id" />
+                                                <button type="submit" class="btn btn-danger btn-sm">Erase now</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                if (Model.TotalPages > 1)
+                {
+                    <nav class="pager">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <a asp-action="Listings" asp-route-deleted="true" asp-route-page="@(Model.PageNumber - 1)">← Prev</a>
+                        }
+                        else
+                        {
+                            <span class="disabled">← Prev</span>
+                        }
+                        <span class="current">@Model.PageNumber of @Model.TotalPages</span>
+                        @if (Model.HasNextPage)
+                        {
+                            <a asp-action="Listings" asp-route-deleted="true" asp-route-page="@(Model.PageNumber + 1)">Next →</a>
+                        }
+                        else
+                        {
+                            <span class="disabled">Next →</span>
+                        }
+                    </nav>
+                }
             }
         }
         else
@@ -136,7 +235,7 @@
                                             </form>
                                         }
 
-                                        <form asp-action="Delete" method="post" onsubmit="return confirm('Permanently delete this listing and its photos?');">
+                                        <form asp-action="Delete" method="post" onsubmit="return confirm('Move this listing to the trash? It leaves the site now and can be restored from the Trash tab for @ListingDeletion.RetentionDays days.');">
                                             <input type="hidden" name="id" value="@l.Id" />
                                             <input type="hidden" name="status" value="@current" />
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>

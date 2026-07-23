@@ -25,10 +25,14 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
 
     public async Task<int> Handle(CreateListingCommand request, CancellationToken cancellationToken)
     {
+        // Deleted listings keep their slug until they are purged, and the unique index still
+        // holds them — so this has to look past the query filter or a new listing sharing a
+        // title with a deleted one would fail on insert.
         var baseSlug = SlugGenerator.Generate(request.Title);
         var slug = baseSlug;
         var suffix = 2;
-        while (await _context.Listings.AnyAsync(l => l.Slug == slug, cancellationToken))
+        while (await _context.Listings.IgnoreQueryFilters()
+                   .AnyAsync(l => l.Slug == slug, cancellationToken))
             slug = $"{baseSlug}-{suffix++}";
 
         var entity = new Listing
