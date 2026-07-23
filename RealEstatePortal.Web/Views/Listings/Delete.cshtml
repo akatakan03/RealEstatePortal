@@ -10,24 +10,24 @@
             <h1 class="page-title" style="margin-bottom:1rem;">Delete listing</h1>
 
             <div class="form-card">
-                <div class="alert alert-danger" style="margin-bottom:1.4rem;">
+                <div class="alert alert-danger">
                     This will permanently delete the listing and its photos. This can't be undone.
                 </div>
 
-                <dl style="display:grid;grid-template-columns:auto 1fr;gap:.6rem 1.2rem;margin:0 0 1.5rem;">
-                    <dt style="color:var(--muted);">Title</dt>
-                    <dd style="margin:0;font-weight:600;">@Model.Title</dd>
-                    <dt style="color:var(--muted);">Type</dt>
-                    <dd style="margin:0;">@Model.ListingType</dd>
-                    <dt style="color:var(--muted);">Property</dt>
-                    <dd style="margin:0;">@Model.PropertyType</dd>
-                    <dt style="color:var(--muted);">Price</dt>
-                    <dd style="margin:0;"><span class="value">@Model.Price.ToString("N0") @Model.Currency</span></dd>
+                <dl class="summary-grid">
+                    <dt>Title</dt>
+                    <dd class="strong">@Model.Title</dd>
+                    <dt>Type</dt>
+                    <dd>@Model.ListingType</dd>
+                    <dt>Property</dt>
+                    <dd>@Model.PropertyType</dd>
+                    <dt>Price</dt>
+                    <dd><span class="value">@Model.Price.ToString("N0") @Model.Currency</span></dd>
                 </dl>
 
                 <form asp-action="Delete" method="post">
                     <input type="hidden" asp-for="Id" />
-                    <div class="form-actions" style="margin-top:0;padding-top:0;border-top:none;">
+                    <div class="form-actions bare">
                         <button type="submit" class="btn btn-danger">Delete permanently</button>
                         <a asp-controller="Dashboard" asp-action="Index" class="btn btn-ghost">Cancel</a>
                     </div>

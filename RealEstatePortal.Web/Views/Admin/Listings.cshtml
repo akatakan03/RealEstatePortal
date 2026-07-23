@@ -33,7 +33,7 @@
         {
             if (!pending.Any())
             {
-                <div class="form-card" style="text-align:center;color:var(--muted);">No re-review requests right now.</div>
+                <div class="form-card card-empty">No re-review requests right now.</div>
             }
             else
             {
@@ -91,7 +91,7 @@
 
             if (!Model.Items.Any())
             {
-                <div class="form-card" style="text-align:center;color:var(--muted);">No listings@(current is null ? "" : $" with status {current}").</div>
+                <div class="form-card card-empty">No listings@(current is null ? "" : $" with status {current}").</div>
             }
             else
             {
@@ -105,7 +105,7 @@
                         {
                             <tr>
                                 <td class="row-title"><a asp-controller="Listings" asp-action="Details" asp-route-id="@l.Id">@l.Title</a></td>
-                                <td style="color:var(--muted);">@(l.OwnerEmail ?? "—")</td>
+                                <td class="muted">@(l.OwnerEmail ?? "—")</td>
                                 <td><span class="badge-status badge-@l.Status.ToString().ToLower()">@l.Status</span></td>
                                 <td><span class="value">@l.PriceAmount.ToString("N0") @l.PriceCurrency</span></td>
                                 <td>

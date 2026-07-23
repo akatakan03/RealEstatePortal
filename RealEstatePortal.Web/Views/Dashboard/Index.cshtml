@@ -27,7 +27,7 @@
 
         @if (TempData["UnlockRequested"] is string sent)
         {
-            <div class="alert alert-success" style="margin-bottom:1.5rem;">@sent</div>
+            <div class="alert alert-success">@sent</div>
         }
 
         @if (Model.TotalListings == 0)

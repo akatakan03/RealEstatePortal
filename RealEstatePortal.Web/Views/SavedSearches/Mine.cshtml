@@ -20,7 +20,7 @@
 
         @if (!Model.Any())
         {
-            <div class="form-card" style="text-align:center;color:var(--muted);">
+            <div class="form-card card-empty">
                 No saved searches yet. Set some filters on the <a asp-controller="Listings" asp-action="Index" style="color:var(--brass-dk);font-weight:600;">browse page</a> and click "Save this search".
             </div>
         }
@@ -36,7 +36,7 @@
                         {
                             <tr>
                                 <td class="row-title">@s.Name</td>
-                                <td style="color:var(--muted);">
+                                <td class="muted">
                                     @{
                                         var parts = new List<string>();
                                         if (!string.IsNullOrWhiteSpace(s.Keyword)) parts.Add($"“{s.Keyword}”");

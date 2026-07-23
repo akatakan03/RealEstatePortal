@@ -597,7 +597,10 @@ img {
     border-radius: 12px;
     padding: .9rem 1.1rem;
     font-size: .95rem;
-    border: 1px solid transparent
+    border: 1px solid transparent;
+    /* An alert is always followed by the thing it is about, so it always needs the gap.
+       Four views were setting this inline; two others were missing it. */
+    margin-bottom: 1.5rem
 }
 
 .alert-success {
@@ -1513,6 +1516,84 @@ textarea.form-control {
     padding-top: 1.4rem;
     border-top: 1px solid var(--line)
 }
+
+    /* When the form is the whole card there is nothing above to divide it from. */
+    .form-actions.bare {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none
+    }
+
+/* ===== small shared patterns =====
+   Each of these was repeated inline across several views. They are here because they are
+   patterns, not because inline styles are forbidden — one-off spacing is still fine inline,
+   and anything computed (a bar's width, a chart's height) has to stay there. */
+
+.muted {
+    color: var(--muted)
+}
+
+/* An empty result, stated in the middle of the card that would have held it. */
+.card-empty {
+    text-align: center;
+    color: var(--muted)
+}
+
+/* Checkbox or radio next to its label, on one line. */
+.check-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem
+}
+
+/* A radio rendered as a pickable box — bigger target, clearer state than a bare dot. */
+.choice-box {
+    flex: 1;
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: .7rem .9rem;
+    cursor: pointer
+}
+
+    .choice-box:hover {
+        border-color: var(--brass)
+    }
+
+/* Subheading inside a form card. */
+.form-section-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 1.8rem 0 1rem
+}
+
+    /* First one in a card has nothing above it to clear. */
+    .form-section-title.first {
+        margin-top: 0
+    }
+
+/* Label/value pairs read as a two-column list rather than a table. */
+.summary-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .6rem 1.2rem;
+    margin: 0 0 1.5rem
+}
+
+    .summary-grid dt {
+        color: var(--muted)
+    }
+
+    .summary-grid dd {
+        margin: 0
+    }
+
+        .summary-grid dd.strong {
+            font-weight: 600
+        }
 
 #pickerMap {
     height: 300px;
