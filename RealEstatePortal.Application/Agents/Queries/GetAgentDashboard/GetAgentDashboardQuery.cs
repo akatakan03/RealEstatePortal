@@ -89,6 +89,13 @@ public class GetAgentDashboardQueryHandler
             })
             .ToListAsync(cancellationToken);
 
+        // One favourite row per (user, listing), so this counts distinct people.
+        var favouriteStats = await _context.Favorites
+            .Where(f => listingIds.Contains(f.ListingId))
+            .GroupBy(f => f.ListingId)
+            .Select(g => new { ListingId = g.Key, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
         // Daily inquiry totals over the same 30-day window as the view trend. The 30-day KPI is
         // summed off this trend rather than aggregated separately, so the two always agree.
         var inquiryTrendRaw = await _context.Inquiries
@@ -114,6 +121,7 @@ public class GetAgentDashboardQueryHandler
         var viewsById = viewStats.ToDictionary(v => v.ListingId);
         var inquiriesById = inquiryStats.ToDictionary(i => i.ListingId);
         var rolledUpById = rolledUp.ToDictionary(r => r.ListingId, r => r.Views);
+        var favouritesById = favouriteStats.ToDictionary(f => f.ListingId, f => f.Count);
 
         var rows = listings
             .Select(l =>
@@ -121,6 +129,7 @@ public class GetAgentDashboardQueryHandler
                 viewsById.TryGetValue(l.Id, out var v);
                 inquiriesById.TryGetValue(l.Id, out var inq);
                 rolledUpById.TryGetValue(l.Id, out var rolled);
+                favouritesById.TryGetValue(l.Id, out var favs);
                 return new AgentListingStatDto
                 {
                     Id = l.Id,
@@ -132,7 +141,8 @@ public class GetAgentDashboardQueryHandler
                     Views7d = v?.Last7 ?? 0,
                     Views30d = v?.Last30 ?? 0,
                     Inquiries7d = inq?.Last7 ?? 0,
-                    Inquiries = inq?.Count ?? 0
+                    Inquiries = inq?.Count ?? 0,
+                    Favorites = favs
                 };
             })
             .OrderByDescending(r => r.TotalViews)
@@ -158,6 +168,7 @@ public class GetAgentDashboardQueryHandler
             Inquiries7d = inquiryStats.Sum(i => i.Last7),
             InquiriesPrev7d = inquiryStats.Sum(i => i.Prev7),
             Inquiries30d = inquiryTrend.Sum(t => t.Count),
+            TotalFavorites = favouriteStats.Sum(f => f.Count),
             Listings = rows,
             ViewTrend = BuildTrend(now, byDay),
             InquiryTrend = inquiryTrend,

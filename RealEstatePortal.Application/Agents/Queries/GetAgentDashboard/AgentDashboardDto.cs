@@ -15,6 +15,8 @@ public record AgentDashboardDto
     public int Inquiries7d { get; init; }
     public int InquiriesPrev7d { get; init; }
     public int Inquiries30d { get; init; }
+    // One row per (user, listing) — so this counts people, not repeat clicks.
+    public int TotalFavorites { get; init; }
     public IReadOnlyList<AgentListingStatDto> Listings { get; init; } = new List<AgentListingStatDto>();
     public IReadOnlyList<DailyCountDto> ViewTrend { get; init; } = new List<DailyCountDto>();
     public IReadOnlyList<DailyCountDto> InquiryTrend { get; init; } = new List<DailyCountDto>();
@@ -39,6 +41,8 @@ public record AgentListingStatDto
     public int UniqueVisitors { get; init; }
     public int Inquiries7d { get; init; }
     public int Inquiries { get; init; }
+    // How many distinct people saved this listing.
+    public int Favorites { get; init; }
 }
 
 public record DailyCountDto(DateOnly Date, int Count);

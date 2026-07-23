@@ -187,6 +187,32 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
     }
 
     [Fact]
+    public async Task CountsTheDistinctPeopleWhoSavedEachListing()
+    {
+        Fixture.CurrentUser.Id = "agent-1";
+
+        await Fixture.ExecuteDbAsync(async db =>
+        {
+            var mine = Seed("Mine", "mine", "agent-1");
+            var other = Seed("Other", "other", "agent-2");
+            db.Listings.AddRange(mine, other);
+            await db.SaveChangesAsync(CancellationToken.None);
+
+            // Two different people saved my listing; someone saved a rival's listing too.
+            db.Favorites.Add(new Favorite { ListingId = mine.Id, UserId = "buyer-1" });
+            db.Favorites.Add(new Favorite { ListingId = mine.Id, UserId = "buyer-2" });
+            db.Favorites.Add(new Favorite { ListingId = other.Id, UserId = "buyer-1" });
+            await db.SaveChangesAsync(CancellationToken.None);
+            return 0;
+        });
+
+        var dash = await Fixture.SendAsync(new GetAgentDashboardQuery());
+
+        dash.TotalFavorites.ShouldBe(2);                 // the rival's save doesn't leak in
+        dash.Listings.Single().Favorites.ShouldBe(2);
+    }
+
+    [Fact]
     public async Task TotalViews_IncludeRolledUpHistory()
     {
         Fixture.CurrentUser.Id = "agent-1";

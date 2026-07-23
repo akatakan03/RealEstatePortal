@@ -71,6 +71,11 @@
                     </div>
                 </div>
                 <div class="kpi">
+                    <div class="kpi-label" title="Distinct people who saved one of your listings. Each person counts once per listing.">Saved by</div>
+                    <div class="kpi-value">@Model.TotalFavorites.ToString("N0")</div>
+                    <div class="kpi-delta flat"><span class="kpi-delta-note">people, all time</span></div>
+                </div>
+                <div class="kpi">
                     <div class="kpi-label" title="How many inquiries each 100 views produced over the last 30 days.">Inquiries / 100 views</div>
                     <div class="kpi-value">@Model.ConversionPer100.ToString("0.0", inv)</div>
                     <div class="kpi-delta flat"><span class="kpi-delta-note">last 30 days</span></div>
@@ -115,6 +120,7 @@
                                 <th class="num">30 days</th>
                                 <th class="num">Total views</th>
                                 <th class="num">Unique</th>
+                                <th class="num">Saves</th>
                                 <th class="num">Inquiries · 7 days</th>
                                 <th class="num">Total inquiries</th>
                             </tr>
@@ -131,6 +137,7 @@
                                     <td class="num">@row.Views30d.ToString("N0")</td>
                                     <td class="num">@row.TotalViews.ToString("N0")</td>
                                     <td class="num">@row.UniqueVisitors.ToString("N0")</td>
+                                    <td class="num">@row.Favorites.ToString("N0")</td>
                                     <td class="num">@row.Inquiries7d.ToString("N0")</td>
                                     <td class="num">@row.Inquiries.ToString("N0")</td>
                                 </tr>
