@@ -1,3 +1,4 @@
+using RealEstatePortal.Application.Common.Analytics;
 using RealEstatePortal.Application.Common.Models;
 using RealEstatePortal.Domain.Enums;
 
@@ -64,5 +65,3 @@ public record AgentListingStatDto
     // How many distinct people saved this listing.
     public int Favorites { get; init; }
 }
-
-public record DailyCountDto(DateOnly Date, int Count);

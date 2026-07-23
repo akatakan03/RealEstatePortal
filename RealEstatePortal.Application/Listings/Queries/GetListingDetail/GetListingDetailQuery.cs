@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RealEstatePortal.Application.Common.Analytics;
 using RealEstatePortal.Application.Common.Interfaces;
-using RealEstatePortal.Application.Common.Models; // Gerekirse ekleyin (AgentProfile vb. modeller için)
 using RealEstatePortal.Application.Listings.Queries.GetListings;
 using RealEstatePortal.Domain.Enums;
 
@@ -89,12 +89,11 @@ public class GetListingDetailQueryHandler
             dto.OwnerAvatarUrl = owner.AvatarKey is null ? null : _storage.GetPublicUrl(owner.AvatarKey);
         }
 
-        // Interest signals. Counted the same calendar-day-aligned way as the agent dashboard,
-        // so a buyer and the agent who owns the listing are always looking at the same number.
-        var now = _clock.GetUtcNow();
-        var today = DateOnly.FromDateTime(now.UtcDateTime);
-        var since = new DateTimeOffset(
-            today.AddDays(-(RecentDays - 1)).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+        // Interest signals, counted over the same windows the agent's dashboard uses — the
+        // buyer's "84 views in the last 7 days" and the agent's "Views · 7 days" are meant to
+        // be the same measurement, and sharing the definition is what keeps them one.
+        var window = AnalyticsWindows.From(_clock);
+        var since = window.Since7;
 
         // Both counts in one round trip. This is the busiest public page, so a second wait for
         // a badge isn't worth it — and each count is an index seek
@@ -112,7 +111,7 @@ public class GetListingDetailQueryHandler
         dto.SaveCount = signals.Saves;
 
         // Free: the listing row is already loaded, so this costs no query at all.
-        dto.IsNew = entity.Created >= now.AddDays(-RecentDays);
+        dto.IsNew = entity.Created >= window.Now.AddDays(-RecentDays);
 
         return dto;
     }

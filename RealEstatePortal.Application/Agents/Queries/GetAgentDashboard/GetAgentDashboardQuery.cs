@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RealEstatePortal.Application.Common.Analytics;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Application.Common.Models;
 using RealEstatePortal.Domain.Enums;
@@ -18,8 +19,6 @@ public record GetAgentDashboardQuery(
 public class GetAgentDashboardQueryHandler
     : IRequestHandler<GetAgentDashboardQuery, AgentDashboardDto>
 {
-    private const int TrendDays = 30;
-
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly TimeProvider _clock;
@@ -37,18 +36,11 @@ public class GetAgentDashboardQueryHandler
     public async Task<AgentDashboardDto> Handle(
         GetAgentDashboardQuery request, CancellationToken cancellationToken)
     {
-        var now = _clock.GetUtcNow();
-        var today = DateOnly.FromDateTime(now.UtcDateTime);
-        // Align the count windows to calendar-day starts so the "30 days" KPI matches the
-        // trend chart exactly (both cover today-29 … today), instead of a rolling 30×24h window.
-        var since7 = new DateTimeOffset(today.AddDays(-6).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-        var since30 = new DateTimeOffset(today.AddDays(-(TrendDays - 1)).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-        // The same window shifted exactly one week back, for the week-over-week delta. The
-        // current window ends at `now` (today is still in progress), so the previous one has to
-        // end at now-7d too — comparing a part-day against seven whole days would report a drop
-        // every morning on flat traffic.
-        var prev7 = since7.AddDays(-7);
-        var prev7End = now.AddDays(-7);
+        var window = AnalyticsWindows.From(_clock);
+        var since7 = window.Since7;
+        var since30 = window.Since30;
+        var prev7 = window.PrevWeekStart;
+        var prev7End = window.PrevWeekEnd;
 
         var listings = await _context.Listings
             .Where(l => l.OwnerId == _user.Id)
@@ -66,9 +58,9 @@ public class GetAgentDashboardQueryHandler
                 l.LockReason,
                 l.UnlockRequested,
                 l.UnlockRequestedAt,
-                // First cover photo (or first by order) as the thumbnail.
-                // The thumbnail, not the display image — a 46px cell has no use for the full
-                // photo, and every other listing query resolves the same key.
+                // First cover photo (or first by order). The thumbnail, not the display image —
+                // a 46px cell has no use for the full photo, and every other listing query
+                // resolves the same key.
                 CoverKey = l.Media
                     .OrderByDescending(m => m.IsCover)
                     .ThenBy(m => m.Order)
@@ -80,8 +72,8 @@ public class GetAgentDashboardQueryHandler
         if (listings.Count == 0)
             return new AgentDashboardDto
             {
-                ViewTrend = BuildEmptyTrend(now),
-                InquiryTrend = BuildEmptyTrend(now)
+                ViewTrend = window.EmptyTrend(),
+                InquiryTrend = window.EmptyTrend()
             };
 
         var listingIds = listings.Select(l => l.Id).ToList();
@@ -225,9 +217,8 @@ public class GetAgentDashboardQueryHandler
             pageNumber,
             pageSize);
 
-        var byDay = trendRaw.ToDictionary(x => DateOnly.FromDateTime(x.Day), x => x.Count);
-        var inquiriesByDay = inquiryTrendRaw.ToDictionary(x => DateOnly.FromDateTime(x.Day), x => x.Count);
-        var inquiryTrend = BuildTrend(now, inquiriesByDay);
+        var viewTrend = window.BuildTrend(trendRaw.Select(x => (x.Day, x.Count)));
+        var inquiryTrend = window.BuildTrend(inquiryTrendRaw.Select(x => (x.Day, x.Count)));
 
         // Every windowed KPI is summed off the stat list it belongs to, so each pair (current
         // week / previous week) can never drift apart if `rows` is later filtered or capped.
@@ -256,7 +247,7 @@ public class GetAgentDashboardQueryHandler
                 Draft: allRows.Count(r => !r.IsLocked && r.Status == ListingStatus.Draft),
                 Archived: allRows.Count(r => !r.IsLocked && r.Status == ListingStatus.Archived),
                 Locked: allRows.Count(r => r.IsLocked)),
-            ViewTrend = BuildTrend(now, byDay),
+            ViewTrend = viewTrend,
             InquiryTrend = inquiryTrend,
             StatusBreakdown = listings
                 .GroupBy(l => l.Status)
@@ -270,20 +261,4 @@ public class GetAgentDashboardQueryHandler
                 .ToList()
         };
     }
-
-    private static IReadOnlyList<DailyCountDto> BuildTrend(
-        DateTimeOffset now, IReadOnlyDictionary<DateOnly, int> byDay)
-    {
-        var today = DateOnly.FromDateTime(now.UtcDateTime);
-        var trend = new List<DailyCountDto>(TrendDays);
-        for (var i = TrendDays - 1; i >= 0; i--)
-        {
-            var day = today.AddDays(-i);
-            trend.Add(new DailyCountDto(day, byDay.TryGetValue(day, out var c) ? c : 0));
-        }
-        return trend;
-    }
-
-    private static IReadOnlyList<DailyCountDto> BuildEmptyTrend(DateTimeOffset now) =>
-        BuildTrend(now, new Dictionary<DateOnly, int>());
 }

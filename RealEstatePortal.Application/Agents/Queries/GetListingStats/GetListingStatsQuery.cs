@@ -1,6 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RealEstatePortal.Application.Agents.Queries.GetAgentDashboard;
+using RealEstatePortal.Application.Common.Analytics;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Application.Listings.Queries.GetListingDetail;
 
@@ -13,8 +13,6 @@ public record GetListingStatsQuery(int Id) : IRequest<ListingStatsDto?>;
 public class GetListingStatsQueryHandler
     : IRequestHandler<GetListingStatsQuery, ListingStatsDto?>
 {
-    private const int TrendDays = 30;
-
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly TimeProvider _clock;
@@ -37,14 +35,14 @@ public class GetListingStatsQueryHandler
 
         if (listing is null) return null;
 
-        var now = _clock.GetUtcNow();
-        var today = DateOnly.FromDateTime(now.UtcDateTime);
-        // The same calendar-day-aligned windows the dashboard uses, so a number here and the
-        // matching number on the dashboard can never disagree.
-        var since7 = new DateTimeOffset(today.AddDays(-6).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-        var since30 = new DateTimeOffset(today.AddDays(-(TrendDays - 1)).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-        var prev7 = since7.AddDays(-7);
-        var prev7End = now.AddDays(-7);
+        // The very same windows the dashboard counts over, so a number here and the matching
+        // number there can never disagree.
+        var window = AnalyticsWindows.From(_clock);
+        var now = window.Now;
+        var since7 = window.Since7;
+        var since30 = window.Since30;
+        var prev7 = window.PrevWeekStart;
+        var prev7End = window.PrevWeekEnd;
 
         var id = listing.Id;
 
@@ -108,9 +106,9 @@ public class GetListingStatsQueryHandler
             .Select(g => new { Day = g.Key, Count = g.Count() })
             .ToListAsync(cancellationToken);
 
-        var viewTrend = BuildTrend(today, viewsByDay.Select(x => (x.Day, x.Count)));
-        var favouriteTrend = BuildTrend(today, favouritesByDay.Select(x => (x.Day, x.Count)));
-        var inquiryTrend = BuildTrend(today, inquiriesByDay.Select(x => (x.Day, x.Count)));
+        var viewTrend = window.BuildTrend(viewsByDay.Select(x => (x.Day, x.Count)));
+        var favouriteTrend = window.BuildTrend(favouritesByDay.Select(x => (x.Day, x.Count)));
+        var inquiryTrend = window.BuildTrend(inquiriesByDay.Select(x => (x.Day, x.Count)));
 
         // The agent's own 30-day average, so this listing can be read against the rest of
         // their portfolio rather than against nothing.
@@ -162,21 +160,5 @@ public class GetListingStatsQueryHandler
                 .Select(p => new PricePointDto(p.Amount, p.Currency, p.ChangedAt))
                 .ToList()
         };
-    }
-
-    // Fills every day in the window, so a quiet day plots as zero instead of vanishing and
-    // making the gap between two busy days look shorter than it was.
-    private static IReadOnlyList<DailyCountDto> BuildTrend(
-        DateOnly today, IEnumerable<(DateTime Day, int Count)> raw)
-    {
-        var byDay = raw.ToDictionary(x => DateOnly.FromDateTime(x.Day), x => x.Count);
-
-        var trend = new List<DailyCountDto>(TrendDays);
-        for (var i = TrendDays - 1; i >= 0; i--)
-        {
-            var day = today.AddDays(-i);
-            trend.Add(new DailyCountDto(day, byDay.TryGetValue(day, out var c) ? c : 0));
-        }
-        return trend;
     }
 }

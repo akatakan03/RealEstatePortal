@@ -1,4 +1,4 @@
-using RealEstatePortal.Application.Agents.Queries.GetAgentDashboard;
+using RealEstatePortal.Application.Common.Analytics;
 using RealEstatePortal.Application.Listings.Queries.GetListingDetail;
 using RealEstatePortal.Domain.Enums;
 
