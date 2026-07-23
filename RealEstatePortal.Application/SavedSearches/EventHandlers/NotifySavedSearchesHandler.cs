@@ -30,13 +30,23 @@ public class NotifySavedSearchesHandler
     {
         var listing = notification.DomainEvent.Listing;
 
-        // Candidate searches with alerts on. We over-fetch loosely in SQL, then match precisely in memory
-        // via the shared matcher (keeps one matching definition; avoids duplicating logic in a query).
-        var searches = await _context.SavedSearches
-            .Where(s => s.AlertsEnabled)
+        // The four structured criteria are pushed into SQL so the database returns candidates
+        // rather than every alert-enabled search in the system — that set grows with the whole
+        // user base, and it was being pulled into memory on every single publish.
+        //
+        // The keyword stays behind: matching it needs the same case-insensitive semantics the
+        // matcher defines, and a collation difference would silently change who gets alerted.
+        // SavedSearchMatcher still has the final say on every candidate, so it remains the one
+        // authoritative definition of a match and this clause can only ever narrow the input.
+        var candidates = await _context.SavedSearches
+            .Where(s => s.AlertsEnabled
+                && (s.ListingType == null || s.ListingType == listing.ListingType)
+                && (s.PropertyType == null || s.PropertyType == listing.PropertyType)
+                && (s.MaxPrice == null || s.MaxPrice >= listing.Price.Amount)
+                && (s.MinBedrooms == null || s.MinBedrooms <= listing.Bedrooms))
             .ToListAsync(cancellationToken);
 
-        var matched = searches.Where(s => SavedSearchMatcher.Matches(s, listing)).ToList();
+        var matched = candidates.Where(s => SavedSearchMatcher.Matches(s, listing)).ToList();
         if (matched.Count == 0) return;
 
         // One email per distinct user (a user may have several matching searches).

@@ -102,9 +102,12 @@ public class GetAgentDashboardQueryHandler
             .ToListAsync(cancellationToken);
 
         // Distinct visitors across all of the agent's listings (one person viewing several
-        // listings counts once).
+        // listings counts once). Bounded to the trend window: without the date filter this
+        // has to de-duplicate every view row the agent has ever received, which measured as
+        // the slowest query on the page by a wide margin. With it, the same
+        // ListingViews(ListingId, ViewedAt) index that serves everything else applies.
         var uniqueVisitors = await _context.ListingViews
-            .Where(v => listingIds.Contains(v.ListingId))
+            .Where(v => listingIds.Contains(v.ListingId) && v.ViewedAt >= since30)
             .Select(v => v.ViewerKey)
             .Distinct()
             .CountAsync(cancellationToken);
