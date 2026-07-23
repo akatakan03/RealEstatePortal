@@ -24,6 +24,7 @@ using RealEstatePortal.Application.Listings.Queries.GetListings;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
+using RealEstatePortal.Web.Helpers;
 using RealEstatePortal.Web.Models.Listings;
 using System.Security.Claims;
 using ValidationException = RealEstatePortal.Application.Common.Exceptions.ValidationException;
@@ -72,10 +73,7 @@ public class ListingsController : Controller
         }
         catch (ValidationException ex)
         {
-            foreach (var (property, errors) in ex.Errors)
-                foreach (var error in errors)
-                    ModelState.AddModelError(property, error);
-
+            ModelState.AddValidationErrors(ex);
             return View(command);
         }
     }
@@ -134,10 +132,7 @@ public class ListingsController : Controller
         }
         catch (ValidationException ex)
         {
-            foreach (var (property, errors) in ex.Errors)
-                foreach (var error in errors)
-                    ModelState.AddModelError(property, error);
-
+            ModelState.AddValidationErrors(ex);
             await LoadPhotosAsync(command.Id);
             return View(command);
         }
@@ -208,9 +203,8 @@ public class ListingsController : Controller
         }
         catch (ValidationException ex)
         {
-            foreach (var (property, errors) in ex.Errors)
-                foreach (var error in errors)
-                    ModelState.AddModelError($"Inquiry.{property}", error);
+            // The command binds under ListingDetailViewModel.Inquiry, so the keys need that prefix.
+            ModelState.AddValidationErrors(ex, prefix: "Inquiry");
 
             var dto = await _sender.Send(new GetListingDetailQuery(command.ListingId));
             if (dto is null) return NotFound();
