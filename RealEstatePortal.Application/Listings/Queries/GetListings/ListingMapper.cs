@@ -27,5 +27,9 @@ public static partial class ListingMapper
     [MapperIgnoreTarget(nameof(ListingDetailDto.Longitude))]
     [MapperIgnoreTarget(nameof(ListingDetailDto.OwnerName))]
     [MapperIgnoreTarget(nameof(ListingDetailDto.OwnerAvatarUrl))]
+    // Interest signals are aggregates over other tables, counted by the handler.
+    [MapperIgnoreTarget(nameof(ListingDetailDto.Views7d))]
+    [MapperIgnoreTarget(nameof(ListingDetailDto.SaveCount))]
+    [MapperIgnoreTarget(nameof(ListingDetailDto.IsNew))]
     public static partial ListingDetailDto ToDetail(Listing listing);
 }

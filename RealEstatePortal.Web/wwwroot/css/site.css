@@ -1187,8 +1187,59 @@ img {
     font-weight: 600;
     font-size: 1.9rem;
     color: var(--brass-dk);
-    margin-bottom: 1.5rem
+    margin-bottom: .6rem
 }
+
+/* A real, recorded drop — the one signal that both rewards attention and is fully verifiable
+   against the price history chart further down the page. */
+.price-drop {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .45rem;
+    flex-wrap: wrap;
+    padding: .3rem .7rem;
+    border-radius: 999px;
+    background: #E4EFE7;
+    color: #235B3A;
+    font-size: .85rem;
+    margin-bottom: .9rem
+}
+
+    .price-drop .pd-arrow {
+        font-size: 1rem;
+        line-height: 1
+    }
+
+    .price-drop .pd-was {
+        color: #4A6B57;
+        font-size: .78rem
+    }
+
+/* Aggregate interest. Quiet by design: it informs, it doesn't shout. */
+.interest-strip {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin: 0 0 1.5rem;
+    padding: 0
+}
+
+    .interest-strip li {
+        font-size: .8rem;
+        color: var(--muted);
+        background: var(--bg-soft, #FAF8F4);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: .28rem .7rem
+    }
+
+    .interest-strip .int-new {
+        background: var(--brass-soft);
+        border-color: var(--brass);
+        color: var(--brass-dk);
+        font-weight: 600
+    }
 
 .detail-tag {
     display: inline-block;

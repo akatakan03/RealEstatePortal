@@ -97,6 +97,42 @@
                     <span class="eyebrow">@listing.PropertyType · @listing.ListingType</span>
                     <h1>@listing.Title</h1>
                     <div class="detail-price">@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</div>
+
+                    @* Interest signals. Every one of these is a counted row or a recorded price
+                       change — nothing here is estimated, and weak numbers are left off rather
+                       than shown, since "2 views" argues against the listing. *@
+                    @if (listing.HasPriceDrop)
+                    {
+                        <div class="price-drop">
+                            <span class="pd-arrow" aria-hidden="true">↓</span>
+                            <strong>@listing.PriceDropPercent.ToString("0.#") % lower</strong>
+                            <span class="pd-was">
+                                was @listing.PreviousPrice.ToString("N0") @listing.PriceCurrency
+                                @if (listing.PriceDroppedAt is { } dropped)
+                                {
+                                    <text>· @dropped.ToString("MMM d, yyyy")</text>
+                                }
+                            </span>
+                        </div>
+                    }
+
+                    @if (listing.IsNew || listing.ShowViews || listing.ShowSaves)
+                    {
+                        <ul class="interest-strip">
+                            @if (listing.IsNew)
+                            {
+                                <li class="int-new">✨ New this week</li>
+                            }
+                            @if (listing.ShowViews)
+                            {
+                                <li>👁 @listing.Views7d.ToString("N0") views in the last 7 days</li>
+                            }
+                            @if (listing.ShowSaves)
+                            {
+                                <li>♥ @listing.SaveCount.ToString("N0") people saved this</li>
+                            }
+                        </ul>
+                    }
                     @if (User.Identity is not null && User.Identity.IsAuthenticated)
                     {
                         <form asp-controller="Favorites" asp-action="Toggle" method="post" style="margin-bottom:1.5rem;">

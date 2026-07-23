@@ -14,18 +14,23 @@ public record GetListingDetailQuery(int Id, bool IncludeNonPublic = false) : IRe
 public class GetListingDetailQueryHandler
     : IRequestHandler<GetListingDetailQuery, ListingDetailDto?>
 {
+    private const int RecentDays = 7;
+
     private readonly IApplicationDbContext _context;
     private readonly IFileStorageService _storage;
     private readonly IIdentityService _identity; // 1. YENİ: Identity servisi eklendi
+    private readonly TimeProvider _clock;
 
     public GetListingDetailQueryHandler(
         IApplicationDbContext context,
         IFileStorageService storage,
-        IIdentityService identity) // 1. YENİ: Constructor'a enjekte edildi
+        IIdentityService identity, // 1. YENİ: Constructor'a enjekte edildi
+        TimeProvider clock)
     {
         _context = context;
         _storage = storage;
         _identity = identity; // 1. YENİ: Field ataması yapıldı
+        _clock = clock;
     }
 
     public async Task<ListingDetailDto?> Handle(
@@ -76,6 +81,21 @@ public class GetListingDetailQueryHandler
             // Eğer bir avatar görseli (AvatarKey) varsa public URL'ini oluştur, yoksa null bırak
             dto.OwnerAvatarUrl = owner.AvatarKey is null ? null : _storage.GetPublicUrl(owner.AvatarKey);
         }
+
+        // Interest signals. Counted the same calendar-day-aligned way as the agent dashboard,
+        // so a buyer and the agent who owns the listing are always looking at the same number.
+        var now = _clock.GetUtcNow();
+        var today = DateOnly.FromDateTime(now.UtcDateTime);
+        var since = new DateTimeOffset(
+            today.AddDays(-(RecentDays - 1)).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+
+        dto.Views7d = await _context.ListingViews
+            .CountAsync(v => v.ListingId == entity.Id && v.ViewedAt >= since, cancellationToken);
+
+        dto.SaveCount = await _context.Favorites
+            .CountAsync(f => f.ListingId == entity.Id, cancellationToken);
+
+        dto.IsNew = entity.Created >= now.AddDays(-RecentDays);
 
         return dto;
     }

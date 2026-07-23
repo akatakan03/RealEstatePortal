@@ -35,6 +35,35 @@ public class ListingDetailDto
 
     // Price timeline, oldest first. Buyers see how the asking price has moved over time.
     public List<PricePointDto> PriceHistory { get; set; } = new();
+
+    // --- Interest signals shown to buyers -------------------------------------------------
+    // All three are real aggregates, never estimates: views and saves are counted rows, and
+    // the price drop comes off the timeline above. Nothing here is inferred or invented.
+    public int Views7d { get; set; }
+    public int SaveCount { get; set; }
+    public bool IsNew { get; set; }
+
+    // Below these a number works against the listing — "1 person saved this" reads as "nobody
+    // wants it" — so the badge is left off entirely rather than shown weak.
+    private const int MinViewsToShow = 20;
+    private const int MinSavesToShow = 3;
+
+    public bool ShowViews => Views7d >= MinViewsToShow;
+    public bool ShowSaves => SaveCount >= MinSavesToShow;
+
+    // Only a *drop* is surfaced. A rise is still visible in the price history chart, but it
+    // isn't a reason to hurry, so it doesn't get a badge.
+    public bool HasPriceDrop =>
+        PriceHistory.Count >= 2
+        && PriceHistory[^1].Amount < PriceHistory[^2].Amount
+        && PriceHistory[^2].Amount > 0;
+
+    public double PriceDropPercent => !HasPriceDrop
+        ? 0
+        : (double)((PriceHistory[^2].Amount - PriceHistory[^1].Amount) / PriceHistory[^2].Amount) * 100.0;
+
+    public decimal PreviousPrice => HasPriceDrop ? PriceHistory[^2].Amount : 0;
+    public DateTimeOffset? PriceDroppedAt => HasPriceDrop ? PriceHistory[^1].ChangedAt : null;
 }
 
 public record PricePointDto(decimal Amount, string Currency, DateTimeOffset ChangedAt);
