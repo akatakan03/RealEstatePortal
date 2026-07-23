@@ -74,8 +74,15 @@ public static class DependencyInjection
 
         services.AddScoped<IImageProcessor, ImageSharpProcessor>();
 
+        // Email is queued, never sent inline: the application gets QueuedEmailService, and
+        // EmailDeliveryWorker is the only thing that touches SMTP. The worker depends on the
+        // concrete SmtpEmailService — resolving IEmailService there would feed the queue
+        // back into itself.
         services.Configure<EmailSettings>(configuration.GetSection("Email"));
-        services.AddScoped<IEmailService, SmtpEmailService>();
+        services.AddSingleton<EmailQueue>();
+        services.AddSingleton<SmtpEmailService>();
+        services.AddSingleton<IEmailService, QueuedEmailService>();
+        services.AddHostedService<EmailDeliveryWorker>();
         services.AddScoped<IIdentityService, IdentityService>();
 
         services.AddScoped<IListingSpatialSearch, ListingSpatialSearch>();
