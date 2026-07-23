@@ -89,12 +89,22 @@ public class GetListingDetailQueryHandler
         var since = new DateTimeOffset(
             today.AddDays(-(RecentDays - 1)).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
 
-        dto.Views7d = await _context.ListingViews
-            .CountAsync(v => v.ListingId == entity.Id && v.ViewedAt >= since, cancellationToken);
+        // Both counts in one round trip. This is the busiest public page, so a second wait for
+        // a badge isn't worth it — and each count is an index seek
+        // (ListingViews(ListingId, ViewedAt) and the Favorites FK index on ListingId), never a scan.
+        var signals = await _context.Listings
+            .Where(l => l.Id == entity.Id)
+            .Select(l => new
+            {
+                Views7d = _context.ListingViews.Count(v => v.ListingId == l.Id && v.ViewedAt >= since),
+                Saves = _context.Favorites.Count(f => f.ListingId == l.Id)
+            })
+            .FirstAsync(cancellationToken);
 
-        dto.SaveCount = await _context.Favorites
-            .CountAsync(f => f.ListingId == entity.Id, cancellationToken);
+        dto.Views7d = signals.Views7d;
+        dto.SaveCount = signals.Saves;
 
+        // Free: the listing row is already loaded, so this costs no query at all.
         dto.IsNew = entity.Created >= now.AddDays(-RecentDays);
 
         return dto;
