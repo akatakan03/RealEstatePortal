@@ -53,7 +53,6 @@ public class AgentDashboardQueryIntegrationTests : IntegrationTestBase
         var row = dash.Listings.Items.Single();
         row.Title.ShouldBe("Mine");
         row.TotalViews.ShouldBe(4);
-        row.UniqueVisitors.ShouldBe(3);
         row.Views7d.ShouldBe(3);          // the 10-day-old view is excluded
         row.Inquiries.ShouldBe(1);
 

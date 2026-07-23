@@ -5,27 +5,14 @@
     ViewData["Title"] = "Dashboard";
     var inv = CultureInfo.InvariantCulture;
 
-    // Week-over-week delta. The arrow + wording carry the direction, never colour alone.
-    (string Arrow, string Css, string Text) Delta(int current, int previous)
-    {
-        if (previous == 0)
-            return current == 0 ? ("→", "flat", "no change") : ("▲", "up", "new this week");
-
-        var pct = (current - previous) * 100.0 / previous;
-        if (Math.Abs(pct) < 0.5) return ("→", "flat", "level");
-        return pct > 0
-            ? ("▲", "up", $"{pct.ToString("0.#", inv)}%")
-            : ("▼", "down", $"{Math.Abs(pct).ToString("0.#", inv)}%");
-    }
-
     var status = ViewBag.Status as ListingStatus?;
     var locked = ViewBag.Locked is true;
     var search = ViewBag.Search as string;
     var noFilter = status is null && !locked;
 
-    var viewsDelta = Delta(Model.Views7d, Model.ViewsPrev7d);
-    var inqDelta = Delta(Model.Inquiries7d, Model.InquiriesPrev7d);
-    var favDelta = Delta(Model.Favorites7d, Model.FavoritesPrev7d);
+    var viewsDelta = TrendDelta.Between(Model.Views7d, Model.ViewsPrev7d);
+    var inqDelta = TrendDelta.Between(Model.Inquiries7d, Model.InquiriesPrev7d);
+    var favDelta = TrendDelta.Between(Model.Favorites7d, Model.FavoritesPrev7d);
 }
 
 <section class="dash-sec">

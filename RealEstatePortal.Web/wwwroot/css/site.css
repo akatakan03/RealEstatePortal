@@ -1961,6 +1961,7 @@ textarea.form-control {
 .listed-by {
     display: flex;
     align-items: center;
+    text-decoration: none;
     gap: .7rem;
     padding: 1rem 1.1rem;
     border: 1px solid var(--line);

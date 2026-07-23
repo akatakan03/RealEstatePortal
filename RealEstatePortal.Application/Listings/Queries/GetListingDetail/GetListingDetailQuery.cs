@@ -18,18 +18,18 @@ public class GetListingDetailQueryHandler
 
     private readonly IApplicationDbContext _context;
     private readonly IFileStorageService _storage;
-    private readonly IIdentityService _identity; // 1. YENİ: Identity servisi eklendi
+    private readonly IIdentityService _identity;
     private readonly TimeProvider _clock;
 
     public GetListingDetailQueryHandler(
         IApplicationDbContext context,
         IFileStorageService storage,
-        IIdentityService identity, // 1. YENİ: Constructor'a enjekte edildi
+        IIdentityService identity,
         TimeProvider clock)
     {
         _context = context;
         _storage = storage;
-        _identity = identity; // 1. YENİ: Field ataması yapıldı
+        _identity = identity;
         _clock = clock;
     }
 
@@ -62,30 +62,32 @@ public class GetListingDetailQueryHandler
             .OrderBy(p => p.ChangedAt)
             .Select(p => new PricePointDto(p.Amount, p.Currency, p.ChangedAt))
             .ToListAsync(cancellationToken);
+
         if (entity.Location is not null)
         {
             dto.Latitude = entity.Location.Latitude;
             dto.Longitude = entity.Location.Longitude;
         }
+
+        // Cover first, then the agent's chosen order — the gallery opens on the cover.
         dto.ImageUrls = entity.Media
-            .OrderByDescending(m => m.IsCover)   // önce kapak resmi
+            .OrderByDescending(m => m.IsCover)
             .ThenBy(m => m.Order)
             .Select(m => _storage.GetPublicUrl(m.ObjectKey))
             .ToList();
 
-        // 2. YENİ: İlan sahibinin (Agent) bilgilerini çekme ve DTO'ya ekleme adımı
         dto.OwnerId = entity.OwnerId ?? string.Empty;
 
+        // The agent's profile lives in Identity, not in this DbContext, so it is a separate
+        // lookup rather than a join.
         var owner = entity.OwnerId is null
             ? null
             : await _identity.GetAgentProfileAsync(entity.OwnerId, cancellationToken);
 
         if (owner is not null)
         {
-            // Kullanıcının DisplayName'i yoksa e-postasını kullan, varsa DisplayName'i yaz
+            // An agent who never set a display name is shown by email rather than as blank.
             dto.OwnerName = string.IsNullOrWhiteSpace(owner.DisplayName) ? owner.Email : owner.DisplayName;
-
-            // Eğer bir avatar görseli (AvatarKey) varsa public URL'ini oluştur, yoksa null bırak
             dto.OwnerAvatarUrl = owner.AvatarKey is null ? null : _storage.GetPublicUrl(owner.AvatarKey);
         }
 

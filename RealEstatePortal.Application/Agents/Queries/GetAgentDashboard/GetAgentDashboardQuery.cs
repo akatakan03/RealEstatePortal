@@ -86,7 +86,6 @@ public class GetAgentDashboardQueryHandler
             {
                 ListingId = g.Key,
                 Total = g.Count(),
-                Unique = g.Select(v => v.ViewerKey).Distinct().Count(),
                 Last7 = g.Sum(v => v.ViewedAt >= since7 ? 1 : 0),
                 Prev7 = g.Sum(v => v.ViewedAt >= prev7 && v.ViewedAt < prev7End ? 1 : 0),
                 Last30 = g.Sum(v => v.ViewedAt >= since30 ? 1 : 0)
@@ -182,7 +181,6 @@ public class GetAgentDashboardQueryHandler
                     UnlockRequestedAt = l.UnlockRequestedAt,
                     CoverThumbnailUrl = string.IsNullOrEmpty(l.CoverKey) ? null : _storage.GetPublicUrl(l.CoverKey),
                     TotalViews = (v?.Total ?? 0) + rolled,   // recent (raw) + historical (rolled up)
-                    UniqueVisitors = v?.Unique ?? 0,
                     Views7d = v?.Last7 ?? 0,
                     Views30d = v?.Last30 ?? 0,
                     Inquiries7d = inq?.Last7 ?? 0,

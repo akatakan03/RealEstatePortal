@@ -59,7 +59,6 @@ public record AgentListingStatDto
     public int Views7d { get; init; }
     public int Views30d { get; init; }
     public int TotalViews { get; init; }
-    public int UniqueVisitors { get; init; }
     public int Inquiries7d { get; init; }
     public int Inquiries { get; init; }
     // How many distinct people saved this listing.
