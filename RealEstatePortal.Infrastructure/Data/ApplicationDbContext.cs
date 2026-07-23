@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Domain.Entities;
+using RealEstatePortal.Infrastructure.Email;
 using RealEstatePortal.Infrastructure.Identity;
 using System.Reflection;
 
@@ -23,6 +24,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<ListingView> ListingViews => Set<ListingView>();
     public DbSet<ListingViewDaily> ListingViewDailies => Set<ListingViewDaily>();
     public DbSet<ListingPriceChange> ListingPriceChanges => Set<ListingPriceChange>();
+
+    // Delivery plumbing, not part of the domain — and deliberately absent from
+    // IApplicationDbContext so no handler can reach it.
+    public DbSet<OutboxEmail> OutboxEmails => Set<OutboxEmail>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

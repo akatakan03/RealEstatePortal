@@ -2,11 +2,12 @@
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using RealEstatePortal.Application.Common.Interfaces;
 
 namespace RealEstatePortal.Infrastructure.Email;
 
-public class SmtpEmailService : IEmailService
+// The real SMTP connection. Only EmailOutboxProcessor uses it — application code gets
+// QueuedEmailService instead, so nothing on a request thread ever waits on a mail server.
+public class SmtpEmailService : IEmailTransport
 {
     private readonly EmailSettings _settings;
 

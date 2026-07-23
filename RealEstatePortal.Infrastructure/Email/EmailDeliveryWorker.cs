@@ -1,63 +1,69 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace RealEstatePortal.Infrastructure.Email;
 
-// Drains the email queue, one message at a time, outside of any request. A failure here costs
-// the message, never the user action that produced it — the listing is already published by
-// the time anything reaches this worker.
+// Decides when the outbox is swept; EmailOutboxProcessor decides what a sweep does.
+//
+// The first sweep after startup is what makes a restart survivable: anything the previous
+// process accepted but never sent is still sitting in the table, due, and goes out now.
 public class EmailDeliveryWorker : BackgroundService
 {
-    private const int MaxAttempts = 3;
-    private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(5);
+    // A safety net only — the signal normally wakes the worker the moment a message lands.
+    // It also paces the retry backoff, since a message waiting on its next attempt won't ring.
+    private static readonly TimeSpan PollInterval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan PurgeInterval = TimeSpan.FromHours(6);
 
-    private readonly EmailQueue _queue;
-    private readonly SmtpEmailService _smtp;
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly EmailOutboxSignal _signal;
+    private readonly TimeProvider _clock;
     private readonly ILogger<EmailDeliveryWorker> _logger;
 
+    private DateTimeOffset _lastPurge = DateTimeOffset.MinValue;
+
     public EmailDeliveryWorker(
-        EmailQueue queue, SmtpEmailService smtp, ILogger<EmailDeliveryWorker> logger)
+        IServiceScopeFactory scopeFactory,
+        EmailOutboxSignal signal,
+        TimeProvider clock,
+        ILogger<EmailDeliveryWorker> logger)
     {
-        _queue = queue;
-        _smtp = smtp;
+        _scopeFactory = scopeFactory;
+        _signal = signal;
+        _clock = clock;
         _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await foreach (var message in _queue.ReadAllAsync(stoppingToken))
+        while (!stoppingToken.IsCancellationRequested)
         {
-            for (var attempt = 1; attempt <= MaxAttempts; attempt++)
+            try
             {
-                try
-                {
-                    await _smtp.SendAsync(message.To, message.Subject, message.HtmlBody, stoppingToken);
-                    break;
-                }
-                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-                {
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    if (attempt == MaxAttempts)
-                    {
-                        // Recipient address is logged: it is needed to chase a missing email,
-                        // and this line only ever appears when delivery has actually failed.
-                        _logger.LogError(ex,
-                            "Giving up on an email to {Recipient} after {Attempts} attempts.",
-                            message.To, MaxAttempts);
-                        break;
-                    }
+                using var scope = _scopeFactory.CreateScope();
+                var processor = scope.ServiceProvider.GetRequiredService<EmailOutboxProcessor>();
 
-                    _logger.LogWarning(
-                        "Email delivery attempt {Attempt} failed; retrying in {Delay}s.",
-                        attempt, RetryDelay.TotalSeconds);
+                await processor.DeliverPendingAsync(stoppingToken);
 
-                    try { await Task.Delay(RetryDelay, stoppingToken); }
-                    catch (OperationCanceledException) { return; }
+                var now = _clock.GetUtcNow();
+                if (now - _lastPurge >= PurgeInterval)
+                {
+                    _lastPurge = now;
+                    await processor.PurgeSentAsync(stoppingToken);
                 }
             }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                // The sweep itself broke — the database was unreachable, say. Nothing is lost:
+                // the rows are still there. Log it and come back on the next tick.
+                _logger.LogError(ex, "Email outbox sweep failed; retrying next cycle.");
+            }
+
+            await _signal.WaitAsync(PollInterval, stoppingToken);
         }
     }
 }
