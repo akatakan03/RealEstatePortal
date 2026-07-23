@@ -74,10 +74,20 @@
                 return descending ? bv - av : av - bv;
             });
 
+            // Reorder with the tbody detached from the document. Moving rows inside a live
+            // table makes the auto-layout engine recompute every column width on each move,
+            // which on a real portfolio is hundreds of full relayouts and locks the tab up.
+            // Offline the mutations cost nothing and reattaching costs one reflow.
+            var parent = body.parentNode;
+            var marker = document.createComment('sorting');
+            parent.replaceChild(marker, body);
+
             items.forEach(function (item) {
                 body.appendChild(item.row);
                 if (item.extra) body.appendChild(item.extra);
             });
+
+            parent.replaceChild(body, marker);
 
             headers.forEach(function (h) {
                 h.classList.remove('sorted-asc', 'sorted-desc');
