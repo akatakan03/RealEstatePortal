@@ -35,6 +35,9 @@ public class EditProfileViewModel
     public string? Bio { get; set; }
 
     /// Language code, not a culture name — "tr" or "en", the same tokens the URL uses.
-    [Display(Name = "Site language")]
+    ///
+    /// This is the language we write to this person in, and nothing else. Which language they
+    /// are reading the site in right now is the URL's business, and the header switcher's.
+    [Display(Name = "Notification language")]
     public string? PreferredCulture { get; set; }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -37,7 +38,15 @@ public class AccountController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+        // Seeded from the language they registered in. Someone who signs up on the English site
+        // and never opens their profile should still be written to in English — without this the
+        // preference stays null and every notification falls back to the site default.
+        var user = new ApplicationUser
+        {
+            UserName = model.Email,
+            Email = model.Email,
+            PreferredCulture = SupportedCultures.CodeOf(CultureInfo.CurrentUICulture)
+        };
         var result = await _userManager.CreateAsync(user, model.Password);
 
         if (result.Succeeded)

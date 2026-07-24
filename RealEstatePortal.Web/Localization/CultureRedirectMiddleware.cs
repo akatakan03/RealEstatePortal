@@ -1,4 +1,4 @@
-namespace RealEstatePortal.Web.Localization;
+﻿namespace RealEstatePortal.Web.Localization;
 
 // Every page lives under a language segment (/tr/listings, /en/listings). This sends anything
 // that arrives without one — an old bookmark, a typed address, a link from before this change —
@@ -72,12 +72,6 @@ public class CultureRedirectMiddleware
         var segment = slash < 0 ? trimmed : trimmed[..slash];
         return segment.IsEmpty ? null : segment.ToString();
     }
-
-    /// Records a language choice made somewhere other than by visiting a URL — saving the
-    /// preference on the profile page. Exposed so that setting is not a second, separate memory
-    /// that disagrees with this cookie about where a bare address should land.
-    public static void Remember(HttpContext context, string culture) =>
-        RememberChoice(context, culture);
 
     private static void RememberChoice(HttpContext context, string culture)
     {

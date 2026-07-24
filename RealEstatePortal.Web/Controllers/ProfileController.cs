@@ -81,11 +81,9 @@ public class ProfileController : Controller
 
         await _userManager.UpdateAsync(user);
 
-        // The middleware reads this cookie to decide where a bare URL lands, so saving the
-        // preference makes the site open in it too — otherwise the setting would govern email
-        // and nothing else, which is not what "site language" says on the label.
-        CultureRedirectMiddleware.Remember(HttpContext, user.PreferredCulture ?? SupportedCultures.Default);
-
+        // Deliberately does not touch the language cookie. Browsing language belongs to the URL
+        // and the header switcher; this setting belongs to email. Making one quietly move the
+        // other gave two memories of "your language" that could disagree on screen.
         TempData["ProfileSaved"] = "Your profile has been updated.";
         return RedirectToAction(nameof(Index));
     }

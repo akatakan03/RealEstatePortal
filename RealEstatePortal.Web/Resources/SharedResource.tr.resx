@@ -1313,13 +1313,13 @@
     <value>Kayıtlı aramanıza uyan yeni bir ilan var:</value>
   </data>
   <!-- Language preference on the profile page. -->
-  <data name="Site language" xml:space="preserve">
-    <value>Site dili</value>
-  </data>
-  <data name="The language we write to you in, and the one the site opens in." xml:space="preserve">
-    <value>Size hangi dilde yazacağımız ve sitenin hangi dilde açılacağı.</value>
-  </data>
   <data name="Your language preference has been saved." xml:space="preserve">
     <value>Dil tercihiniz kaydedildi.</value>
+  </data>
+  <data name="Notification language" xml:space="preserve">
+    <value>Bildirim dili</value>
+  </data>
+  <data name="The language we email you in. To change the language you are reading, use the switcher at the top of the page." xml:space="preserve">
+    <value>Size gönderdiğimiz e-postaların dili. Okuduğunuz dili değiştirmek için sayfanın üstündeki anahtarı kullanın.</value>
   </data>
 </root>

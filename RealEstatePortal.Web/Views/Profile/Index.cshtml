@@ -1,4 +1,4 @@
-@model RealEstatePortal.Web.Models.Profile.ProfileHubViewModel
+﻿@model RealEstatePortal.Web.Models.Profile.ProfileHubViewModel
 @{
     ViewData["Title"] = L["My account"].Value;
 }
@@ -54,7 +54,7 @@
                         <dd>@(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)</dd>
                         <dt>@L["About"]</dt>
                         <dd>@(string.IsNullOrWhiteSpace(Model.Bio) ? "—" : Model.Bio)</dd>
-                        <dt>@L["Site language"]</dt>
+                        <dt>@L["Notification language"]</dt>
                         <dd>@SupportedCultures.NameOf(Model.PreferredCulture ?? SupportedCultures.Default)</dd>
                     </dl>
                 </div>
