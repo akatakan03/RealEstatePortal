@@ -10,7 +10,7 @@
     var saves30 = Model.Favorites30dEquivalent;
 
     string Ago(DateTimeOffset? when) =>
-        when is null ? "never" : when.Value.ToString("MMM d, yyyy", inv);
+        when is null ? L["never"].Value : when.Value.ToString("d");
 }
 
 <div class="ls-head">
@@ -19,18 +19,18 @@
         <div class="ls-meta">
             @if (Model.IsLocked)
             {
-                <span class="status-pill status-locked">🔒 Locked</span>
+                <span class="status-pill status-locked">🔒 @L["Locked"]</span>
             }
             else
             {
-                <span class="status-pill status-@Model.Status.ToString().ToLowerInvariant()">@Model.Status</span>
+                <span class="status-pill status-@Model.Status.ToString().ToLowerInvariant()">@L.Localize(Model.Status)</span>
             }
             <span>@Model.PriceAmount.ToString("N0") @Model.PriceCurrency</span>
-            <span>Listed @Model.DaysListed day@(Model.DaysListed == 1 ? "" : "s") ago</span>
+            <span>@L["Listed {0} days ago", Model.DaysListed]</span>
         </div>
     </div>
     <a class="btn btn-ghost btn-sm" href="@Url.ListingUrl(Model.Id, Model.Slug)"
-       target="_blank" rel="noopener">Open listing ↗</a>
+       target="_blank" rel="noopener">@L["Open listing"] ↗</a>
 </div>
 
 @* The funnel is the story: of everyone who looked, how many cared enough to save, and how
@@ -38,52 +38,52 @@
 <div class="ls-funnel">
     <div class="fn-step">
         <span class="fn-value">@Model.Views30d.ToString("N0")</span>
-        <span class="fn-label">views · 30 days</span>
-        <span class="fn-rate">@Model.ViewsPerDay.ToString("0.#", inv) per day</span>
+        <span class="fn-label">@L["views · last 30 days"]</span>
+        <span class="fn-rate">@L["{0} per day", Model.ViewsPerDay.ToString("0.#")]</span>
     </div>
     <span class="fn-arrow" aria-hidden="true">→</span>
     <div class="fn-step">
         <span class="fn-value">@saves30.ToString("N0")</span>
-        <span class="fn-label">saved it</span>
-        <span class="fn-rate">@Model.SavesPer100Views.ToString("0.0", inv) per 100 views</span>
+        <span class="fn-label">@L["saved it"]</span>
+        <span class="fn-rate">@L["{0} per 100 views", Model.SavesPer100Views.ToString("0.0")]</span>
     </div>
     <span class="fn-arrow" aria-hidden="true">→</span>
     <div class="fn-step">
         <span class="fn-value">@Model.Inquiries30d.ToString("N0")</span>
-        <span class="fn-label">got in touch</span>
-        <span class="fn-rate">@Model.InquiriesPer100Views.ToString("0.0", inv) per 100 views</span>
+        <span class="fn-label">@L["got in touch"]</span>
+        <span class="fn-rate">@L["{0} per 100 views", Model.InquiriesPer100Views.ToString("0.0")]</span>
     </div>
 </div>
 
 <div class="kpi-row ls-kpis">
     <div class="kpi">
-        <div class="kpi-label">Views · 7 days</div>
+        <div class="kpi-label">@L["Views · 7 days"]</div>
         <div class="kpi-value">@Model.Views7d.ToString("N0")</div>
         <div class="kpi-delta @viewsDelta.Css">
-            <span aria-hidden="true">@viewsDelta.Arrow</span> @viewsDelta.Text
-            <span class="kpi-delta-note">vs previous 7 days</span>
+            <span aria-hidden="true">@viewsDelta.Arrow</span> @L[viewsDelta.Text]
+            <span class="kpi-delta-note">@L["vs previous 7 days"]</span>
         </div>
     </div>
     <div class="kpi">
-        <div class="kpi-label">Saves · 7 days</div>
+        <div class="kpi-label">@L["Saves · 7 days"]</div>
         <div class="kpi-value">@Model.Favorites7d.ToString("N0")</div>
         <div class="kpi-delta @favDelta.Css">
-            <span aria-hidden="true">@favDelta.Arrow</span> @favDelta.Text
-            <span class="kpi-delta-note">@Model.TotalFavorites.ToString("N0") all time</span>
+            <span aria-hidden="true">@favDelta.Arrow</span> @L[favDelta.Text]
+            <span class="kpi-delta-note">@L["{0} all time", Model.TotalFavorites.ToString("N0")]</span>
         </div>
     </div>
     <div class="kpi">
-        <div class="kpi-label">Inquiries · 7 days</div>
+        <div class="kpi-label">@L["Inquiries · 7 days"]</div>
         <div class="kpi-value">@Model.Inquiries7d.ToString("N0")</div>
         <div class="kpi-delta @inqDelta.Css">
-            <span aria-hidden="true">@inqDelta.Arrow</span> @inqDelta.Text
-            <span class="kpi-delta-note">@Model.TotalInquiries.ToString("N0") all time</span>
+            <span aria-hidden="true">@inqDelta.Arrow</span> @L[inqDelta.Text]
+            <span class="kpi-delta-note">@L["{0} all time", Model.TotalInquiries.ToString("N0")]</span>
         </div>
     </div>
     <div class="kpi">
-        <div class="kpi-label" title="All-time views, including the older activity that has been rolled up into daily totals.">Total views</div>
+        <div class="kpi-label" title="@L["All-time views, including the older activity that has been rolled up into daily totals."]">@L["Total views"]</div>
         <div class="kpi-value">@Model.TotalViews.ToString("N0")</div>
-        <div class="kpi-delta flat"><span class="kpi-delta-note">@Model.UniqueVisitors.ToString("N0") unique · recent</span></div>
+        <div class="kpi-delta flat"><span class="kpi-delta-note">@L["{0} unique · recent", Model.UniqueVisitors.ToString("N0")]</span></div>
     </div>
 </div>
 
@@ -93,36 +93,39 @@
     var ratio = Model.VsPortfolio;
     var pct = Math.Abs(ratio - 1) * 100;
     var verdict = Math.Abs(ratio - 1) < 0.05
-        ? "about average for your portfolio"
+        ? L["about average for your portfolio"].Value
         : ratio > 1
-            ? $"{pct.ToString("0", inv)}% above your portfolio average"
-            : $"{pct.ToString("0", inv)}% below your portfolio average";
+            ? L["{0}% above your portfolio average", pct.ToString("0")].Value
+            : L["{0}% below your portfolio average", pct.ToString("0")].Value;
 
+    @* One sentence, one entry — the verdict goes in as a placeholder so a translator can put
+       it where the grammar wants it, and keeps its emphasis on the way in. *@
     <p class="ls-benchmark">
-        Over the last 30 days this listing is <strong>@verdict</strong>
-        (@Model.PortfolioAvgViews30d.ToString("0.#", inv) views on average across your
-        @Model.PortfolioListingCount listings).
+        @Html.Raw(L["Over the last 30 days this listing is {0} ({1} views on average across your {2} listings).",
+                   $"<strong>{verdict}</strong>",
+                   Model.PortfolioAvgViews30d.ToString("0.#"),
+                   Model.PortfolioListingCount])
     </p>
 }
 
 <div class="chart-pair">
-    @await Html.PartialAsync("_TrendChart", (Model.ViewTrend, "Views", "views", "views", "view"))
-    @await Html.PartialAsync("_TrendChart", (Model.FavoriteTrend, "Saves", "saves", "saves", "save"))
+    @await Html.PartialAsync("_TrendChart", (Model.ViewTrend, "Daily views", "views", "views", "view"))
+    @await Html.PartialAsync("_TrendChart", (Model.FavoriteTrend, "Daily saves", "saves", "saves", "save"))
 </div>
 
 <div class="chart-pair ls-charts-lower">
-    @await Html.PartialAsync("_TrendChart", (Model.InquiryTrend, "Inquiries", "inquiries", "inquiries", "inquiry"))
+    @await Html.PartialAsync("_TrendChart", (Model.InquiryTrend, "Daily inquiries", "inquiries", "inquiries", "inquiry"))
 
     <div class="dash-card">
         <div class="dash-card-head">
-            <h2>Activity</h2>
-            <span class="dash-card-sub">the last time anything happened</span>
+            <h2>@L["Activity"]</h2>
+            <span class="dash-card-sub">@L["the last time anything happened"]</span>
         </div>
         <dl class="ls-facts">
-            <div><dt>Last view</dt><dd>@Ago(Model.LastViewAt)</dd></div>
-            <div><dt>Last inquiry</dt><dd>@Ago(Model.LastInquiryAt)</dd></div>
-            <div><dt>Published</dt><dd>@Model.CreatedAt.ToString("MMM d, yyyy", inv)</dd></div>
-            <div><dt>Price changes</dt><dd>@Math.Max(Model.PriceHistory.Count - 1, 0)</dd></div>
+            <div><dt>@L["Last view"]</dt><dd>@Ago(Model.LastViewAt)</dd></div>
+            <div><dt>@L["Last inquiry"]</dt><dd>@Ago(Model.LastInquiryAt)</dd></div>
+            <div><dt>@L["Published"]</dt><dd>@Model.CreatedAt.ToString("d")</dd></div>
+            <div><dt>@L["Price changes"]</dt><dd>@Math.Max(Model.PriceHistory.Count - 1, 0)</dd></div>
         </dl>
     </div>
 </div>

@@ -14,14 +14,17 @@
     var total = Math.Max(items.Sum(i => i.Count), 1);
 }
 
+@* Labels are enum member names ("Active", "Sale"), which is exactly how the resource file is
+   keyed — so they translate without the query having to know about languages. *@
 <div class="breakdown">
-    <h3 class="breakdown-title">@Model.Title</h3>
-    <div class="stack" role="img" aria-label="@Model.Title breakdown">
+    <h3 class="breakdown-title">@L[Model.Title]</h3>
+    <div class="stack" role="img" aria-label="@L["{0} breakdown", L[Model.Title].Value]">
         @for (var i = 0; i < items.Count; i++)
         {
             var share = items[i].Count * 100.0 / total;
+            @* The width has to stay invariant — a comma decimal is not valid CSS. *@
             <div class="stack-seg seg-@(i + 1)" style="width:@share.ToString("0.##", inv)%"
-                 title="@items[i].Label: @items[i].Count (@share.ToString("0.#", inv)%)"></div>
+                 title="@L[items[i].Label]: @items[i].Count (@share.ToString("0.#")%)"></div>
         }
     </div>
     @* Legend carries identity and the values — never colour alone, never a clipped inline label. *@
@@ -30,7 +33,7 @@
         {
             <li>
                 <span class="swatch seg-@(i + 1)" aria-hidden="true"></span>
-                <span class="lg-label">@items[i].Label</span>
+                <span class="lg-label">@L[items[i].Label]</span>
                 <span class="lg-value">@items[i].Count.ToString("N0")</span>
             </li>
         }

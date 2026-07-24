@@ -81,7 +81,10 @@
                                     <span class="menu-label">@L["Workspace"]</span>
                                     <a role="menuitem" asp-controller="Dashboard" asp-action="Index">@L["Dashboard"]</a>
                                     <a role="menuitem" asp-controller="Inquiries" asp-action="Index" class="menu-item-badge">
-                                        <span>@L["Inquiries"]</span> @await Component.InvokeAsync("UnreadInquiries")
+                                        @* "Inquiry inbox", not "Inquiries": resource names are
+                                           matched without regard to case, so this would collide
+                                           with the "inquiries" unit noun used in the charts. *@
+                                        <span>@L["Inquiry inbox"]</span> @await Component.InvokeAsync("UnreadInquiries")
                                     </a>
                                 </div>
                             }

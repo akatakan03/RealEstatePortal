@@ -2,7 +2,7 @@
 @using RealEstatePortal.Application.Listings.Queries.GetPublicListings
 @model RealEstatePortal.Web.Models.Listings.ListingBrowseViewModel
 @{
-    ViewData["Title"] = L["Browse Listings"].Value;
+    ViewData["Title"] = L["Browse listings"].Value;
     var routeData = Model.CurrentFilter();
     var hasCenter = Model.Filter.CenterLat.HasValue && Model.Filter.CenterLng.HasValue;
     var currentRadius = Model.Filter.RadiusKm ?? 10;

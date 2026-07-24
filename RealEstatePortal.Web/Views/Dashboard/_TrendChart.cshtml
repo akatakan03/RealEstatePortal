@@ -2,6 +2,8 @@
 @using RealEstatePortal.Application.Common.Analytics
 @model (IReadOnlyList<DailyCountDto> Points, string Title, string Series, string Plural, string Singular)
 @{
+    // `inv` is for geometry only — a bar's height must use a dot whatever the visitor's
+    // language. Everything a person reads is formatted in the current culture.
     var inv = CultureInfo.InvariantCulture;
     var pts = Model.Points;
     var peak = pts.Count > 0 ? pts.Max(p => p.Count) : 0;
@@ -9,14 +11,15 @@
     // The window and its total both come off the points, so the heading, the screen-reader
     // label and the bars can never quote different numbers for the same chart.
     var total = pts.Sum(p => p.Count);
-    var sub = $"last {pts.Count} days · {total.ToString("N0", inv)} total";
+    var sub = L["last {0} days · {1} total", pts.Count, total.ToString("N0")];
 
-    string Noun(int n) => n == 1 ? Model.Singular : Model.Plural;
+    // The caller passes English nouns; they double as the resource keys.
+    string Noun(int n) => L[n == 1 ? Model.Singular : Model.Plural].Value;
 }
 
 <div class="dash-card">
     <div class="dash-card-head">
-        <h2>@Model.Title</h2>
+        <h2>@L[Model.Title]</h2>
         <span class="dash-card-sub">@sub</span>
     </div>
 
@@ -28,31 +31,31 @@
         </div>
         <div class="chart-plot">
             <div class="trend trend-@Model.Series" role="img"
-                 aria-label="Daily @Model.Plural over the last @pts.Count days, @total in total">
+                 aria-label="@L["Daily {0} over the last {1} days, {2} in total", L[Model.Plural].Value, pts.Count, total]">
                 @foreach (var d in pts)
                 {
                     var pct = (d.Count * 100.0 / scale).ToString("0.##", inv);
                     <div class="trend-bar" style="height:@pct%"
-                         title="@d.Date.ToString("MMM d", inv): @d.Count @Noun(d.Count)"></div>
+                         title="@d.Date.ToString("MMM d"): @d.Count @Noun(d.Count)"></div>
                 }
             </div>
             <div class="chart-x">
-                <span>@(pts.Count > 0 ? pts[0].Date.ToString("MMM d", inv) : "")</span>
-                <span>@(pts.Count > 0 ? pts[pts.Count - 1].Date.ToString("MMM d", inv) : "")</span>
+                <span>@(pts.Count > 0 ? pts[0].Date.ToString("MMM d") : "")</span>
+                <span>@(pts.Count > 0 ? pts[pts.Count - 1].Date.ToString("MMM d") : "")</span>
             </div>
         </div>
     </div>
 
     <details class="chart-table">
-        <summary>Table view</summary>
+        <summary>@L["Table view"]</summary>
         <div class="table-scroll">
             <table class="stats-table">
-                <thead><tr><th>Day</th><th class="num">@Model.Plural</th></tr></thead>
+                <thead><tr><th>@L["Day"]</th><th class="num">@L[Model.Plural]</th></tr></thead>
                 <tbody>
                     @foreach (var d in pts)
                     {
                         <tr>
-                            <td>@d.Date.ToString("MMM d, yyyy", inv)</td>
+                            <td>@d.Date.ToString("d")</td>
                             <td class="num">@d.Count.ToString("N0")</td>
                         </tr>
                     }

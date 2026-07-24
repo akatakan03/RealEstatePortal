@@ -2,7 +2,7 @@
 @using RealEstatePortal.Domain.Enums
 @model RealEstatePortal.Application.Agents.Queries.GetAgentDashboard.AgentDashboardDto
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = L["Dashboard"].Value;
     var inv = CultureInfo.InvariantCulture;
 
     var status = ViewBag.Status as ListingStatus?;
@@ -19,10 +19,10 @@
     <div class="container">
         <div class="dash-hero">
             <div>
-                <h1>Dashboard</h1>
-                <p class="lead">How your listings are performing.</p>
+                <h1>@L["Dashboard"]</h1>
+                <p class="lead">@L["How your listings are performing."]</p>
             </div>
-            <a class="btn btn-primary" asp-controller="Listings" asp-action="Create">+ New listing</a>
+            <a class="btn btn-primary" asp-controller="Listings" asp-action="Create">+ @L["New listing"]</a>
         </div>
 
         @if (TempData["UnlockRequested"] is string sent)
@@ -33,59 +33,59 @@
         @if (Model.TotalListings == 0)
         {
             <div class="empty-state">
-                <span class="value">No listings yet</span>
-                Once you publish a listing, its views and inquiries will show up here.
-                <div style="margin-top:1rem;"><a class="btn btn-primary" asp-controller="Listings" asp-action="Create">Create a listing</a></div>
+                <span class="value">@L["No listings yet"]</span>
+                @L["Once you publish a listing, its views and inquiries will show up here."]
+                <div style="margin-top:1rem;"><a class="btn btn-primary" asp-controller="Listings" asp-action="Create">@L["Create a listing"]</a></div>
             </div>
         }
         else
         {
             <div class="kpi-row">
                 <div class="kpi">
-                    <div class="kpi-label">Total views</div>
+                    <div class="kpi-label">@L["Total views"]</div>
                     <div class="kpi-value">@Model.TotalViews.ToString("N0")</div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-label" title="Distinct visitors over the last 30 days. One person who opened several of your listings counts once.">Unique visitors · 30 days</div>
+                    <div class="kpi-label" title="@L["Distinct visitors over the last 30 days. One person who opened several of your listings counts once."]">@L["Unique visitors · 30 days"]</div>
                     <div class="kpi-value">@Model.UniqueVisitors.ToString("N0")</div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-label">Views · 7 days</div>
+                    <div class="kpi-label">@L["Views · 7 days"]</div>
                     <div class="kpi-value">@Model.Views7d.ToString("N0")</div>
                     <div class="kpi-delta @viewsDelta.Css">
-                        <span aria-hidden="true">@viewsDelta.Arrow</span> @viewsDelta.Text
-                        <span class="kpi-delta-note">vs previous 7 days</span>
+                        <span aria-hidden="true">@viewsDelta.Arrow</span> @L[viewsDelta.Text]
+                        <span class="kpi-delta-note">@L["vs previous 7 days"]</span>
                     </div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-label">Views · 30 days</div>
+                    <div class="kpi-label">@L["Views · 30 days"]</div>
                     <div class="kpi-value">@Model.Views30d.ToString("N0")</div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-label">Inquiries · 7 days</div>
+                    <div class="kpi-label">@L["Inquiries · 7 days"]</div>
                     <div class="kpi-value">
                         <a asp-controller="Inquiries" asp-action="Index" style="color:inherit;">@Model.Inquiries7d.ToString("N0")</a>
                     </div>
                     <div class="kpi-delta @inqDelta.Css">
-                        <span aria-hidden="true">@inqDelta.Arrow</span> @inqDelta.Text
-                        <span class="kpi-delta-note">vs previous 7 days · @Model.TotalInquiries.ToString("N0") all time</span>
+                        <span aria-hidden="true">@inqDelta.Arrow</span> @L[inqDelta.Text]
+                        <span class="kpi-delta-note">@L["vs previous 7 days · {0} all time", Model.TotalInquiries.ToString("N0")]</span>
                     </div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-label" title="People who saved one of your listings. Each person counts once per listing.">Saves · 7 days</div>
+                    <div class="kpi-label" title="@L["People who saved one of your listings. Each person counts once per listing."]">@L["Saves · 7 days"]</div>
                     <div class="kpi-value">@Model.Favorites7d.ToString("N0")</div>
                     <div class="kpi-delta @favDelta.Css">
-                        <span aria-hidden="true">@favDelta.Arrow</span> @favDelta.Text
-                        <span class="kpi-delta-note">vs previous 7 days · @Model.TotalFavorites.ToString("N0") all time</span>
+                        <span aria-hidden="true">@favDelta.Arrow</span> @L[favDelta.Text]
+                        <span class="kpi-delta-note">@L["vs previous 7 days · {0} all time", Model.TotalFavorites.ToString("N0")]</span>
                     </div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-label" title="How many inquiries each 100 views produced over the last 30 days.">Inquiries / 100 views</div>
+                    <div class="kpi-label" title="@L["How many inquiries each 100 views produced over the last 30 days."]">@L["Inquiries / 100 views"]</div>
                     <div class="kpi-value">@Model.ConversionPer100.ToString("0.0", inv)</div>
-                    <div class="kpi-delta flat"><span class="kpi-delta-note">last 30 days</span></div>
+                    <div class="kpi-delta flat"><span class="kpi-delta-note">@L["last 30 days"]</span></div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-label">Active listings</div>
+                    <div class="kpi-label">@L["Active listings"]</div>
                     <div class="kpi-value">@Model.ActiveListings / @Model.TotalListings</div>
                 </div>
             </div>
@@ -93,15 +93,15 @@
             @* Two measures on very different scales get two charts — never one plot with two y-axes. *@
             <div class="chart-pair">
                 @await Html.PartialAsync("_TrendChart",
-                    (Model.ViewTrend, "Views", "views", "views", "view"))
+                    (Model.ViewTrend, "Daily views", "views", "views", "view"))
                 @await Html.PartialAsync("_TrendChart",
-                    (Model.InquiryTrend, "Inquiries", "inquiries", "inquiries", "inquiry"))
+                    (Model.InquiryTrend, "Daily inquiries", "inquiries", "inquiries", "inquiry"))
             </div>
 
             <div class="dash-card">
                 <div class="dash-card-head">
-                    <h2>Portfolio</h2>
-                    <span class="dash-card-sub">how your @Model.TotalListings listing@(Model.TotalListings == 1 ? "" : "s") break down</span>
+                    <h2>@L["Portfolio"]</h2>
+                    <span class="dash-card-sub">@L["how your {0} listings break down", Model.TotalListings]</span>
                 </div>
                 <div class="breakdown-row">
                     @await Html.PartialAsync("_Breakdown", (Model.StatusBreakdown, "By status"))
@@ -111,8 +111,8 @@
 
             <div class="dash-card">
                 <div class="dash-card-head">
-                    <h2>My listings</h2>
-                    <span class="dash-card-sub">newest first — open Stats for a listing's own numbers</span>
+                    <h2>@L["My listings"]</h2>
+                    <span class="dash-card-sub">@L["newest first — open Stats for a listing's own numbers"]</span>
                 </div>
 
                 @* Filtering and paging happen on the server: a portfolio of any size renders
@@ -120,22 +120,22 @@
                 <div class="listing-toolbar">
                     <div class="filter-tabs" role="tablist">
                         <a class="filter-tab @(noFilter ? "is-active" : "")"
-                           asp-action="Index" asp-route-search="@search">All <span class="ft-count">@Model.TabCounts.All</span></a>
+                           asp-action="Index" asp-route-search="@search">@L["All"] <span class="ft-count">@Model.TabCounts.All</span></a>
                         <a class="filter-tab @(!locked && status == ListingStatus.Active ? "is-active" : "")"
-                           asp-action="Index" asp-route-status="@ListingStatus.Active" asp-route-search="@search">Active <span class="ft-count">@Model.TabCounts.Active</span></a>
+                           asp-action="Index" asp-route-status="@ListingStatus.Active" asp-route-search="@search">@L["Active"] <span class="ft-count">@Model.TabCounts.Active</span></a>
                         <a class="filter-tab @(!locked && status == ListingStatus.Draft ? "is-active" : "")"
-                           asp-action="Index" asp-route-status="@ListingStatus.Draft" asp-route-search="@search">Draft <span class="ft-count">@Model.TabCounts.Draft</span></a>
+                           asp-action="Index" asp-route-status="@ListingStatus.Draft" asp-route-search="@search">@L["Draft"] <span class="ft-count">@Model.TabCounts.Draft</span></a>
                         <a class="filter-tab @(!locked && status == ListingStatus.Archived ? "is-active" : "")"
-                           asp-action="Index" asp-route-status="@ListingStatus.Archived" asp-route-search="@search">Archived <span class="ft-count">@Model.TabCounts.Archived</span></a>
+                           asp-action="Index" asp-route-status="@ListingStatus.Archived" asp-route-search="@search">@L["Archived"] <span class="ft-count">@Model.TabCounts.Archived</span></a>
                         <a class="filter-tab @(locked ? "is-active" : "")"
-                           asp-action="Index" asp-route-locked="true" asp-route-search="@search">Locked <span class="ft-count">@Model.TabCounts.Locked</span></a>
+                           asp-action="Index" asp-route-locked="true" asp-route-search="@search">@L["Locked"] <span class="ft-count">@Model.TabCounts.Locked</span></a>
                     </div>
                     <form method="get" asp-action="Index" class="listing-search-form">
                         <input type="hidden" name="status" value="@(status?.ToString())" />
                         <input type="hidden" name="locked" value="@locked.ToString().ToLowerInvariant()" />
                         <input type="search" name="search" value="@search" class="listing-search"
-                               placeholder="Search by title…" autocomplete="off" aria-label="Search your listings by title" />
-                        <button type="submit" class="btn btn-ghost btn-sm">Search</button>
+                               placeholder="@L["Search by title…"]" autocomplete="off" aria-label="@L["Search your listings by title"]" />
+                        <button type="submit" class="btn btn-ghost btn-sm">@L["Search"]</button>
                     </form>
                 </div>
 
@@ -143,10 +143,10 @@
                     <table class="stats-table listing-table" id="myListingsTable">
                         <thead>
                             <tr>
-                                <th>Listing</th>
-                                <th>Type</th>
-                                <th class="num">Price</th>
-                                <th>Status</th>
+                                <th>@L["Listing"]</th>
+                                <th>@L["Type"]</th>
+                                <th class="num">@L["Price"]</th>
+                                <th>@L["Status"]</th>
                                 <th class="col-actions"></th>
                             </tr>
                         </thead>
@@ -172,16 +172,16 @@
                                                href="@Url.ListingUrl(row.Id, row.Slug)">@row.Title</a>
                                         </div>
                                     </td>
-                                    <td>@row.ListingType</td>
+                                    <td>@L.Localize(row.ListingType)</td>
                                     <td class="num">@row.PriceAmount.ToString("N0") @row.PriceCurrency</td>
                                     <td>
                                         @if (row.IsLocked)
                                         {
-                                            <span class="status-pill status-locked">🔒 Locked</span>
+                                            <span class="status-pill status-locked">🔒 @L["Locked"]</span>
                                         }
                                         else
                                         {
-                                            <span class="status-pill status-@row.Status.ToString().ToLowerInvariant()">@row.Status</span>
+                                            <span class="status-pill status-@row.Status.ToString().ToLowerInvariant()">@L.Localize(row.Status)</span>
                                         }
                                     </td>
                                     <td class="col-actions">
@@ -189,23 +189,23 @@
                                             @* Stats stay available on a locked listing — the agent
                                                still needs to see what it did before it was pulled. *@
                                             <button type="button" class="btn btn-ghost btn-sm" data-stats-for="@row.Id"
-                                                    data-stats-title="@row.Title">Stats</button>
+                                                    data-stats-title="@row.Title">@L["Stats"]</button>
                                             @if (!row.IsLocked)
                                             {
                                                 @if (row.Status == ListingStatus.Active)
                                                 {
                                                     <form asp-controller="Listings" asp-action="Archive" asp-route-id="@row.Id" method="post">
-                                                        <button type="submit" class="btn btn-ghost btn-sm">Archive</button>
+                                                        <button type="submit" class="btn btn-ghost btn-sm">@L["Archive"]</button>
                                                     </form>
                                                 }
                                                 else
                                                 {
                                                     <form asp-controller="Listings" asp-action="Publish" asp-route-id="@row.Id" method="post">
-                                                        <button type="submit" class="btn btn-primary btn-sm">Publish</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm">@L["Publish"]</button>
                                                     </form>
                                                 }
-                                                <a asp-controller="Listings" asp-action="Edit" asp-route-id="@row.Id" class="btn btn-ghost btn-sm">Edit</a>
-                                                <a asp-controller="Listings" asp-action="Delete" asp-route-id="@row.Id" class="btn btn-danger btn-sm">Delete</a>
+                                                <a asp-controller="Listings" asp-action="Edit" asp-route-id="@row.Id" class="btn btn-ghost btn-sm">@L["Edit"]</a>
+                                                <a asp-controller="Listings" asp-action="Delete" asp-route-id="@row.Id" class="btn btn-danger btn-sm">@L["Delete"]</a>
                                             }
                                         </div>
                                     </td>
@@ -218,19 +218,21 @@
                                     <tr class="locked-row">
                                         <td colspan="5">
                                             <div class="locked-msg">
-                                                <strong>Locked by an administrator.</strong>
+                                                <strong>@L["Locked by an administrator."]</strong>
                                                 <span>@row.LockReason</span>
                                                 @if (row.UnlockRequested)
                                                 {
-                                                    <small class="review-requested">⏳ Re-review requested@(row.UnlockRequestedAt is null ? "" : $" on {row.UnlockRequestedAt:MMM d, yyyy}"). An admin will take another look.</small>
+                                                    <small class="review-requested">⏳ @(row.UnlockRequestedAt is null
+                                                        ? L["Re-review requested. An admin will take another look."]
+                                                        : L["Re-review requested on {0}. An admin will take another look.", row.UnlockRequestedAt.Value.ToString("d")])</small>
                                                 }
                                                 else
                                                 {
                                                     <details class="unlock-appeal">
-                                                        <summary>Fixed it — request re-review</summary>
+                                                        <summary>@L["Fixed it — request re-review"]</summary>
                                                         <form asp-controller="Listings" asp-action="RequestUnlock" asp-route-id="@row.Id" method="post">
-                                                            <textarea name="note" maxlength="1000" rows="3" placeholder="Optional: tell the admin what you changed (e.g. replaced the photos)."></textarea>
-                                                            <button type="submit" class="btn btn-primary btn-sm">Send request</button>
+                                                            <textarea name="note" maxlength="1000" rows="3" placeholder="@L["Optional: tell the admin what you changed (e.g. replaced the photos)."]"></textarea>
+                                                            <button type="submit" class="btn btn-primary btn-sm">@L["Send request"]</button>
                                                         </form>
                                                     </details>
                                                 }
@@ -243,7 +245,7 @@
                     </table>
                     @if (Model.Listings.TotalCount == 0)
                     {
-                        <p class="no-match">No listings match your filters.</p>
+                        <p class="no-match">@L["No listings match your filters."]</p>
                     }
                 </div>
 
@@ -253,21 +255,21 @@
                         @if (Model.Listings.HasPreviousPage)
                         {
                             <a asp-action="Index" asp-route-status="@status" asp-route-locked="@locked"
-                               asp-route-search="@search" asp-route-page="@(Model.Listings.PageNumber - 1)">← Prev</a>
+                               asp-route-search="@search" asp-route-page="@(Model.Listings.PageNumber - 1)">← @L["Prev"]</a>
                         }
                         else
                         {
-                            <span class="disabled">← Prev</span>
+                            <span class="disabled">← @L["Prev"]</span>
                         }
-                        <span class="current">@Model.Listings.PageNumber of @Model.Listings.TotalPages</span>
+                        <span class="current">@L["{0} of {1}", Model.Listings.PageNumber, Model.Listings.TotalPages]</span>
                         @if (Model.Listings.HasNextPage)
                         {
                             <a asp-action="Index" asp-route-status="@status" asp-route-locked="@locked"
-                               asp-route-search="@search" asp-route-page="@(Model.Listings.PageNumber + 1)">Next →</a>
+                               asp-route-search="@search" asp-route-page="@(Model.Listings.PageNumber + 1)">@L["Next"] →</a>
                         }
                         else
                         {
-                            <span class="disabled">Next →</span>
+                            <span class="disabled">@L["Next"] →</span>
                         }
                     </nav>
                 }
@@ -280,11 +282,11 @@
    demand — rendering 76 sets of charts up front would cost far more than it's worth. *@
 <dialog id="statsModal" class="stats-modal" aria-labelledby="statsModalTitle">
     <div class="stats-modal-head">
-        <h2 id="statsModalTitle">Listing stats</h2>
-        <button type="button" class="stats-modal-close" data-stats-close aria-label="Close">✕</button>
+        <h2 id="statsModalTitle">@L["Listing stats"]</h2>
+        <button type="button" class="stats-modal-close" data-stats-close aria-label="@L["Close"]">✕</button>
     </div>
     <div class="stats-modal-body" id="statsModalBody">
-        <p class="stats-modal-status">Loading…</p>
+        <p class="stats-modal-status">@L["Loading…"]</p>
     </div>
 </dialog>
 

@@ -164,7 +164,9 @@
                     <div class="fact"><span class="value">@listing.Bedrooms</span><span class="lbl">@L["Bedrooms"]</span></div>
                     <div class="fact"><span class="value">@listing.Bathrooms</span><span class="lbl">@L["Bathrooms"]</span></div>
                     <div class="fact"><span class="value">@listing.AreaSqMeters.ToString("N0")</span><span class="lbl">@L["m² area"]</span></div>
-                    <div class="fact"><span class="value" style="font-size:1.05rem;">@L.Localize(listing.ListingType)</span><span class="lbl">@L["Listing"]</span></div>
+                    @* "Listing type", not "Listing": the dashboard table has a column headed
+                       with the latter meaning the listing itself, and one key cannot be both. *@
+                    <div class="fact"><span class="value" style="font-size:1.05rem;">@L.Localize(listing.ListingType)</span><span class="lbl">@L["Listing type"]</span></div>
                 </div>
 
                 <div class="detail-section">

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -87,7 +87,7 @@
   <data name="Dashboard" xml:space="preserve">
     <value>Panelim</value>
   </data>
-  <data name="Inquiries" xml:space="preserve">
+  <data name="Inquiry inbox" xml:space="preserve">
     <value>Gelen talepler</value>
   </data>
   <data name="Admin" xml:space="preserve">
@@ -183,6 +183,10 @@
     <value>m² alan</value>
   </data>
   <data name="Listing" xml:space="preserve">
+    <value>İlan</value>
+    <comment>Column header for the listing itself. "Listing type" is a separate entry.</comment>
+  </data>
+  <data name="Listing type" xml:space="preserve">
     <value>İlan tipi</value>
   </data>
   <data name="Features" xml:space="preserve">
@@ -259,9 +263,6 @@
   </data>
 
   <!-- ============ Browse listings ============ -->
-  <data name="Browse Listings" xml:space="preserve">
-    <value>İlanlar</value>
-  </data>
   <data name="İstanbul property, curated" xml:space="preserve">
     <value>İstanbul'dan seçilmiş ilanlar</value>
   </data>
@@ -456,6 +457,261 @@
   </data>
   <data name="Last changed {0}" xml:space="preserve">
     <value>Son değişiklik {0}</value>
+  </data>
+
+  <!-- ============ Agent dashboard ============ -->
+  <data name="How your listings are performing." xml:space="preserve">
+    <value>İlanlarınız nasıl gidiyor.</value>
+  </data>
+  <data name="No listings yet" xml:space="preserve">
+    <value>Henüz ilanınız yok</value>
+  </data>
+  <data name="Once you publish a listing, its views and inquiries will show up here." xml:space="preserve">
+    <value>Bir ilan yayınladığınızda görüntülenmeleri ve gelen talepleri burada göreceksiniz.</value>
+  </data>
+  <data name="Create a listing" xml:space="preserve">
+    <value>İlan oluştur</value>
+  </data>
+  <data name="Total views" xml:space="preserve">
+    <value>Toplam görüntülenme</value>
+  </data>
+  <data name="Unique visitors · 30 days" xml:space="preserve">
+    <value>Tekil ziyaretçi · 30 gün</value>
+  </data>
+  <data name="Distinct visitors over the last 30 days. One person who opened several of your listings counts once." xml:space="preserve">
+    <value>Son 30 gündeki tekil ziyaretçi sayısı. Birkaç ilanınıza bakan bir kişi bir kez sayılır.</value>
+  </data>
+  <data name="Views · 7 days" xml:space="preserve">
+    <value>Görüntülenme · 7 gün</value>
+  </data>
+  <data name="Views · 30 days" xml:space="preserve">
+    <value>Görüntülenme · 30 gün</value>
+  </data>
+  <data name="Inquiries · 7 days" xml:space="preserve">
+    <value>Talep · 7 gün</value>
+  </data>
+  <data name="Saves · 7 days" xml:space="preserve">
+    <value>Favorileme · 7 gün</value>
+  </data>
+  <data name="People who saved one of your listings. Each person counts once per listing." xml:space="preserve">
+    <value>İlanlarınızdan birini favorileyen kişiler. Her kişi ilan başına bir kez sayılır.</value>
+  </data>
+  <data name="Inquiries / 100 views" xml:space="preserve">
+    <value>100 görüntülenmede talep</value>
+  </data>
+  <data name="How many inquiries each 100 views produced over the last 30 days." xml:space="preserve">
+    <value>Son 30 günde her 100 görüntülenmenin kaç talep getirdiği.</value>
+  </data>
+  <data name="last 30 days" xml:space="preserve">
+    <value>son 30 gün</value>
+  </data>
+  <data name="Active listings" xml:space="preserve">
+    <value>Yayındaki ilan</value>
+  </data>
+  <data name="vs previous 7 days" xml:space="preserve">
+    <value>önceki 7 güne göre</value>
+  </data>
+  <data name="vs previous 7 days · {0} all time" xml:space="preserve">
+    <value>önceki 7 güne göre · toplam {0}</value>
+  </data>
+  <data name="{0} all time" xml:space="preserve">
+    <value>toplam {0}</value>
+  </data>
+  <data name="no change" xml:space="preserve">
+    <value>değişim yok</value>
+  </data>
+  <data name="all new this week" xml:space="preserve">
+    <value>bu hafta yeni</value>
+  </data>
+  <data name="level" xml:space="preserve">
+    <value>sabit</value>
+  </data>
+  <data name="Portfolio" xml:space="preserve">
+    <value>Portföy</value>
+  </data>
+  <data name="how your {0} listings break down" xml:space="preserve">
+    <value>{0} ilanınızın dağılımı</value>
+  </data>
+  <data name="By status" xml:space="preserve">
+    <value>Duruma göre</value>
+  </data>
+  <data name="By listing type" xml:space="preserve">
+    <value>İlan tipine göre</value>
+  </data>
+  <data name="{0} breakdown" xml:space="preserve">
+    <value>{0} dağılımı</value>
+  </data>
+  <data name="My listings" xml:space="preserve">
+    <value>İlanlarım</value>
+  </data>
+  <data name="newest first — open Stats for a listing's own numbers" xml:space="preserve">
+    <value>en yeniden eskiye — bir ilanın kendi rakamları için İstatistik'e bakın</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>Tümü</value>
+  </data>
+  <data name="Locked" xml:space="preserve">
+    <value>Kilitli</value>
+  </data>
+  <data name="Search by title…" xml:space="preserve">
+    <value>Başlığa göre ara…</value>
+  </data>
+  <data name="Search your listings by title" xml:space="preserve">
+    <value>İlanlarınızı başlığa göre arayın</value>
+  </data>
+  <data name="Price" xml:space="preserve">
+    <value>Fiyat</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Durum</value>
+  </data>
+  <data name="Stats" xml:space="preserve">
+    <value>İstatistik</value>
+  </data>
+  <data name="Archive" xml:space="preserve">
+    <value>Arşivle</value>
+  </data>
+  <data name="Publish" xml:space="preserve">
+    <value>Yayınla</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Düzenle</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Sil</value>
+  </data>
+  <data name="Locked by an administrator." xml:space="preserve">
+    <value>Bir yönetici tarafından kilitlendi.</value>
+  </data>
+  <data name="Re-review requested. An admin will take another look." xml:space="preserve">
+    <value>Yeniden inceleme talep edildi. Bir yönetici tekrar bakacak.</value>
+  </data>
+  <data name="Re-review requested on {0}. An admin will take another look." xml:space="preserve">
+    <value>{0} tarihinde yeniden inceleme talep edildi. Bir yönetici tekrar bakacak.</value>
+  </data>
+  <data name="Fixed it — request re-review" xml:space="preserve">
+    <value>Düzelttim — yeniden inceleme iste</value>
+  </data>
+  <data name="Optional: tell the admin what you changed (e.g. replaced the photos)." xml:space="preserve">
+    <value>İsteğe bağlı: neyi değiştirdiğinizi yazın (ör. fotoğrafları yeniledim).</value>
+  </data>
+  <data name="Send request" xml:space="preserve">
+    <value>Talebi gönder</value>
+  </data>
+  <data name="No listings match your filters." xml:space="preserve">
+    <value>Filtrelerinize uyan ilan yok.</value>
+  </data>
+  <data name="Listing stats" xml:space="preserve">
+    <value>İlan istatistikleri</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Loading…" xml:space="preserve">
+    <value>Yükleniyor…</value>
+  </data>
+
+  <!-- ============ Charts ============ -->
+  <data name="last {0} days · {1} total" xml:space="preserve">
+    <value>son {0} gün · toplam {1}</value>
+  </data>
+  <data name="Daily {0} over the last {1} days, {2} in total" xml:space="preserve">
+    <value>Son {1} gündeki günlük {0}, toplam {2}</value>
+  </data>
+  <data name="Table view" xml:space="preserve">
+    <value>Tablo görünümü</value>
+  </data>
+  <data name="Day" xml:space="preserve">
+    <value>Gün</value>
+  </data>
+  <data name="Daily views" xml:space="preserve">
+    <value>Günlük görüntülenme</value>
+  </data>
+  <data name="views" xml:space="preserve">
+    <value>görüntülenme</value>
+  </data>
+  <data name="view" xml:space="preserve">
+    <value>görüntülenme</value>
+  </data>
+  <data name="Daily saves" xml:space="preserve">
+    <value>Günlük favorileme</value>
+  </data>
+  <data name="Daily inquiries" xml:space="preserve">
+    <value>Günlük talep</value>
+  </data>
+  <data name="saves" xml:space="preserve">
+    <value>favorileme</value>
+  </data>
+  <data name="save" xml:space="preserve">
+    <value>favorileme</value>
+  </data>
+  <data name="inquiries" xml:space="preserve">
+    <value>talep</value>
+  </data>
+  <data name="inquiry" xml:space="preserve">
+    <value>talep</value>
+  </data>
+
+  <!-- ============ Per-listing stats panel ============ -->
+  <data name="Listed {0} days ago" xml:space="preserve">
+    <value>{0} gün önce yayınlandı</value>
+  </data>
+  <data name="Open listing" xml:space="preserve">
+    <value>İlanı aç</value>
+  </data>
+  <data name="views · last 30 days" xml:space="preserve">
+    <value>görüntülenme · 30 gün</value>
+  </data>
+  <data name="{0} per day" xml:space="preserve">
+    <value>günde {0}</value>
+  </data>
+  <data name="saved it" xml:space="preserve">
+    <value>favoriledi</value>
+  </data>
+  <data name="{0} per 100 views" xml:space="preserve">
+    <value>100 görüntülenmede {0}</value>
+  </data>
+  <data name="got in touch" xml:space="preserve">
+    <value>iletişime geçti</value>
+  </data>
+  <data name="All-time views, including the older activity that has been rolled up into daily totals." xml:space="preserve">
+    <value>Günlük toplamlara aktarılmış eski hareketler dahil, tüm zamanların görüntülenmesi.</value>
+  </data>
+  <data name="{0} unique · recent" xml:space="preserve">
+    <value>{0} tekil · yakın dönem</value>
+  </data>
+  <data name="about average for your portfolio" xml:space="preserve">
+    <value>portföyünüzün ortalamasında</value>
+  </data>
+  <data name="{0}% above your portfolio average" xml:space="preserve">
+    <value>portföy ortalamanızın %{0} üzerinde</value>
+  </data>
+  <data name="{0}% below your portfolio average" xml:space="preserve">
+    <value>portföy ortalamanızın %{0} altında</value>
+  </data>
+  <data name="Over the last 30 days this listing is {0} ({1} views on average across your {2} listings)." xml:space="preserve">
+    <value>Son 30 günde bu ilan {0} ({2} ilanınızda ortalama {1} görüntülenme).</value>
+  </data>
+  <data name="Activity" xml:space="preserve">
+    <value>Hareketler</value>
+  </data>
+  <data name="the last time anything happened" xml:space="preserve">
+    <value>en son ne zaman bir şey oldu</value>
+  </data>
+  <data name="Last view" xml:space="preserve">
+    <value>Son görüntülenme</value>
+  </data>
+  <data name="Last inquiry" xml:space="preserve">
+    <value>Son talep</value>
+  </data>
+  <data name="Published" xml:space="preserve">
+    <value>Yayına alındı</value>
+  </data>
+  <data name="Price changes" xml:space="preserve">
+    <value>Fiyat değişikliği</value>
+  </data>
+  <data name="never" xml:space="preserve">
+    <value>hiç</value>
   </data>
 
   <!-- ============ Enum members ============
