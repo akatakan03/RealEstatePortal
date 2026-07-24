@@ -8,6 +8,8 @@ using RealEstatePortal.Application.Listings.EventHandlers;
 using RealEstatePortal.Domain.Entities;
 using RealEstatePortal.Domain.Events;
 using Xunit;
+using RealEstatePortal.Application.UnitTests.Common;
+using RealEstatePortal.Application.Common.Models;
 
 namespace RealEstatePortal.Application.UnitTests.Listings;
 
@@ -22,11 +24,11 @@ public class ListingPublishedEventHandlerTests
 
         var email = Substitute.For<IEmailService>();
         var identity = Substitute.For<IIdentityService>();
-        identity.GetUserEmailAsync("agent-1", Arg.Any<CancellationToken>())
-            .Returns("agent@test.local");
+        identity.GetEmailRecipientAsync("agent-1", Arg.Any<CancellationToken>())
+            .Returns(new EmailRecipient("agent@test.local", "tr"));
         var logger = Substitute.For<ILogger<ListingPublishedEventHandler>>();
 
-        var handler = new ListingPublishedEventHandler(email, identity, logger);
+        var handler = new ListingPublishedEventHandler(email, identity, new PassThroughText(), logger);
 
         await handler.Handle(notification, CancellationToken.None);
 
@@ -46,11 +48,11 @@ public class ListingPublishedEventHandlerTests
 
         var email = Substitute.For<IEmailService>();
         var identity = Substitute.For<IIdentityService>();
-        identity.GetUserEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns((string?)null);
+        identity.GetEmailRecipientAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns((EmailRecipient?)null);
 
         var handler = new ListingPublishedEventHandler(
-            email, identity, Substitute.For<ILogger<ListingPublishedEventHandler>>());
+            email, identity, new PassThroughText(), Substitute.For<ILogger<ListingPublishedEventHandler>>());
 
         await handler.Handle(notification, CancellationToken.None);
 

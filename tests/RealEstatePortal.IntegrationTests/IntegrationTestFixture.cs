@@ -11,6 +11,7 @@ using RealEstatePortal.Infrastructure;
 using RealEstatePortal.Infrastructure.Data;
 using MediatR;
 using Microsoft.Data.SqlClient;
+using RealEstatePortal.Application.Common.Models;
 
 namespace RealEstatePortal.IntegrationTests;
 
@@ -66,6 +67,7 @@ public class IntegrationTestFixture : IAsyncLifetime
         services.AddSingleton(GeocodingService);
         services.RemoveAll<IIdentityService>();
         services.AddSingleton(IdentityService);
+        services.AddSingleton<ILocalizedText, PassThroughText>();
         services.RemoveAll<IRealtimeNotifier>();
         services.AddSingleton(Substitute.For<IRealtimeNotifier>());
         // IListingSpatialSearch stays REAL — it hits the DB, which is what we want to test.
@@ -86,8 +88,12 @@ public class IntegrationTestFixture : IAsyncLifetime
             DbAdapter = DbAdapter.SqlServer,
             TablesToIgnore = new Table[] { new Table("__EFMigrationsHistory") }
         });
+        // Both: the moderation screens ask only for an address, notifications ask for the
+        // address and the language to write in.
         IdentityService.GetUserEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("owner@test.local");
+        IdentityService.GetEmailRecipientAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new EmailRecipient("owner@test.local", null));
     }
 
     public async Task ResetStateAsync()

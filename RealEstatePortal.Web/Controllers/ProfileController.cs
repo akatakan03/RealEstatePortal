@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Infrastructure.Identity;
+using RealEstatePortal.Web.Localization;
 using RealEstatePortal.Web.Models.Profile;
 
 namespace RealEstatePortal.Web.Controllers;
@@ -38,6 +39,7 @@ public class ProfileController : Controller
             Phone = user.PhoneNumber,
             Bio = user.Bio,
             AvatarUrl = user.AvatarKey is null ? null : _storage.GetPublicUrl(user.AvatarKey),
+            PreferredCulture = user.PreferredCulture,
             Roles = roles,
             IsAgent = roles.Contains(Roles.Agent),
             IsAdmin = roles.Contains(Roles.Admin)
@@ -54,7 +56,8 @@ public class ProfileController : Controller
         {
             DisplayName = user.DisplayName,
             Phone = user.PhoneNumber,
-            Bio = user.Bio
+            Bio = user.Bio,
+            PreferredCulture = user.PreferredCulture
         });
     }
 
@@ -70,7 +73,18 @@ public class ProfileController : Controller
         user.DisplayName = model.DisplayName?.Trim();
         user.PhoneNumber = model.Phone?.Trim();
         user.Bio = model.Bio?.Trim();
+
+        // Anything unrecognised is stored as null, which every reader treats as the site default.
+        user.PreferredCulture = SupportedCultures.IsSupported(model.PreferredCulture)
+            ? model.PreferredCulture
+            : null;
+
         await _userManager.UpdateAsync(user);
+
+        // The middleware reads this cookie to decide where a bare URL lands, so saving the
+        // preference makes the site open in it too — otherwise the setting would govern email
+        // and nothing else, which is not what "site language" says on the label.
+        CultureRedirectMiddleware.Remember(HttpContext, user.PreferredCulture ?? SupportedCultures.Default);
 
         TempData["ProfileSaved"] = "Your profile has been updated.";
         return RedirectToAction(nameof(Index));

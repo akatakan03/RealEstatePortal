@@ -45,6 +45,19 @@
                         <span asp-validation-for="Bio" class="text-danger"></span>
                     </div>
 
+                    <div class="mb-field">
+                        <label asp-for="PreferredCulture" class="form-label"></label>
+                        @* Each language names itself, never translated — the same rule the header
+                           switcher follows. *@
+                        <select asp-for="PreferredCulture" class="form-select">
+                            @foreach (var code in SupportedCultures.Codes)
+                            {
+                                <option value="@code">@SupportedCultures.NameOf(code)</option>
+                            }
+                        </select>
+                        <p class="form-hint">@L["The language we write to you in, and the one the site opens in."]</p>
+                    </div>
+
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">@L["Save changes"]</button>
                         <a asp-action="Index" class="btn btn-ghost">@L["Cancel"]</a>

@@ -11,13 +11,16 @@ public class ListingPublishedEventHandler
 {
     private readonly IEmailService _email;
     private readonly IIdentityService _identity;
+    private readonly ILocalizedText _text;
     private readonly ILogger<ListingPublishedEventHandler> _logger;
 
     public ListingPublishedEventHandler(
-        IEmailService email, IIdentityService identity, ILogger<ListingPublishedEventHandler> logger)
+        IEmailService email, IIdentityService identity, ILocalizedText text,
+        ILogger<ListingPublishedEventHandler> logger)
     {
         _email = email;
         _identity = identity;
+        _text = text;
         _logger = logger;
     }
 
@@ -33,15 +36,19 @@ public class ListingPublishedEventHandler
         {
             if (listing.OwnerId is null) return;
 
-            var email = await _identity.GetUserEmailAsync(listing.OwnerId, cancellationToken);
-            if (string.IsNullOrEmpty(email)) return;
+            var recipient = await _identity.GetEmailRecipientAsync(listing.OwnerId, cancellationToken);
+            if (recipient is null) return;
 
-            var subject = $"Your listing \"{listing.Title}\" is now live";
-            var body =
-                $"<p>Good news — your listing <strong>{System.Net.WebUtility.HtmlEncode(listing.Title)}</strong> " +
-                "is now published and visible to buyers.</p>";
+            // The markup is passed in rather than written into the resource: a translator should
+            // see a sentence, not tags, and cannot break the HTML by mistyping one. The title is
+            // encoded because it is agent-supplied text going into a page.
+            var title = $"<strong>{System.Net.WebUtility.HtmlEncode(listing.Title)}</strong>";
 
-            await _email.SendAsync(email, subject, body, cancellationToken);
+            var subject = _text.For(recipient.Culture, "Your listing \"{0}\" is now live", listing.Title);
+            var body = "<p>" + _text.For(recipient.Culture,
+                "Good news — your listing {0} is now published and visible to buyers.", title) + "</p>";
+
+            await _email.SendAsync(recipient.Email, subject, body, cancellationToken);
         }
         catch (Exception ex)
         {

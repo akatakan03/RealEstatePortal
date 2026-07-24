@@ -14,6 +14,7 @@ public class ProfileHubViewModel
     public string? Bio { get; set; }
     public string? AvatarUrl { get; set; }
     public IList<string> Roles { get; set; } = new List<string>();
+    public string? PreferredCulture { get; set; }
     public bool IsAgent { get; set; }
     public bool IsAdmin { get; set; }
 }
@@ -32,4 +33,8 @@ public class EditProfileViewModel
     [Display(Name = "About you")]
     [StringLength(600, ErrorMessage = "{0} can be at most {1} characters.")]
     public string? Bio { get; set; }
+
+    /// Language code, not a culture name — "tr" or "en", the same tokens the URL uses.
+    [Display(Name = "Site language")]
+    public string? PreferredCulture { get; set; }
 }

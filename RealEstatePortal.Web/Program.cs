@@ -62,6 +62,10 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.MvcViewOptions>(options =>
     options.ClientModelValidatorProviders.Insert(0, new LocalizedNumericClientModelValidatorProvider()));
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+// Lets the Application layer write notifications in the recipient's language without knowing
+// anything about how the site does localization.
+builder.Services.AddSingleton<ILocalizedText, SharedResourceText>();
 builder.Services.Configure<RouteOptions>(options =>
     options.ConstraintMap[CultureRouteConstraint.Name] = typeof(CultureRouteConstraint));
 

@@ -20,6 +20,16 @@ public class IdentityService : IIdentityService
         return user?.Email;
     }
 
+    public async Task<EmailRecipient?> GetEmailRecipientAsync(
+        string userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        return string.IsNullOrEmpty(user?.Email)
+            ? null   // nowhere to write to; the caller skips the message rather than failing
+            : new EmailRecipient(user.Email, user.PreferredCulture);
+    }
+
     public async Task<AgentProfileDto?> GetAgentProfileAsync(
         string userId, CancellationToken cancellationToken = default)
     {

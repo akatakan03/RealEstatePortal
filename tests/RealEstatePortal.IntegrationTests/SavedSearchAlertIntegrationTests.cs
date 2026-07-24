@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -8,6 +8,7 @@ using RealEstatePortal.Domain.Enums;
 using RealEstatePortal.Domain.ValueObjects;
 using Shouldly;
 using Xunit;
+using RealEstatePortal.Application.Common.Models;
 
 namespace RealEstatePortal.IntegrationTests;
 
@@ -23,8 +24,8 @@ public class SavedSearchAlertIntegrationTests : IntegrationTestBase
     {
         Fixture.CurrentUser.Id = "agent-1";
         Fixture.IdentityService
-            .GetUserEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(call => $"{call.ArgAt<string>(0)}@example.com");
+            .GetEmailRecipientAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(call => new EmailRecipient($"{call.ArgAt<string>(0)}@example.com", null));
 
         var listingId = await Fixture.ExecuteDbAsync(async db =>
         {
@@ -84,8 +85,8 @@ public class SavedSearchAlertIntegrationTests : IntegrationTestBase
     {
         Fixture.CurrentUser.Id = "agent-1";
         Fixture.IdentityService
-            .GetUserEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(call => $"{call.ArgAt<string>(0)}@example.com");
+            .GetEmailRecipientAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(call => new EmailRecipient($"{call.ArgAt<string>(0)}@example.com", null));
 
         var listingId = await Fixture.ExecuteDbAsync(async db =>
         {

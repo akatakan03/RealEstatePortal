@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using RealEstatePortal.Application.UnitTests.Common;
+using RealEstatePortal.Application.Common.Models;
 
 namespace RealEstatePortal.Application.UnitTests.Inquiries;
 
@@ -44,7 +46,8 @@ public class CreateInquiryCommandTests
 
         var email = Substitute.For<IEmailService>();
         var id = Substitute.For<IIdentityService>();
-        id.GetUserEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns("agent@test.local");
+        id.GetEmailRecipientAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new EmailRecipient("agent@test.local", "tr"));
         var log = Substitute.For<ILogger<CreateInquiryCommandHandler>>();
         return (ctx, email, id, log);
     }
@@ -53,7 +56,7 @@ public class CreateInquiryCommandTests
     public async Task Handle_SavesInquiry_AndEmailsAgent()
     {
         var (ctx, email, id, log) = Deps(new List<Listing> { ActiveListing() });
-        var handler = new CreateInquiryCommandHandler(ctx, email, id, log);
+        var handler = new CreateInquiryCommandHandler(ctx, email, id, new PassThroughText(), log);
 
         await handler.Handle(Command(), CancellationToken.None);
 
@@ -67,7 +70,7 @@ public class CreateInquiryCommandTests
     public async Task Handle_WhenListingMissingOrNotActive_ThrowsNotFound()
     {
         var (ctx, email, id, log) = Deps(new List<Listing>());   // empty
-        var handler = new CreateInquiryCommandHandler(ctx, email, id, log);
+        var handler = new CreateInquiryCommandHandler(ctx, email, id, new PassThroughText(), log);
 
         await Should.ThrowAsync<NotFoundException>(
             () => handler.Handle(Command(99), CancellationToken.None));
@@ -84,7 +87,7 @@ public class CreateInquiryCommandTests
         email.SendAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromException(new InvalidOperationException("smtp down")));
 
-        var handler = new CreateInquiryCommandHandler(ctx, email, id, log);
+        var handler = new CreateInquiryCommandHandler(ctx, email, id, new PassThroughText(), log);
 
         // If the email failure propagated, this await would throw and fail the test.
         await handler.Handle(Command(), CancellationToken.None);

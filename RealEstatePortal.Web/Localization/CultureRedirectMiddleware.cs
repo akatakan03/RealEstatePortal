@@ -73,6 +73,12 @@ public class CultureRedirectMiddleware
         return segment.IsEmpty ? null : segment.ToString();
     }
 
+    /// Records a language choice made somewhere other than by visiting a URL — saving the
+    /// preference on the profile page. Exposed so that setting is not a second, separate memory
+    /// that disagrees with this cookie about where a bare address should land.
+    public static void Remember(HttpContext context, string culture) =>
+        RememberChoice(context, culture);
+
     private static void RememberChoice(HttpContext context, string culture)
     {
         if (context.Request.Cookies[CookieName] == culture)

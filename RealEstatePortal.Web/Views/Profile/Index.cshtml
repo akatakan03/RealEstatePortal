@@ -54,6 +54,8 @@
                         <dd>@(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)</dd>
                         <dt>@L["About"]</dt>
                         <dd>@(string.IsNullOrWhiteSpace(Model.Bio) ? "—" : Model.Bio)</dd>
+                        <dt>@L["Site language"]</dt>
+                        <dd>@SupportedCultures.NameOf(Model.PreferredCulture ?? SupportedCultures.Default)</dd>
                     </dl>
                 </div>
 

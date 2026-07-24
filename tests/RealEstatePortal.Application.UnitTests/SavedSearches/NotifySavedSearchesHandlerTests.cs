@@ -12,6 +12,8 @@ using RealEstatePortal.Domain.Enums;
 using RealEstatePortal.Domain.Events;
 using RealEstatePortal.Domain.ValueObjects;
 using Xunit;
+using RealEstatePortal.Application.UnitTests.Common;
+using RealEstatePortal.Application.Common.Models;
 
 namespace RealEstatePortal.Application.UnitTests.SavedSearches;
 
@@ -42,11 +44,12 @@ public class NotifySavedSearchesHandlerTests
 
         var email = Substitute.For<IEmailService>();
         var identity = Substitute.For<IIdentityService>();
-        identity.GetUserEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(ci => $"{ci.Arg<string>()}@test.local");
+        identity.GetEmailRecipientAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ci => new EmailRecipient($"{ci.Arg<string>()}@test.local", "tr"));
 
         var handler = new NotifySavedSearchesHandler(
-            context, email, identity, Substitute.For<ILogger<NotifySavedSearchesHandler>>());
+            context, email, identity, new PassThroughText(),
+            Substitute.For<ILogger<NotifySavedSearchesHandler>>());
         return (handler, email, identity);
     }
 

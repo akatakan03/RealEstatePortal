@@ -1275,4 +1275,51 @@
   <data name="{0} can be at most {1} characters." xml:space="preserve">
     <value>{0} en fazla {1} karakter olabilir.</value>
   </data>
+  <!-- Notification emails. The markup is passed in as an argument, so these are plain sentences. -->
+  <data name="New inquiry for &quot;{0}&quot;" xml:space="preserve">
+    <value>&quot;{0}&quot; ilanı için yeni talep</value>
+  </data>
+  <data name="You received a new inquiry on your listing {0}." xml:space="preserve">
+    <value>{0} ilanınız için yeni bir talep geldi.</value>
+  </data>
+  <data name="From:" xml:space="preserve">
+    <value>Gönderen:</value>
+  </data>
+  <data name="Message:" xml:space="preserve">
+    <value>Mesaj:</value>
+  </data>
+  <data name="Your listing &quot;{0}&quot; is now live" xml:space="preserve">
+    <value>&quot;{0}&quot; ilanınız yayında</value>
+  </data>
+  <data name="Good news — your listing {0} is now published and visible to buyers." xml:space="preserve">
+    <value>Müjde — {0} ilanınız yayına alındı ve alıcılara görünüyor.</value>
+  </data>
+  <data name="Your listing &quot;{0}&quot; has been locked by an administrator" xml:space="preserve">
+    <value>&quot;{0}&quot; ilanınız bir yönetici tarafından kilitlendi</value>
+  </data>
+  <data name="Your listing {0} has been taken off the site by an administrator and can't be published until it's unlocked." xml:space="preserve">
+    <value>{0} ilanınız bir yönetici tarafından siteden kaldırıldı ve kilidi açılana kadar yayınlanamaz.</value>
+  </data>
+  <data name="Reason given:" xml:space="preserve">
+    <value>Belirtilen sebep:</value>
+  </data>
+  <data name="Please review your listing. Once the issue is resolved, contact support to have it unlocked." xml:space="preserve">
+    <value>Lütfen ilanınızı gözden geçirin. Sorunu giderdiğinizde kilidin açılması için destek ekibine başvurun.</value>
+  </data>
+  <data name="New match: {0}" xml:space="preserve">
+    <value>Yeni eşleşme: {0}</value>
+  </data>
+  <data name="A new listing matches your saved search:" xml:space="preserve">
+    <value>Kayıtlı aramanıza uyan yeni bir ilan var:</value>
+  </data>
+  <!-- Language preference on the profile page. -->
+  <data name="Site language" xml:space="preserve">
+    <value>Site dili</value>
+  </data>
+  <data name="The language we write to you in, and the one the site opens in." xml:space="preserve">
+    <value>Size hangi dilde yazacağımız ve sitenin hangi dilde açılacağı.</value>
+  </data>
+  <data name="Your language preference has been saved." xml:space="preserve">
+    <value>Dil tercihiniz kaydedildi.</value>
+  </data>
 </root>

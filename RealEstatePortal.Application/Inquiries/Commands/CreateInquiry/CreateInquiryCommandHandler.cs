@@ -13,17 +13,20 @@ public class CreateInquiryCommandHandler : IRequestHandler<CreateInquiryCommand,
     private readonly IApplicationDbContext _context;
     private readonly IEmailService _email;
     private readonly IIdentityService _identity;
+    private readonly ILocalizedText _text;
     private readonly ILogger<CreateInquiryCommandHandler> _logger;
 
     public CreateInquiryCommandHandler(
         IApplicationDbContext context,
         IEmailService email,
         IIdentityService identity,
+        ILocalizedText text,
         ILogger<CreateInquiryCommandHandler> logger)
     {
         _context = context;
         _email = email;
         _identity = identity;
+        _text = text;
         _logger = logger;
     }
 
@@ -48,17 +51,30 @@ public class CreateInquiryCommandHandler : IRequestHandler<CreateInquiryCommand,
         {
             if (listing.OwnerId is not null)
             {
-                var agentEmail = await _identity.GetUserEmailAsync(listing.OwnerId, cancellationToken);
-                if (!string.IsNullOrEmpty(agentEmail))
+                var recipient = await _identity.GetEmailRecipientAsync(listing.OwnerId, cancellationToken);
+                if (recipient is not null)
                 {
-                    var subject = $"New inquiry for \"{listing.Title}\"";
-                    var body =
-                        $"<p>You received a new inquiry on your listing <strong>{listing.Title}</strong>.</p>" +
-                        $"<p><strong>From:</strong> {request.Name} ({request.Email}" +
-                        (string.IsNullOrWhiteSpace(request.Phone) ? "" : $", {request.Phone}") + ")</p>" +
-                        $"<p><strong>Message:</strong><br/>{System.Net.WebUtility.HtmlEncode(request.Message)}</p>";
+                    // Written in the agent's language, not the visitor's: the visitor may well be
+                    // browsing in English while the agent reads Turkish, and this is the agent's mail.
+                    var culture = recipient.Culture;
 
-                    await _email.SendAsync(agentEmail, subject, body, cancellationToken);
+                    // The title was going into the body unencoded — an apostrophe or angle bracket
+                    // in an agent's own title would have landed as markup.
+                    var title = $"<strong>{System.Net.WebUtility.HtmlEncode(listing.Title)}</strong>";
+                    var from = System.Net.WebUtility.HtmlEncode(
+                        string.IsNullOrWhiteSpace(request.Phone)
+                            ? $"{request.Name} ({request.Email})"
+                            : $"{request.Name} ({request.Email}, {request.Phone})");
+
+                    var subject = _text.For(culture, "New inquiry for \"{0}\"", listing.Title);
+                    var body =
+                        "<p>" + _text.For(culture,
+                            "You received a new inquiry on your listing {0}.", title) + "</p>" +
+                        "<p><strong>" + _text.For(culture, "From:") + "</strong> " + from + "</p>" +
+                        "<p><strong>" + _text.For(culture, "Message:") + "</strong><br/>" +
+                        System.Net.WebUtility.HtmlEncode(request.Message) + "</p>";
+
+                    await _email.SendAsync(recipient.Email, subject, body, cancellationToken);
                 }
             }
         }

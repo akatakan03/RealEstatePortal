@@ -13,15 +13,17 @@ public class NotifySavedSearchesHandler
     private readonly IApplicationDbContext _context;
     private readonly IEmailService _email;
     private readonly IIdentityService _identity;
+    private readonly ILocalizedText _text;
     private readonly ILogger<NotifySavedSearchesHandler> _logger;
 
     public NotifySavedSearchesHandler(
-        IApplicationDbContext context, IEmailService email,
-        IIdentityService identity, ILogger<NotifySavedSearchesHandler> logger)
+        IApplicationDbContext context, IEmailService email, IIdentityService identity,
+        ILocalizedText text, ILogger<NotifySavedSearchesHandler> logger)
     {
         _context = context;
         _email = email;
         _identity = identity;
+        _text = text;
         _logger = logger;
     }
 
@@ -54,16 +56,21 @@ public class NotifySavedSearchesHandler
         {
             try
             {
-                var email = await _identity.GetUserEmailAsync(userId, cancellationToken);
-                if (string.IsNullOrEmpty(email)) continue;
+                var recipient = await _identity.GetEmailRecipientAsync(userId, cancellationToken);
+                if (recipient is null) continue;
 
-                var subject = $"New match: {listing.Title}";
+                // Formatted for the reader, not the server: a price is read, so it follows the
+                // language the rest of the message is written in.
+                var money = listing.Price.Amount.ToString(
+                    "N0", _text.CultureFor(recipient.Culture));
+
+                var subject = _text.For(recipient.Culture, "New match: {0}", listing.Title);
                 var body =
-                    $"<p>A new listing matches your saved search:</p>" +
+                    "<p>" + _text.For(recipient.Culture, "A new listing matches your saved search:") + "</p>" +
                     $"<p><strong>{System.Net.WebUtility.HtmlEncode(listing.Title)}</strong><br/>" +
-                    $"{listing.Price.Amount:N0} {listing.Price.Currency} · {listing.Address}</p>";
+                    $"{money} {listing.Price.Currency} · {System.Net.WebUtility.HtmlEncode(listing.Address)}</p>";
 
-                await _email.SendAsync(email, subject, body, cancellationToken);
+                await _email.SendAsync(recipient.Email, subject, body, cancellationToken);
             }
             catch (Exception ex)
             {
