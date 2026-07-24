@@ -13,6 +13,10 @@ public class CreateListingCommandValidator : AbstractValidator<CreateListingComm
         RuleFor(v => v.Description).NotEmpty().MaximumLength(4000);
         RuleFor(v => v.Price).GreaterThan(0).WithMessage("Price must be greater than zero.");
         RuleFor(v => v.Currency).NotEmpty().MaximumLength(3);
+        // Was enforced only by MVC's implicit required for non-nullable strings, which
+        // produces an English message no localizer can reach. The rule belongs here with
+        // the rest of them.
+        RuleFor(v => v.Address).NotEmpty().MaximumLength(300);
         RuleFor(v => v.AreaSqMeters).GreaterThan(0).WithMessage("Area must be greater than zero.");
         RuleFor(v => v.Bedrooms).GreaterThanOrEqualTo(0);
         RuleFor(v => v.Bathrooms).GreaterThanOrEqualTo(0);

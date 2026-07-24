@@ -1,5 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+// A DataAnnotations message only reaches the localizer when ErrorMessage is written out:
+// without it MVC formats the framework's own resource and never asks. The English text is
+// the resource key, exactly as everywhere else, and {0} is filled with the [Display] name.
+
 namespace RealEstatePortal.Web.Models.Profile;
 
 public class ProfileHubViewModel
@@ -17,15 +21,15 @@ public class ProfileHubViewModel
 public class EditProfileViewModel
 {
     [Display(Name = "Display name")]
-    [StringLength(80)]
+    [StringLength(80, ErrorMessage = "{0} can be at most {1} characters.")]
     public string? DisplayName { get; set; }
 
     [Display(Name = "Phone")]
-    [Phone]
-    [StringLength(30)]
+    [Phone(ErrorMessage = "{0} does not look like a valid number.")]
+    [StringLength(30, ErrorMessage = "{0} can be at most {1} characters.")]
     public string? Phone { get; set; }
 
     [Display(Name = "About you")]
-    [StringLength(600)]
+    [StringLength(600, ErrorMessage = "{0} can be at most {1} characters.")]
     public string? Bio { get; set; }
 }

@@ -18,6 +18,7 @@ public class CreateListingCommandValidatorTests
         AreaSqMeters = 90,
         Bedrooms = 2,
         Bathrooms = 1,
+        Address = "Kadıköy, İstanbul",
         ListingType = ListingType.Sale,
         PropertyType = PropertyType.Apartment
     };
@@ -42,6 +43,17 @@ public class CreateListingCommandValidatorTests
         var command = Valid();
         command.Price = 0;
         _validator.TestValidate(command).ShouldHaveValidationErrorFor(c => c.Price);
+    }
+
+    // The address used to be required only by MVC's implicit check on non-nullable strings, which
+    // has been turned off because its message could not be translated. The rule lives here now, so
+    // this is what keeps a listing from being published with no address at all.
+    [Fact]
+    public void EmptyAddress_FailsValidation()
+    {
+        var command = Valid();
+        command.Address = "";
+        _validator.TestValidate(command).ShouldHaveValidationErrorFor(c => c.Address);
     }
 
     [Fact]

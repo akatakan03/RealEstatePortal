@@ -1,5 +1,8 @@
+using FluentValidation;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -34,6 +37,13 @@ builder.Host.UseSerilog((context, config) =>
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<DomainExceptionFilter>();
+
+    // MVC treats a non-nullable string as implicitly required and rejects it with a message from
+    // a framework resource — "The Title field is required." — that no localizer can reach, since
+    // there is no attribute in the source to hang an ErrorMessage on. Every one of those fields is
+    // already covered by a FluentValidation rule, which does speak Turkish, so this turns off the
+    // duplicate check rather than leaving one English sentence in an otherwise translated form.
+    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
 
     // Must be inserted at the front: the built-in SimpleTypeModelBinderProvider would otherwise
     // claim double first and parse it in the request culture. See the binder for why that breaks
@@ -70,6 +80,11 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Must come after AddInfrastructure: that is where AddIdentity registers the stock describer,
+// and the last registration for a service type is the one resolved. Registering earlier would
+// silently lose to it and leave Identity's rejections in English.
+builder.Services.AddScoped<IdentityErrorDescriber, LocalizedIdentityErrorDescriber>();
 builder.Services
     .AddAuthentication()   // no argument -> keeps Identity's cookie as the DEFAULT scheme
     .AddJwtBearer(options =>
@@ -200,6 +215,27 @@ builder.Services.AddHostedService<ListingViewRollupWorker>();
 builder.Services.AddHostedService<DeletedListingPurgeWorker>();
 
 var app = builder.Build();
+
+// FluentValidation's own messages are already translated — the library ships them and picks the
+// language from the current UI culture — but they quote the property name, which came out as
+// 'Currency' and 'Listing Id' inside otherwise Turkish sentences. This resolves those names
+// through the same resource file the labels use.
+//
+// The localizer is safe to hold onto: it reads CurrentUICulture on each lookup rather than at
+// construction, so one instance answers correctly for every request.
+{
+    var fieldNames = app.Services.GetRequiredService<IStringLocalizer<SharedResource>>();
+    ValidatorOptions.Global.DisplayNameResolver = (_, member, _) =>
+    {
+        if (member is null) return null;
+
+        // No entry means no translation for this language, and returning null lets
+        // FluentValidation fall back to splitting the property name into words —
+        // "Area Sq Meters" rather than the raw identifier.
+        var name = fieldNames[member.Name];
+        return name.ResourceNotFound ? null : name.Value;
+    };
+}
 
 // Must run before anything that reads the client IP or scheme (rate limiter, HTTPS redirect, logging).
 app.UseForwardedHeaders();

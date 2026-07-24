@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Localization;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Infrastructure.Identity;
+using RealEstatePortal.Web.Localization;
 using RealEstatePortal.Web.Models.Account;
 
 namespace RealEstatePortal.Web.Controllers;
@@ -12,13 +14,16 @@ public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager)
+        SignInManager<ApplicationUser> signInManager,
+        IStringLocalizer<SharedResource> localizer)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _localizer = localizer;
     }
 
     [HttpGet]
@@ -73,7 +78,9 @@ public class AccountController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+        // Deliberately vague: saying which half was wrong tells someone probing the site
+        // whether an address has an account here.
+        ModelState.AddModelError(string.Empty, _localizer["That email address or password is not correct."]);
         return View(model);
     }
 

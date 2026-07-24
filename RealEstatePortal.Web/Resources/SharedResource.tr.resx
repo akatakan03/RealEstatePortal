@@ -1142,4 +1142,137 @@
   <data name="Please enter a valid number." xml:space="preserve">
     <value>Lütfen geçerli bir sayı girin.</value>
   </data>
+  <!-- Field names quoted inside FluentValidation's own messages. Resolved by DisplayNameResolver in Program.cs; a name with no entry here falls back to the split property name. -->
+  <data name="AreaSqMeters" xml:space="preserve">
+    <value>Alan</value>
+  </data>
+  <data name="ListingType" xml:space="preserve">
+    <value>İlan tipi</value>
+  </data>
+  <data name="PropertyType" xml:space="preserve">
+    <value>Konut tipi</value>
+  </data>
+  <data name="FloorNumber" xml:space="preserve">
+    <value>Bulunduğu kat</value>
+  </data>
+  <data name="TotalFloors" xml:space="preserve">
+    <value>Toplam kat</value>
+  </data>
+  <data name="BuildingAge" xml:space="preserve">
+    <value>Bina yaşı</value>
+  </data>
+  <data name="MonthlyDues" xml:space="preserve">
+    <value>Aidat</value>
+  </data>
+  <data name="Latitude" xml:space="preserve">
+    <value>Enlem</value>
+  </data>
+  <data name="Longitude" xml:space="preserve">
+    <value>Boylam</value>
+  </data>
+  <data name="ListingId" xml:space="preserve">
+    <value>İlan</value>
+  </data>
+  <data name="DisplayName" xml:space="preserve">
+    <value>Görünen ad</value>
+  </data>
+  <data name="Bio" xml:space="preserve">
+    <value>Hakkınızda</value>
+  </data>
+  <!-- Validation messages written by the validators. They are English in the Application layer, which is also how this file is keyed, so the text doubles as the lookup. -->
+  <data name="Price must be greater than zero." xml:space="preserve">
+    <value>Fiyat sıfırdan büyük olmalı.</value>
+  </data>
+  <data name="Area must be greater than zero." xml:space="preserve">
+    <value>Alan sıfırdan büyük olmalı.</value>
+  </data>
+  <data name="Latitude is out of range." xml:space="preserve">
+    <value>Enlem geçerli aralıkta değil.</value>
+  </data>
+  <data name="Longitude is out of range." xml:space="preserve">
+    <value>Boylam geçerli aralıkta değil.</value>
+  </data>
+  <data name="Floor number looks invalid." xml:space="preserve">
+    <value>Bulunduğu kat geçersiz görünüyor.</value>
+  </data>
+  <data name="Total floors must be positive." xml:space="preserve">
+    <value>Toplam kat sayısı sıfırdan büyük olmalı.</value>
+  </data>
+  <data name="Floor can't be higher than the building's total floors." xml:space="preserve">
+    <value>Bulunduğu kat, binanın toplam kat sayısından büyük olamaz.</value>
+  </data>
+  <data name="Building age looks invalid." xml:space="preserve">
+    <value>Bina yaşı geçersiz görünüyor.</value>
+  </data>
+  <data name="Monthly dues can't be negative." xml:space="preserve">
+    <value>Aidat negatif olamaz.</value>
+  </data>
+  <data name="Please enter a message." xml:space="preserve">
+    <value>Lütfen bir mesaj yazın.</value>
+  </data>
+  <data name="Please choose at least one image." xml:space="preserve">
+    <value>Lütfen en az bir görsel seçin.</value>
+  </data>
+  <data name="Only image files are allowed." xml:space="preserve">
+    <value>Yalnızca görsel dosyaları yüklenebilir.</value>
+  </data>
+  <data name="One of the selected files is empty." xml:space="preserve">
+    <value>Seçtiğiniz dosyalardan biri boş.</value>
+  </data>
+  <data name="Please give a reason for locking this listing." xml:space="preserve">
+    <value>Lütfen bu ilanı neden kilitlediğinizi yazın.</value>
+  </data>
+  <data name="Your note is too long (1000 characters max)." xml:space="preserve">
+    <value>Notunuz çok uzun (en fazla 1000 karakter).</value>
+  </data>
+  <data name="&quot;{0}&quot; is not an image." xml:space="preserve">
+    <value>“{0}” bir görsel değil.</value>
+  </data>
+  <!-- Identity's own rejections, shown on the sign-in and registration forms. -->
+  <data name="That email address or password is not correct." xml:space="preserve">
+    <value>E-posta adresi veya şifre hatalı.</value>
+  </data>
+  <data name="An account with this email address already exists." xml:space="preserve">
+    <value>Bu e-posta adresiyle bir hesap zaten var.</value>
+  </data>
+  <data name="That email address doesn't look right." xml:space="preserve">
+    <value>Bu e-posta adresi geçerli görünmüyor.</value>
+  </data>
+  <data name="The password must be at least {0} characters." xml:space="preserve">
+    <value>Şifre en az {0} karakter olmalı.</value>
+  </data>
+  <data name="The password must contain at least one digit." xml:space="preserve">
+    <value>Şifre en az bir rakam içermeli.</value>
+  </data>
+  <data name="The password must contain at least one lowercase letter." xml:space="preserve">
+    <value>Şifre en az bir küçük harf içermeli.</value>
+  </data>
+  <data name="The password must contain at least one uppercase letter." xml:space="preserve">
+    <value>Şifre en az bir büyük harf içermeli.</value>
+  </data>
+  <data name="The password must contain at least one symbol." xml:space="preserve">
+    <value>Şifre en az bir sembol içermeli.</value>
+  </data>
+  <data name="The password must use at least {0} different characters." xml:space="preserve">
+    <value>Şifre en az {0} farklı karakter kullanmalı.</value>
+  </data>
+  <data name="That password is not correct." xml:space="preserve">
+    <value>Şifre hatalı.</value>
+  </data>
+  <!-- DataAnnotations messages. {0} is the [Display] name; StringLength passes max as {1} and min as {2}. -->
+  <data name="Please fill in {0}." xml:space="preserve">
+    <value>{0} alanını doldurun.</value>
+  </data>
+  <data name="{0} does not look like a valid address." xml:space="preserve">
+    <value>{0} geçerli bir adres gibi görünmüyor.</value>
+  </data>
+  <data name="{0} does not look like a valid number." xml:space="preserve">
+    <value>{0} geçerli bir numara gibi görünmüyor.</value>
+  </data>
+  <data name="{0} must be between {2} and {1} characters." xml:space="preserve">
+    <value>{0} en az {2}, en fazla {1} karakter olmalı.</value>
+  </data>
+  <data name="{0} can be at most {1} characters." xml:space="preserve">
+    <value>{0} en fazla {1} karakter olabilir.</value>
+  </data>
 </root>

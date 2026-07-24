@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Localization;
 using RealEstatePortal.Application.Common.Exceptions;
 using RealEstatePortal.Application.Favorites.Queries.IsListingFavorited;
 using RealEstatePortal.Application.Geocoding.Queries.GeocodeAddress;
@@ -35,10 +36,12 @@ namespace RealEstatePortal.Web.Controllers;
 public class ListingsController : Controller
 {
     private readonly ISender _sender;
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
-    public ListingsController(ISender sender)
+    public ListingsController(ISender sender, IStringLocalizer<SharedResource> localizer)
     {
         _sender = sender;
+        _localizer = localizer;
     }
 
     [HttpGet]
@@ -74,7 +77,7 @@ public class ListingsController : Controller
         }
         catch (ValidationException ex)
         {
-            ModelState.AddValidationErrors(ex);
+            ModelState.AddValidationErrors(ex, _localizer);
             return View(command);
         }
     }
@@ -115,7 +118,8 @@ public class ListingsController : Controller
 
                     if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
                     {
-                        ModelState.AddModelError(string.Empty, $"\"{file.FileName}\" is not an image.");
+                        ModelState.AddModelError(string.Empty,
+                            _localizer["\"{0}\" is not an image.", file.FileName]);
                         await LoadPhotosAsync(command.Id);
                         return View(command);
                     }
@@ -133,7 +137,7 @@ public class ListingsController : Controller
         }
         catch (ValidationException ex)
         {
-            ModelState.AddValidationErrors(ex);
+            ModelState.AddValidationErrors(ex, _localizer);
             await LoadPhotosAsync(command.Id);
             return View(command);
         }
@@ -210,7 +214,7 @@ public class ListingsController : Controller
         catch (ValidationException ex)
         {
             // The command binds under ListingDetailViewModel.Inquiry, so the keys need that prefix.
-            ModelState.AddValidationErrors(ex, prefix: "Inquiry");
+            ModelState.AddValidationErrors(ex, _localizer, prefix: "Inquiry");
 
             var dto = await _sender.Send(new GetListingDetailQuery(command.ListingId));
             if (dto is null) return NotFound();

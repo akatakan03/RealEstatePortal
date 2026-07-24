@@ -21,7 +21,15 @@ placeholder = re.compile(r"\{(\d+)\}")
 problems = []
 names = []
 
-for data in ET.parse(PATH).getroot().findall("data"):
+try:
+    root = ET.parse(PATH).getroot()
+except ET.ParseError as error:
+    # Usually an unescaped " or & in a name attribute — a key is English text, so it can contain
+    # either. They have to be written as &quot; and &amp;.
+    print("%s is not well-formed XML: %s" % (PATH, error))
+    sys.exit(1)
+
+for data in root.findall("data"):
     name = data.get("name")
     value_el = data.find("value")
     if name is None:
