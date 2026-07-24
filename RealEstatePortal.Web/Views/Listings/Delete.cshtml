@@ -1,43 +1,40 @@
-﻿@using RealEstatePortal.Domain.Constants
+@using RealEstatePortal.Domain.Constants
 @model RealEstatePortal.Application.Listings.Commands.UpdateListing.UpdateListingCommand
 @{
-    ViewData["Title"] = "Delete Listing";
+    ViewData["Title"] = L["Delete listing"].Value;
 }
 
 <div class="form-page">
     <div class="container">
         <div class="form-shell narrow">
-            <span class="eyebrow">Agent dashboard</span>
-            <h1 class="page-title" style="margin-bottom:1rem;">Delete listing</h1>
+            <span class="eyebrow">@L["Agent dashboard"]</span>
+            <h1 class="page-title" style="margin-bottom:1rem;">@L["Delete listing"]</h1>
 
             <div class="form-card">
                 <div class="alert alert-danger">
-                    This takes the listing off the site straight away — visitors won't find it and
-                    it leaves your dashboard.
+                    @L["This takes the listing off the site straight away — visitors won't find it and it leaves your dashboard."]
                 </div>
 
                 <p class="muted delete-note">
-                    Nothing is erased yet. The listing, its photos, and every inquiry you've received
-                    about it are kept for @ListingDeletion.RetentionDays days, so a mistake can be put
-                    right — ask an administrator to restore it. After that it's erased for good.
+                    @L["Nothing is erased yet. The listing, its photos, and every inquiry you've received about it are kept for {0} days, so a mistake can be put right — ask an administrator to restore it. After that it's erased for good.", ListingDeletion.RetentionDays]
                 </p>
 
                 <dl class="summary-grid">
-                    <dt>Title</dt>
+                    <dt>@L["Title"]</dt>
                     <dd class="strong">@Model.Title</dd>
-                    <dt>Type</dt>
-                    <dd>@Model.ListingType</dd>
-                    <dt>Property</dt>
-                    <dd>@Model.PropertyType</dd>
-                    <dt>Price</dt>
+                    <dt>@L["Listing type"]</dt>
+                    <dd>@L.Localize(Model.ListingType)</dd>
+                    <dt>@L["Property"]</dt>
+                    <dd>@L.Localize(Model.PropertyType)</dd>
+                    <dt>@L["Price"]</dt>
                     <dd><span class="value">@Model.Price.ToString("N0") @Model.Currency</span></dd>
                 </dl>
 
                 <form asp-action="Delete" method="post">
                     <input type="hidden" asp-for="Id" />
                     <div class="form-actions bare">
-                        <button type="submit" class="btn btn-danger">Delete listing</button>
-                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-ghost">Cancel</a>
+                        <button type="submit" class="btn btn-danger">@L["Delete listing"]</button>
+                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-ghost">@L["Cancel"]</a>
                     </div>
                 </form>
             </div>

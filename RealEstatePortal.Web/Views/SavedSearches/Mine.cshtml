@@ -1,27 +1,28 @@
-﻿@using RealEstatePortal.Domain.Enums
+@using RealEstatePortal.Domain.Enums
 @model List<RealEstatePortal.Application.SavedSearches.Queries.GetMySavedSearches.SavedSearchDto>
 @{
-    ViewData["Title"] = "Saved searches";
+    ViewData["Title"] = L["Saved searches"].Value;
 }
 
 <div class="dash">
     <div class="container">
         <div class="dash-head">
             <div>
-                <span class="eyebrow">Your account</span>
-                <h1 class="page-title">Saved searches</h1>
+                <span class="eyebrow">@L["Your account"]</span>
+                <h1 class="page-title">@L["Saved searches"]</h1>
             </div>
-            <a class="btn btn-ghost" asp-controller="Favorites" asp-action="Mine">♥ Saved listings</a>
+            <a class="btn btn-ghost" asp-controller="Favorites" asp-action="Mine">♥ @L["Saved listings"]</a>
         </div>
 
         <div class="form-card" style="margin-bottom:1.5rem;color:var(--muted);">
-            We'll email you when a newly published listing matches one of these searches.
+            @L["We'll email you when a newly published listing matches one of these searches."]
         </div>
 
         @if (!Model.Any())
         {
             <div class="form-card card-empty">
-                No saved searches yet. Set some filters on the <a asp-controller="Listings" asp-action="Index" style="color:var(--brass-dk);font-weight:600;">browse page</a> and click "Save this search".
+                @Html.Raw(L["No saved searches yet. Set some filters on the {0} and save the search you want to be told about.",
+                    $"<a href=\"{Url.Action("Index", "Listings")}\" style=\"color:var(--brass-dk);font-weight:600;\">{L["browse page"].Value}</a>"])
             </div>
         }
         else
@@ -29,7 +30,9 @@
             <div class="table-card">
                 <table class="table">
                     <thead>
-                        <tr><th>Name</th><th>Criteria</th><th></th></tr>
+                        @* Not the "Name" key — that one labels the contact form's full-name field
+                           and reads "Ad soyad". This column is the name given to the search. *@
+                        <tr><th>@L["Search name"]</th><th>@L["Criteria"]</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach (var s in Model)
@@ -40,17 +43,21 @@
                                     @{
                                         var parts = new List<string>();
                                         if (!string.IsNullOrWhiteSpace(s.Keyword)) parts.Add($"“{s.Keyword}”");
-                                        if (s.ListingType.HasValue) parts.Add(s.ListingType.ToString()!);
-                                        if (s.PropertyType.HasValue) parts.Add(s.PropertyType.ToString()!);
-                                        if (s.MinBedrooms.HasValue) parts.Add($"{s.MinBedrooms}+ bed");
+                                        if (s.ListingType.HasValue) parts.Add(L.Localize(s.ListingType.Value));
+                                        if (s.PropertyType.HasValue) parts.Add(L.Localize(s.PropertyType.Value));
+                                        if (s.MinBedrooms.HasValue) parts.Add(L["{0}+ bedrooms", s.MinBedrooms].Value);
                                         if (s.MaxPrice.HasValue) parts.Add($"≤ {s.MaxPrice.Value:N0}");
                                     }
-                                    @(parts.Any() ? string.Join(" · ", parts) : "Any listing")
+                                    @(parts.Any() ? string.Join(" · ", parts) : L["Any listing"].Value)
                                 </td>
                                 <td>
-                                    <form asp-action="Delete" method="post" class="row-actions" onsubmit="return confirm('Delete this saved search?');">
+                                    @* The message lands inside a JS string literal, so it must not
+                                       contain an apostrophe: Razor encodes it to &#x27; and the
+                                       browser decodes it back, breaking out of the quotes. Turkish
+                                       phrasing here is deliberately apostrophe-free. *@
+                                    <form asp-action="Delete" method="post" class="row-actions" onsubmit="return confirm('@L["Delete this saved search?"]');">
                                         <input type="hidden" name="id" value="@s.Id" />
-                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        <button type="submit" class="btn btn-danger btn-sm">@L["Delete"]</button>
                                     </form>
                                 </td>
                             </tr>

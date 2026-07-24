@@ -774,4 +774,368 @@
   <data name="Fiber" xml:space="preserve">
     <value>Fiber</value>
   </data>
+  <!-- Agent profile (public) -->
+  <data name="Agent dashboard" xml:space="preserve">
+    <value>Danışman paneli</value>
+  </data>
+  <data name="{0} active listing" xml:space="preserve">
+    <value>yayında {0} ilan</value>
+  </data>
+  <data name="{0} active listings" xml:space="preserve">
+    <value>yayında {0} ilan</value>
+  </data>
+  <data name="Listings by {0}" xml:space="preserve">
+    <value>{0} ilanları</value>
+  </data>
+  <data name="This agent has no active listings right now." xml:space="preserve">
+    <value>Bu danışmanın şu an yayında ilanı yok.</value>
+  </data>
+  <!-- Inquiry inbox -->
+  <data name="No inquiries yet." xml:space="preserve">
+    <value>Henüz talep yok.</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Gönderen</value>
+  </data>
+  <data name="Received" xml:space="preserve">
+    <value>Geliş tarihi</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Aç</value>
+  </data>
+  <data name="Inquiry detail" xml:space="preserve">
+    <value>Talep detayı</value>
+  </data>
+  <data name="Back to inquiries" xml:space="preserve">
+    <value>Taleplere dön</value>
+  </data>
+  <data name="Inquiry from {0}" xml:space="preserve">
+    <value>{0} kişisinden gelen talep</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Telefon</value>
+  </data>
+  <data name="Their message" xml:space="preserve">
+    <value>Gelen mesaj</value>
+  </data>
+  <data name="Mark as handled" xml:space="preserve">
+    <value>İlgilenildi olarak işaretle</value>
+  </data>
+  <!-- Inquiry status (enum members) -->
+  <data name="New" xml:space="preserve">
+    <value>Yeni</value>
+  </data>
+  <data name="Read" xml:space="preserve">
+    <value>Okundu</value>
+  </data>
+  <data name="Handled" xml:space="preserve">
+    <value>İlgilenildi</value>
+  </data>
+  <!-- Saved listings -->
+  <data name="Saved listings" xml:space="preserve">
+    <value>Favori ilanlarım</value>
+  </data>
+  <data name="Your account" xml:space="preserve">
+    <value>Hesabınız</value>
+  </data>
+  <data name="You haven't saved any listings yet." xml:space="preserve">
+    <value>Henüz ilan favorilemediniz.</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Çıkar</value>
+  </data>
+  <!-- Saved searches -->
+  <data name="Saved searches" xml:space="preserve">
+    <value>Kayıtlı aramalar</value>
+  </data>
+  <data name="We'll email you when a newly published listing matches one of these searches." xml:space="preserve">
+    <value>Bu aramalardan birine uyan yeni bir ilan yayınlandığında size e-posta göndeririz.</value>
+  </data>
+  <data name="No saved searches yet. Set some filters on the {0} and save the search you want to be told about." xml:space="preserve">
+    <value>Henüz kayıtlı arama yok. {0} üzerinde filtreleri ayarlayıp haberdar olmak istediğiniz aramayı kaydedin.</value>
+  </data>
+  <data name="browse page" xml:space="preserve">
+    <value>ilanlar sayfası</value>
+  </data>
+  <data name="Search name" xml:space="preserve">
+    <value>Arama adı</value>
+  </data>
+  <data name="Criteria" xml:space="preserve">
+    <value>Kriterler</value>
+  </data>
+  <data name="{0}+ bedrooms" xml:space="preserve">
+    <value>{0}+ oda</value>
+  </data>
+  <data name="Any listing" xml:space="preserve">
+    <value>Tüm ilanlar</value>
+  </data>
+  <data name="Delete this saved search?" xml:space="preserve">
+    <value>Bu kayıtlı arama silinsin mi?</value>
+  </data>
+  <!-- Profile -->
+  <data name="My account" xml:space="preserve">
+    <value>Hesabım</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Bilgiler</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>Hakkında</value>
+  </data>
+  <data name="Shortcuts" xml:space="preserve">
+    <value>Kısayollar</value>
+  </data>
+  <data name="Admin moderation" xml:space="preserve">
+    <value>İlan denetimi</value>
+  </data>
+  <data name="Edit profile" xml:space="preserve">
+    <value>Profili düzenle</value>
+  </data>
+  <data name="Profile photo" xml:space="preserve">
+    <value>Profil fotoğrafı</value>
+  </data>
+  <data name="Square images look best — it's resized and optimised automatically." xml:space="preserve">
+    <value>Kare görseller en iyi sonucu verir — boyutlandırma ve optimizasyon otomatik yapılır.</value>
+  </data>
+  <data name="Upload photo" xml:space="preserve">
+    <value>Fotoğrafı yükle</value>
+  </data>
+  <data name="Your details" xml:space="preserve">
+    <value>Bilgileriniz</value>
+  </data>
+  <data name="Display name" xml:space="preserve">
+    <value>Görünen ad</value>
+  </data>
+  <data name="About you" xml:space="preserve">
+    <value>Hakkınızda</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>Üye</value>
+  </data>
+  <!-- Listing form (create / edit) -->
+  <data name="Title" xml:space="preserve">
+    <value>Başlık</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Açıklama</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Para birimi</value>
+  </data>
+  <data name="Area (m²)" xml:space="preserve">
+    <value>Alan (m²)</value>
+  </data>
+  <data name="Features &amp; details" xml:space="preserve">
+    <value>Özellikler ve detaylar</value>
+  </data>
+  <data name="Not specified" xml:space="preserve">
+    <value>Belirtilmedi</value>
+  </data>
+  <data name="Total floors" xml:space="preserve">
+    <value>Toplam kat</value>
+  </data>
+  <data name="Building age (yrs)" xml:space="preserve">
+    <value>Bina yaşı (yıl)</value>
+  </data>
+  <data name="Parking / garage" xml:space="preserve">
+    <value>Otopark / garaj</value>
+  </data>
+  <data name="Address" xml:space="preserve">
+    <value>Adres</value>
+  </data>
+  <data name="Locate on map" xml:space="preserve">
+    <value>Haritada bul</value>
+  </data>
+  <data name="Type the address and use the locate button, then drag the pin to the exact spot." xml:space="preserve">
+    <value>Adresi yazıp haritada bul düğmesini kullanın, sonra iğneyi tam noktaya sürükleyin.</value>
+  </data>
+  <data name="Create listing" xml:space="preserve">
+    <value>İlanı oluştur</value>
+  </data>
+  <data name="Edit listing" xml:space="preserve">
+    <value>İlanı düzenle</value>
+  </data>
+  <data name="Save changes" xml:space="preserve">
+    <value>Değişiklikleri kaydet</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Vazgeç</value>
+  </data>
+  <data name="Add photos" xml:space="preserve">
+    <value>Fotoğraf ekle</value>
+  </data>
+  <data name="Uploaded when you save." xml:space="preserve">
+    <value>Kaydettiğinizde yüklenir.</value>
+  </data>
+  <data name="Current photos" xml:space="preserve">
+    <value>Mevcut fotoğraflar</value>
+  </data>
+  <data name="listing photo" xml:space="preserve">
+    <value>ilan fotoğrafı</value>
+  </data>
+  <data name="Cover" xml:space="preserve">
+    <value>Kapak</value>
+  </data>
+  <data name="Set cover" xml:space="preserve">
+    <value>Kapak yap</value>
+  </data>
+  <data name="Delete this photo? This cannot be undone." xml:space="preserve">
+    <value>Bu fotoğraf silinsin mi? Bu işlem geri alınamaz.</value>
+  </data>
+  <!-- Delete listing (agent) -->
+  <data name="Delete listing" xml:space="preserve">
+    <value>İlanı sil</value>
+  </data>
+  <data name="This takes the listing off the site straight away — visitors won't find it and it leaves your dashboard." xml:space="preserve">
+    <value>İlan siteden hemen kalkar — ziyaretçiler bulamaz ve panelinizden çıkar.</value>
+  </data>
+  <data name="Nothing is erased yet. The listing, its photos, and every inquiry you've received about it are kept for {0} days, so a mistake can be put right — ask an administrator to restore it. After that it's erased for good." xml:space="preserve">
+    <value>Henüz hiçbir şey kalıcı silinmedi. İlan, fotoğrafları ve hakkında aldığınız tüm talepler {0} gün saklanır; bir yanlışlık olduysa düzeltilebilir — geri alması için bir yöneticiye başvurun. Bu sürenin sonunda kalıcı olarak silinir.</value>
+  </data>
+  <!-- Admin moderation -->
+  <data name="Listing moderation" xml:space="preserve">
+    <value>İlan denetimi</value>
+  </data>
+  <data name="All listings" xml:space="preserve">
+    <value>Tüm ilanlar</value>
+  </data>
+  <data name="Re-review requests" xml:space="preserve">
+    <value>Yeniden inceleme talepleri</value>
+  </data>
+  <data name="Trash" xml:space="preserve">
+    <value>Çöp kutusu</value>
+  </data>
+  <data name="No re-review requests right now." xml:space="preserve">
+    <value>Şu an yeniden inceleme talebi yok.</value>
+  </data>
+  <data name="Agents who addressed a lock and asked for another look. Oldest first." xml:space="preserve">
+    <value>Kilidi giderip yeniden bakılmasını isteyen danışmanlar. En eskiden yeniye.</value>
+  </data>
+  <data name="requested {0}" xml:space="preserve">
+    <value>{0} tarihinde talep edildi</value>
+  </data>
+  <data name="Locked for:" xml:space="preserve">
+    <value>Kilit sebebi:</value>
+  </data>
+  <data name="The agent didn't leave a note." xml:space="preserve">
+    <value>Danışman not bırakmamış.</value>
+  </data>
+  <data name="Unlock" xml:space="preserve">
+    <value>Kilidi aç</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Sahibi</value>
+  </data>
+  <data name="Nothing in the trash." xml:space="preserve">
+    <value>Çöp kutusu boş.</value>
+  </data>
+  <data name="Deleted listings stay here for {0} days with their photos, inquiries and saves intact, then are erased automatically. Restoring one brings it back as a draft." xml:space="preserve">
+    <value>Silinen ilanlar fotoğrafları, talepleri ve favorileriyle birlikte {0} gün burada kalır, sonra otomatik olarak kalıcı silinir. Geri alınan ilan taslak olarak döner.</value>
+  </data>
+  <data name="Deleted" xml:space="preserve">
+    <value>Silinme</value>
+  </data>
+  <data name="Erased in" xml:space="preserve">
+    <value>Kalıcı silinmesine</value>
+  </data>
+  <data name="any moment" xml:space="preserve">
+    <value>birazdan</value>
+  </data>
+  <data name="1 day" xml:space="preserve">
+    <value>1 gün</value>
+  </data>
+  <data name="{0} days" xml:space="preserve">
+    <value>{0} gün</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Geri al</value>
+  </data>
+  <data name="Erase now" xml:space="preserve">
+    <value>Kalıcı sil</value>
+  </data>
+  <data name="Search by title or address…" xml:space="preserve">
+    <value>Başlığa veya adrese göre ara…</value>
+  </data>
+  <data name="No listings." xml:space="preserve">
+    <value>İlan yok.</value>
+  </data>
+  <data name="No listings with status {0}." xml:space="preserve">
+    <value>{0} durumunda ilan yok.</value>
+  </data>
+  <data name="Lock" xml:space="preserve">
+    <value>Kilitle</value>
+  </data>
+  <data name="Locked — {0}" xml:space="preserve">
+    <value>Kilitli — {0}</value>
+  </data>
+  <data name="Re-review requested" xml:space="preserve">
+    <value>Yeniden inceleme talep edildi</value>
+  </data>
+  <data name="Re-review requested · {0}" xml:space="preserve">
+    <value>Yeniden inceleme talep edildi · {0}</value>
+  </data>
+  <data name="Lock listing" xml:space="preserve">
+    <value>İlanı kilitle</value>
+  </data>
+  <data name="This takes the listing off the public site and prevents the agent from publishing it until you unlock it." xml:space="preserve">
+    <value>Bu işlem ilanı siteden kaldırır ve siz kilidi açana kadar danışmanın yayınlamasını engeller.</value>
+  </data>
+  <data name="Reason (the agent will see this and be emailed it)" xml:space="preserve">
+    <value>Sebep (danışman bunu görecek ve e-posta ile alacak)</value>
+  </data>
+  <data name="e.g. The photos don't match the described property. Please re-upload accurate images." xml:space="preserve">
+    <value>ör. Fotoğraflar anlatılan konutla uyuşmuyor. Lütfen doğru görselleri yükleyin.</value>
+  </data>
+  <data name="Locking “{0}”. This takes it off the public site until you unlock it." xml:space="preserve">
+    <value>“{0}” kilitleniyor. Siz kilidi açana kadar siteden kalkar.</value>
+  </data>
+  <!-- Confirmation prompts. These land inside a JavaScript string literal, so the Turkish is deliberately apostrophe-free: Razor encodes ' as &amp;#x27; and the browser decodes it back, ending the literal early. -->
+  <data name="Erase this listing now? Its photos, inquiries and saves go with it. This cannot be undone." xml:space="preserve">
+    <value>Bu ilan şimdi kalıcı olarak silinsin mi? Fotoğrafları, talepleri ve favorileri de gider. Bu işlem geri alınamaz.</value>
+  </data>
+  <data name="Move this listing to the trash? It leaves the site now and can be restored from the Trash tab for {0} days." xml:space="preserve">
+    <value>Bu ilan çöp kutusuna taşınsın mı? Siteden hemen kalkar ve {0} gün boyunca Çöp kutusu sekmesinden geri alınabilir.</value>
+  </data>
+  <!-- Error page -->
+  <data name="Something went wrong" xml:space="preserve">
+    <value>Bir şeyler ters gitti</value>
+  </data>
+  <data name="We couldn't complete that request. Nothing you had saved has been lost — please try again in a moment." xml:space="preserve">
+    <value>İsteğinizi tamamlayamadık. Kaydettikleriniz kaybolmadı — lütfen birazdan tekrar deneyin.</value>
+  </data>
+  <data name="If it keeps happening, quote this reference:" xml:space="preserve">
+    <value>Sorun devam ederse bu referansı iletin:</value>
+  </data>
+  <!-- Notices the controllers put in TempData. They are stored in English and translated by the view that renders them, where the request culture is known. -->
+  <data name="Your message has been sent to the agent." xml:space="preserve">
+    <value>Mesajınız danışmana iletildi.</value>
+  </data>
+  <data name="Your re-review request has been sent to the administrators." xml:space="preserve">
+    <value>Yeniden inceleme talebiniz yöneticilere iletildi.</value>
+  </data>
+  <data name="Listing restored as a draft. The agent can publish it again." xml:space="preserve">
+    <value>İlan taslak olarak geri alındı. Danışman yeniden yayınlayabilir.</value>
+  </data>
+  <data name="Listing erased along with its photos, inquiries and saves." xml:space="preserve">
+    <value>İlan; fotoğrafları, talepleri ve favorileriyle birlikte kalıcı olarak silindi.</value>
+  </data>
+  <data name="Your profile has been updated." xml:space="preserve">
+    <value>Profiliniz güncellendi.</value>
+  </data>
+  <data name="Your photo has been updated." xml:space="preserve">
+    <value>Fotoğrafınız güncellendi.</value>
+  </data>
+  <data name="Please choose an image." xml:space="preserve">
+    <value>Lütfen bir görsel seçin.</value>
+  </data>
+  <data name="That file isn't an image." xml:space="preserve">
+    <value>Bu dosya bir görsel değil.</value>
+  </data>
+  <!-- Heating / internet enum members that carry no obvious English word. ADSL, VDSL and Fiber are left alone: they read the same in Turkish. -->
+  <data name="None" xml:space="preserve">
+    <value>Yok</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Bilinmiyor</value>
+  </data>
 </root>

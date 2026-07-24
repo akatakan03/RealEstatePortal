@@ -18,10 +18,14 @@
                 }
             </div>
             <div class="agent-info">
-                <span class="eyebrow">Agent</span>
+                <span class="eyebrow">@L["Agent"]</span>
                 <h1>@Model.DisplayName</h1>
                 <div class="agent-meta">
-                    @Model.Listings.Count active listing@(Model.Listings.Count == 1 ? "" : "s")
+                    @* Two keys rather than a suffix: English pluralises with an "s" the Turkish
+                       noun does not take, so the whole phrase has to be translatable. *@
+                    @(Model.Listings.Count == 1
+                        ? L["{0} active listing", Model.Listings.Count]
+                        : L["{0} active listings", Model.Listings.Count])
                 </div>
                 @if (!string.IsNullOrWhiteSpace(Model.Bio))
                 {
@@ -31,13 +35,13 @@
         </div>
 
         <div class="sec-head">
-            <h2>Listings by @Model.DisplayName</h2>
+            <h2>@L["Listings by {0}", Model.DisplayName]</h2>
         </div>
 
         @if (!Model.Listings.Any())
         {
             <div class="form-card card-empty">
-                This agent has no active listings right now.
+                @L["This agent has no active listings right now."]
             </div>
         }
         else
@@ -47,7 +51,7 @@
                 {
                     <a class="listing-card" href="@Url.ListingUrl(listing.Id, listing.Slug)">
                         <div class="lc-media">
-                            <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@listing.ListingType</span>
+                            <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@L.Localize(listing.ListingType)</span>
                             @{ var cover = ListingImages.CoverOrPlaceholder(listing.CoverThumbnailUrl, listing.Id, Configuration.GetValue<bool>("Demo:PlaceholderImages")); }
                             @if (!string.IsNullOrEmpty(cover))
                             {
@@ -55,14 +59,14 @@
                             }
                             else
                             {
-                                <div class="noimg">No photo yet</div>
+                                <div class="noimg">@L["No photo yet"]</div>
                             }
                         </div>
                         <div class="lc-body">
-                            <div class="lc-loc">@listing.PropertyType</div>
+                            <div class="lc-loc">@L.Localize(listing.PropertyType)</div>
                             <div class="lc-title">@listing.Title</div>
                             <div class="lc-meta">
-                                <span><span class="value">@listing.Bedrooms</span> bd</span>
+                                <span><span class="value">@listing.Bedrooms</span> @L["bd"]</span>
                                 <span><span class="value">@listing.AreaSqMeters.ToString("N0")</span> m²</span>
                             </div>
                             <div class="lc-price"><span class="value">@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</span></div>

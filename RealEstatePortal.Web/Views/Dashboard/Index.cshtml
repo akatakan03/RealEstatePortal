@@ -25,9 +25,11 @@
             <a class="btn btn-primary" asp-controller="Listings" asp-action="Create">+ @L["New listing"]</a>
         </div>
 
+        @* Translated here rather than in the controller: the message has survived a redirect,
+           and rendering is where the request culture is known for certain. *@
         @if (TempData["UnlockRequested"] is string sent)
         {
-            <div class="alert alert-success">@sent</div>
+            <div class="alert alert-success">@L[sent]</div>
         }
 
         @if (Model.TotalListings == 0)

@@ -1,34 +1,38 @@
-﻿@using RealEstatePortal.Domain.Enums
+@using RealEstatePortal.Domain.Enums
 @model RealEstatePortal.Application.Inquiries.Queries.InquiryDto
 @{
-    ViewData["Title"] = "Inquiry";
+    @* "Inquiry detail", not "Inquiry": resource names are matched without regard to case and
+       "inquiry" is already the unit noun used by the dashboard charts. *@
+    ViewData["Title"] = L["Inquiry detail"].Value;
 }
 
-<a asp-action="Index" class="btn btn-link px-0">← Back to inquiries</a>
+<a asp-action="Index" class="btn btn-link px-0">← @L["Back to inquiries"]</a>
 
-<h1>Inquiry from @Model.Name</h1>
+<h1>@L["Inquiry from {0}", Model.Name]</h1>
 
 <dl class="row">
-    <dt class="col-sm-2">Listing</dt>
+    <dt class="col-sm-2">@L["Listing"]</dt>
     <dd class="col-sm-10">
         <a href="@Url.ListingUrl(Model.ListingId)">@Model.ListingTitle</a>
     </dd>
-    <dt class="col-sm-2">Status</dt>
-    <dd class="col-sm-10">@Model.Status</dd>
-    <dt class="col-sm-2">Email</dt>
+    <dt class="col-sm-2">@L["Status"]</dt>
+    <dd class="col-sm-10">@L.Localize(Model.Status)</dd>
+    <dt class="col-sm-2">@L["Email"]</dt>
     <dd class="col-sm-10"><a href="mailto:@Model.Email">@Model.Email</a></dd>
-    <dt class="col-sm-2">Phone</dt>
+    <dt class="col-sm-2">@L["Phone"]</dt>
     <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)</dd>
-    <dt class="col-sm-2">Received</dt>
+    <dt class="col-sm-2">@L["Received"]</dt>
     <dd class="col-sm-10">@Model.Created.ToLocalTime().ToString("f")</dd>
 </dl>
 
-<h4>Message</h4>
+@* Not the "Message" key: that one labels the field a visitor types into and reads
+   "Mesajınız" in Turkish, which is wrong when an agent is reading what was sent to them. *@
+<h4>@L["Their message"]</h4>
 <p style="white-space: pre-wrap;">@Model.Message</p>
 
 @if (Model.Status != InquiryStatus.Handled)
 {
     <form asp-action="MarkHandled" asp-route-id="@Model.Id" method="post">
-        <button type="submit" class="btn btn-success">Mark as handled</button>
+        <button type="submit" class="btn btn-success">@L["Mark as handled"]</button>
     </form>
 }

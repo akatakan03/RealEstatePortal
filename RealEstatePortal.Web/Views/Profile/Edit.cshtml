@@ -1,30 +1,31 @@
 ﻿@model RealEstatePortal.Web.Models.Profile.EditProfileViewModel
 @{
-    ViewData["Title"] = "Edit profile";
+    ViewData["Title"] = L["Edit profile"].Value;
 }
 
 <div class="form-page">
     <div class="container">
         <div class="form-shell">
-            <span class="eyebrow">Your account</span>
-            <h1 class="page-title" style="margin-bottom:1.5rem;">Edit profile</h1>
+            <span class="eyebrow">@L["Your account"]</span>
+            <h1 class="page-title" style="margin-bottom:1.5rem;">@L["Edit profile"]</h1>
 
+            @* Translated here, not in the controller: see the note in Index.cshtml. *@
             @if (TempData["ProfileError"] is string err)
             {
-                <div class="alert alert-danger">@err</div>
+                <div class="alert alert-danger">@L[err]</div>
             }
 
             <div class="form-card" style="margin-bottom:1.5rem;">
-                <h3 class="profile-h3">Profile photo</h3>
+                <h3 class="profile-h3">@L["Profile photo"]</h3>
                 <form asp-action="Avatar" method="post" enctype="multipart/form-data">
                     <input type="file" name="avatar" accept="image/*" class="form-control" required />
-                    <p class="form-hint">Square images look best — it's resized and optimised automatically.</p>
-                    <button type="submit" class="btn btn-ghost btn-sm" style="margin-top:.6rem;">Upload photo</button>
+                    <p class="form-hint">@L["Square images look best — it's resized and optimised automatically."]</p>
+                    <button type="submit" class="btn btn-ghost btn-sm" style="margin-top:.6rem;">@L["Upload photo"]</button>
                 </form>
             </div>
 
             <div class="form-card">
-                <h3 class="profile-h3">Your details</h3>
+                <h3 class="profile-h3">@L["Your details"]</h3>
                 <form asp-action="Edit" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:1rem;"></div>
 
@@ -45,8 +46,8 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Save changes</button>
-                        <a asp-action="Index" class="btn btn-ghost">Cancel</a>
+                        <button type="submit" class="btn btn-primary">@L["Save changes"]</button>
+                        <a asp-action="Index" class="btn btn-ghost">@L["Cancel"]</a>
                     </div>
                 </form>
             </div>

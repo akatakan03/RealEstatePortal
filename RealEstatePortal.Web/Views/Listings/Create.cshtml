@@ -1,134 +1,143 @@
-﻿@using RealEstatePortal.Domain.Enums
+@using RealEstatePortal.Domain.Enums
 @model RealEstatePortal.Application.Listings.Commands.CreateListing.CreateListingCommand
 @{
-    ViewData["Title"] = "New Listing";
+    ViewData["Title"] = L["Create a listing"].Value;
 }
 
+@* The labels are written out rather than generated from the model. The command lives in the
+   Application layer, which has no [Display] attributes and should not grow presentation
+   concerns; without them asp-for would fall back to the property name and render "AreaSqMeters".
+   A label tag helper keeps whatever content it is given, so this both localizes and reads
+   better than the generated text. *@
 <div class="form-page">
     <div class="container">
         <div class="form-shell">
-            <span class="eyebrow">Agent dashboard</span>
-            <h1 class="page-title" style="margin-bottom:1.5rem;">Create a listing</h1>
+            <span class="eyebrow">@L["Agent dashboard"]</span>
+            <h1 class="page-title" style="margin-bottom:1.5rem;">@L["Create a listing"]</h1>
 
             <div class="form-card">
                 <form asp-action="Create" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:1rem;"></div>
 
                     <div class="mb-field">
-                        <label asp-for="Title" class="form-label"></label>
+                        <label asp-for="Title" class="form-label">@L["Title"]</label>
                         <input asp-for="Title" class="form-control" />
                         <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
                     <div class="mb-field">
-                        <label asp-for="Description" class="form-label"></label>
+                        <label asp-for="Description" class="form-label">@L["Description"]</label>
                         <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
                     <div class="form-row">
                         <div class="mb-field">
-                            <label asp-for="ListingType" class="form-label"></label>
-                            <select asp-for="ListingType" asp-items="Html.GetEnumSelectList<ListingType>()" class="form-select"></select>
+                            <label asp-for="ListingType" class="form-label">@L["Listing type"]</label>
+                            <select asp-for="ListingType" asp-items="L.EnumSelectList<ListingType>()" class="form-select"></select>
                         </div>
                         <div class="mb-field">
-                            <label asp-for="PropertyType" class="form-label"></label>
-                            <select asp-for="PropertyType" asp-items="Html.GetEnumSelectList<PropertyType>()" class="form-select"></select>
+                            <label asp-for="PropertyType" class="form-label">@L["Property"]</label>
+                            <select asp-for="PropertyType" asp-items="L.EnumSelectList<PropertyType>()" class="form-select"></select>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="mb-field">
-                            <label asp-for="Price" class="form-label"></label>
+                            <label asp-for="Price" class="form-label">@L["Price"]</label>
                             <input asp-for="Price" class="form-control" />
                             <span asp-validation-for="Price" class="text-danger"></span>
                         </div>
                         <div class="mb-field">
-                            <label asp-for="Currency" class="form-label"></label>
+                            <label asp-for="Currency" class="form-label">@L["Currency"]</label>
                             <input asp-for="Currency" class="form-control" />
                             <span asp-validation-for="Currency" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="form-row-3">
                         <div class="mb-field">
-                            <label asp-for="Bedrooms" class="form-label"></label>
+                            <label asp-for="Bedrooms" class="form-label">@L["Bedrooms"]</label>
                             <input asp-for="Bedrooms" class="form-control" />
                             <span asp-validation-for="Bedrooms" class="text-danger"></span>
                         </div>
                         <div class="mb-field">
-                            <label asp-for="Bathrooms" class="form-label"></label>
+                            <label asp-for="Bathrooms" class="form-label">@L["Bathrooms"]</label>
                             <input asp-for="Bathrooms" class="form-control" />
                             <span asp-validation-for="Bathrooms" class="text-danger"></span>
                         </div>
                         <div class="mb-field">
-                            <label asp-for="AreaSqMeters" class="form-label"></label>
+                            <label asp-for="AreaSqMeters" class="form-label">@L["Area (m²)"]</label>
                             <input asp-for="AreaSqMeters" class="form-control" />
                             <span asp-validation-for="AreaSqMeters" class="text-danger"></span>
                         </div>
                     </div>
 
-                    <h3 class="form-section-title">Features &amp; details</h3>
+                    <h3 class="form-section-title">@L["Features & details"]</h3>
 
                     <div class="form-row">
                         <div class="mb-field">
-                            <label asp-for="Heating" class="form-label">Heating</label>
-                            <select asp-for="Heating" asp-items="Html.GetEnumSelectList<RealEstatePortal.Domain.Enums.HeatingType>()" class="form-select">
-                                <option value="">Not specified</option>
+                            <label asp-for="Heating" class="form-label">@L["Heating"]</label>
+                            <select asp-for="Heating" asp-items="L.EnumSelectList<HeatingType>()" class="form-select">
+                                <option value="">@L["Not specified"]</option>
                             </select>
                         </div>
                         <div class="mb-field">
-                            <label asp-for="Internet" class="form-label">Internet</label>
-                            <select asp-for="Internet" asp-items="Html.GetEnumSelectList<RealEstatePortal.Domain.Enums.InternetInfrastructure>()" class="form-select">
-                                <option value="">Not specified</option>
+                            <label asp-for="Internet" class="form-label">@L["Internet"]</label>
+                            <select asp-for="Internet" asp-items="L.EnumSelectList<InternetInfrastructure>()" class="form-select">
+                                <option value="">@L["Not specified"]</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-row-3">
                         <div class="mb-field">
-                            <label asp-for="FloorNumber" class="form-label">Floor</label>
+                            <label asp-for="FloorNumber" class="form-label">@L["Floor"]</label>
                             <input asp-for="FloorNumber" class="form-control" />
                         </div>
                         <div class="mb-field">
-                            <label asp-for="TotalFloors" class="form-label">Total floors</label>
+                            <label asp-for="TotalFloors" class="form-label">@L["Total floors"]</label>
                             <input asp-for="TotalFloors" class="form-control" />
                         </div>
                         <div class="mb-field">
-                            <label asp-for="BuildingAge" class="form-label">Building age (yrs)</label>
+                            <label asp-for="BuildingAge" class="form-label">@L["Building age (yrs)"]</label>
                             <input asp-for="BuildingAge" class="form-control" />
                         </div>
                     </div>
 
                     <div class="mb-field">
-                        <label asp-for="MonthlyDues" class="form-label">Monthly dues (aidat)</label>
+                        <label asp-for="MonthlyDues" class="form-label">@L["Monthly dues"]</label>
                         <input asp-for="MonthlyDues" class="form-control" />
                     </div>
 
                     <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:.5rem;">
                         <label class="check-row">
-                            <input type="checkbox" asp-for="IsFurnished" /> Furnished
+                            <input type="checkbox" asp-for="IsFurnished" /> @L["Furnished"]
                         </label>
                         <label class="check-row">
-                            <input type="checkbox" asp-for="HasBalcony" /> Balcony
+                            <input type="checkbox" asp-for="HasBalcony" /> @L["Balcony"]
                         </label>
                         <label class="check-row">
-                            <input type="checkbox" asp-for="HasParking" /> Parking / garage
+                            <input type="checkbox" asp-for="HasParking" /> @L["Parking / garage"]
                         </label>
                     </div>
 
                     <div class="mb-field">
-                        <label asp-for="Address" class="form-label"></label>
+                        <label asp-for="Address" class="form-label">@L["Address"]</label>
                         <div class="input-with-btn">
                             <input asp-for="Address" class="form-control" />
-                            <button type="button" class="btn btn-ghost" id="locateBtn">Locate on map</button>
+                            <button type="button" class="btn btn-ghost" id="locateBtn">@L["Locate on map"]</button>
                         </div>
-                        <p class="form-hint">Type the address and click "Locate on map", then drag the pin to the exact spot.</p>
+                        <p class="form-hint">@L["Type the address and use the locate button, then drag the pin to the exact spot."]</p>
                     </div>
 
                     <input type="hidden" asp-for="Latitude" />
                     <input type="hidden" asp-for="Longitude" />
+                    @* The coordinates are hidden, so without these the form would just refuse to
+                       submit with nothing on the page marked wrong. *@
+                    <span asp-validation-for="Latitude" class="text-danger"></span>
+                    <span asp-validation-for="Longitude" class="text-danger"></span>
                     <div id="pickerMap"></div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Create listing</button>
-                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-ghost">Cancel</a>
+                        <button type="submit" class="btn btn-primary">@L["Create listing"]</button>
+                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-ghost">@L["Cancel"]</a>
                     </div>
                 </form>
             </div>

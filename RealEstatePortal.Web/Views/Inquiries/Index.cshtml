@@ -1,53 +1,51 @@
 ﻿@using RealEstatePortal.Domain.Enums
 @model List<RealEstatePortal.Application.Inquiries.Queries.InquiryDto>
 @{
-    ViewData["Title"] = "Inquiries";
+    ViewData["Title"] = L["Inquiry inbox"].Value;
 }
 
 <div class="dash">
     <div class="container">
         <div class="dash-head">
             <div>
-                <span class="eyebrow">Agent dashboard</span>
-                <h1 class="page-title">Inquiries</h1>
+                <span class="eyebrow">@L["Agent dashboard"]</span>
+                <h1 class="page-title">@L["Inquiry inbox"]</h1>
             </div>
         </div>
 
         @if (!Model.Any())
         {
-            <div class="form-card card-empty">No inquiries yet.</div>
+            <div class="form-card card-empty">@L["No inquiries yet."]</div>
         }
         else
         {
             <div class="table-card">
                 <table class="table">
                     <thead>
-                        <tr><th>Status</th><th>Listing</th><th>From</th><th>Received</th><th></th></tr>
+                        <tr><th>@L["Status"]</th><th>@L["Listing"]</th><th>@L["From"]</th><th>@L["Received"]</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach (var inq in Model)
                         {
                             <tr class="@(inq.Status == InquiryStatus.New ? "unread-row" : "")">
                                 <td>
-                                    @switch (inq.Status)
-                                    {
-                                        case InquiryStatus.New:
-                                            <span class="badge-status badge-sold">New</span>
-                                            break;
-                                        case InquiryStatus.Read:
-
-                                            <span class="badge-status badge-draft">Read</span>
-                                            break;
-                                        case InquiryStatus.Handled:
-
-                                            <span class="badge-status badge-active">Handled</span>
-                                            break;
+                                    @{
+                                        var badge = inq.Status switch
+                                        {
+                                            InquiryStatus.New => "badge-sold",
+                                            InquiryStatus.Read => "badge-draft",
+                                            _ => "badge-active"
+                                        };
                                     }
+                                    <span class="badge-status @badge">@L.Localize(inq.Status)</span>
                                 </td>
                                 <td class="row-title">@inq.ListingTitle</td>
                                 <td>@inq.Name</td>
                                 <td class="muted">@inq.Created.ToLocalTime().ToString("g")</td>
-                                <td><div class="row-actions"><a asp-action="Details" asp-route-id="@inq.Id" class="btn btn-ghost btn-sm">View</a></div></td>
+                                @* "Open", not "View": resource names are matched without regard to
+                                   case, so "View" would collide with the "view" unit noun the
+                                   dashboard charts use, and one of the two would render in English. *@
+                                <td><div class="row-actions"><a asp-action="Details" asp-route-id="@inq.Id" class="btn btn-ghost btn-sm">@L["Open"]</a></div></td>
                             </tr>
                         }
                     </tbody>

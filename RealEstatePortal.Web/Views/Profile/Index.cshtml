@@ -1,21 +1,24 @@
-﻿@model RealEstatePortal.Web.Models.Profile.ProfileHubViewModel
+@model RealEstatePortal.Web.Models.Profile.ProfileHubViewModel
 @{
-    ViewData["Title"] = "My account";
+    ViewData["Title"] = L["My account"].Value;
 }
 
 <div class="dash">
     <div class="container">
         <div class="dash-head">
             <div>
-                <span class="eyebrow">Your account</span>
-                <h1 class="page-title">My account</h1>
+                <span class="eyebrow">@L["Your account"]</span>
+                <h1 class="page-title">@L["My account"]</h1>
             </div>
-            <a class="btn btn-ghost" asp-action="Edit">Edit profile</a>
+            <a class="btn btn-ghost" asp-action="Edit">@L["Edit profile"]</a>
         </div>
 
+        @* The controller puts the English wording in TempData and it is translated here rather
+           than there. Rendering is where the request culture is known for certain — the message
+           outlives a redirect, and translating it late means it matches the page it appears on. *@
         @if (TempData["ProfileSaved"] is string ok)
         {
-            <div class="alert alert-success">@ok</div>
+            <div class="alert alert-success">@L[ok]</div>
         }
 
         <div class="profile-grid">
@@ -23,7 +26,7 @@
                 <div class="avatar-lg">
                     @if (Model.AvatarUrl is not null)
                     {
-                        <img src="@Model.AvatarUrl" alt="Profile photo" />
+                        <img src="@Model.AvatarUrl" alt="@L["Profile photo"]" />
                     }
                     else
                     {
@@ -32,39 +35,41 @@
                 </div>
                 <h2 class="profile-name">@(string.IsNullOrWhiteSpace(Model.DisplayName) ? Model.Email : Model.DisplayName)</h2>
                 <div class="profile-roles">
+                    @* Role names are English words, so they go through the same resource file and
+                       any role without an entry still renders as its own name. *@
                     @foreach (var r in Model.Roles)
                     {
-                        <span class="badge-status badge-sold">@r</span>
+                        <span class="badge-status badge-sold">@L[r]</span>
                     }
                 </div>
             </div>
 
             <div>
                 <div class="form-card" style="margin-bottom:1.5rem;">
-                    <h3 class="profile-h3">Details</h3>
+                    <h3 class="profile-h3">@L["Details"]</h3>
                     <dl class="profile-dl">
-                        <dt>Email</dt>
+                        <dt>@L["Email"]</dt>
                         <dd>@Model.Email</dd>
-                        <dt>Phone</dt>
+                        <dt>@L["Phone"]</dt>
                         <dd>@(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)</dd>
-                        <dt>About</dt>
+                        <dt>@L["About"]</dt>
                         <dd>@(string.IsNullOrWhiteSpace(Model.Bio) ? "—" : Model.Bio)</dd>
                     </dl>
                 </div>
 
                 <div class="form-card">
-                    <h3 class="profile-h3">Shortcuts</h3>
+                    <h3 class="profile-h3">@L["Shortcuts"]</h3>
                     <div class="profile-links">
-                        <a class="btn btn-ghost" asp-controller="Favorites" asp-action="Mine">♥ Saved listings</a>
-                        <a class="btn btn-ghost" asp-controller="SavedSearches" asp-action="Mine">🔔 Alerts</a>
+                        <a class="btn btn-ghost" asp-controller="Favorites" asp-action="Mine">♥ @L["Saved listings"]</a>
+                        <a class="btn btn-ghost" asp-controller="SavedSearches" asp-action="Mine">🔔 @L["Alerts"]</a>
                         @if (Model.IsAgent)
                         {
-                            <a class="btn btn-ghost" asp-controller="Dashboard" asp-action="Index">My listings</a>
-                            <a class="btn btn-ghost" asp-controller="Inquiries" asp-action="Index">Inquiries</a>
+                            <a class="btn btn-ghost" asp-controller="Dashboard" asp-action="Index">@L["My listings"]</a>
+                            <a class="btn btn-ghost" asp-controller="Inquiries" asp-action="Index">@L["Inquiry inbox"]</a>
                         }
                         @if (Model.IsAdmin)
                         {
-                            <a class="btn btn-ghost" asp-controller="Admin" asp-action="Listings">Admin moderation</a>
+                            <a class="btn btn-ghost" asp-controller="Admin" asp-action="Listings">@L["Admin moderation"]</a>
                         }
                     </div>
                 </div>

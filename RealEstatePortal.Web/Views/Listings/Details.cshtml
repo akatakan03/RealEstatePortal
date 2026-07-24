@@ -42,9 +42,11 @@
             </div>
         }
 
+        @* The controller stores the English wording; it is translated here, where the request
+           culture is known. The message has survived a redirect to reach this page. *@
         @if (TempData["InquirySuccess"] is string ok)
         {
-            <div class="alert alert-success">@ok</div>
+            <div class="alert alert-success">@L[ok]</div>
         }
 
         @if (listing.ImageUrls.Any())

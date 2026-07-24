@@ -12,6 +12,7 @@ using RealEstatePortal.Web;
 using RealEstatePortal.Web.Filters;
 using RealEstatePortal.Web.HealthChecks;
 using RealEstatePortal.Web.Localization;
+using RealEstatePortal.Web.ModelBinding;
 using RealEstatePortal.Web.Services;
 using Serilog;
 using System.Globalization;
@@ -33,6 +34,11 @@ builder.Host.UseSerilog((context, config) =>
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<DomainExceptionFilter>();
+
+    // Must be inserted at the front: the built-in SimpleTypeModelBinderProvider would otherwise
+    // claim double first and parse it in the request culture. See the binder for why that breaks
+    // the map picker once the site runs in Turkish.
+    options.ModelBinderProviders.Insert(0, new InvariantDoubleModelBinderProvider());
 })
 // Sends [Display] names and DataAnnotations messages through the same resource file the
 // views use, so a form label is translated once rather than at every <label> that renders it.

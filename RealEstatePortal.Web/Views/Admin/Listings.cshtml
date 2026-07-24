@@ -1,8 +1,8 @@
-﻿@using RealEstatePortal.Domain.Constants
+@using RealEstatePortal.Domain.Constants
 @using RealEstatePortal.Domain.Enums
 @model RealEstatePortal.Application.Common.Models.PaginatedList<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
 @{
-    ViewData["Title"] = "Moderation";
+    ViewData["Title"] = L["Listing moderation"].Value;
     var current = ViewBag.StatusFilter as ListingStatus?;
     var pending = ViewBag.PendingUnlockRequests as List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
         ?? new List<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>();
@@ -17,27 +17,29 @@
     <div class="container">
         <div class="dash-head">
             <div>
-                <span class="eyebrow">Admin</span>
-                <h1 class="page-title">Listing moderation</h1>
+                <span class="eyebrow">@L["Admin"]</span>
+                <h1 class="page-title">@L["Listing moderation"]</h1>
             </div>
         </div>
 
+        @* The controller stores the English wording and it is translated at render time, where
+           the request culture is known — the message has survived a redirect to get here. *@
         @if (TempData["AdminNotice"] is string notice)
         {
-            <div class="alert alert-success">@notice</div>
+            <div class="alert alert-success">@L[notice]</div>
         }
 
         <div class="filter-tabs" role="tablist" style="margin-bottom:1.25rem;">
-            <a class="filter-tab @(listView ? "is-active" : "")" asp-action="Listings">All listings</a>
+            <a class="filter-tab @(listView ? "is-active" : "")" asp-action="Listings">@L["All listings"]</a>
             <a class="filter-tab @(requestsView ? "is-active" : "")" asp-action="Listings" asp-route-requests="true">
-                ⏳ Re-review requests
+                ⏳ @L["Re-review requests"]
                 @if (pending.Any())
                 {
                     <span class="ft-count">@pending.Count</span>
                 }
             </a>
             <a class="filter-tab @(deletedView ? "is-active" : "")" asp-action="Listings" asp-route-deleted="true">
-                🗑 Trash
+                🗑 @L["Trash"]
                 @if (deletedCount > 0)
                 {
                     <span class="ft-count">@deletedCount</span>
@@ -49,13 +51,13 @@
         {
             if (!pending.Any())
             {
-                <div class="form-card card-empty">No re-review requests right now.</div>
+                <div class="form-card card-empty">@L["No re-review requests right now."]</div>
             }
             else
             {
                 <div class="review-queue">
                     <div class="review-queue-head">
-                        <span class="review-queue-sub">Agents who addressed a lock and asked for another look. Oldest first.</span>
+                        <span class="review-queue-sub">@L["Agents who addressed a lock and asked for another look. Oldest first."]</span>
                     </div>
                     @foreach (var p in pending)
                     {
@@ -66,23 +68,23 @@
                                     @(p.OwnerEmail ?? "—")
                                     @if (p.UnlockRequestedAt is not null)
                                     {
-                                        <span> · requested @p.UnlockRequestedAt.Value.ToString("MMM d, yyyy")</span>
+                                        <span> · @L["requested {0}", p.UnlockRequestedAt.Value.ToString("d")]</span>
                                     }
                                 </div>
-                                <div class="rq-reason"><strong>Locked for:</strong> @p.LockReason</div>
+                                <div class="rq-reason"><strong>@L["Locked for:"]</strong> @p.LockReason</div>
                                 @if (!string.IsNullOrWhiteSpace(p.UnlockRequestNote))
                                 {
                                     <div class="rq-note">“@p.UnlockRequestNote”</div>
                                 }
                                 else
                                 {
-                                    <div class="rq-note rq-note-empty">The agent didn't leave a note.</div>
+                                    <div class="rq-note rq-note-empty">@L["The agent didn't leave a note."]</div>
                                 }
                             </div>
                             <form asp-action="Unlock" method="post" class="rq-action">
                                 <input type="hidden" name="id" value="@p.Id" />
                                 <input type="hidden" name="requests" value="true" />
-                                <button type="submit" class="btn btn-primary btn-sm">🔓 Unlock</button>
+                                <button type="submit" class="btn btn-primary btn-sm">🔓 @L["Unlock"]</button>
                             </form>
                         </div>
                     }
@@ -93,20 +95,18 @@
         {
             if (!Model.Items.Any())
             {
-                <div class="form-card card-empty">Nothing in the trash.</div>
+                <div class="form-card card-empty">@L["Nothing in the trash."]</div>
             }
             else
             {
                 <p class="muted trash-note">
-                    Deleted listings stay here for @ListingDeletion.RetentionDays days with their photos,
-                    inquiries and saves intact, then are erased automatically. Restoring one brings it
-                    back as a draft.
+                    @L["Deleted listings stay here for {0} days with their photos, inquiries and saves intact, then are erased automatically. Restoring one brings it back as a draft.", ListingDeletion.RetentionDays]
                 </p>
 
                 <div class="table-card">
                     <table class="table">
                         <thead>
-                            <tr><th>Title</th><th>Owner</th><th>Deleted</th><th>Erased in</th><th></th></tr>
+                            <tr><th>@L["Title"]</th><th>@L["Owner"]</th><th>@L["Deleted"]</th><th>@L["Erased in"]</th><th></th></tr>
                         </thead>
                         <tbody>
                             @foreach (var l in Model.Items)
@@ -117,12 +117,12 @@
                                         ListingDeletion.RetentionDays - (DateTimeOffset.UtcNow - l.DeletedAt.Value).TotalDays));
                                 var soon = daysLeft <= 3;
                                 var daysLabel = daysLeft == 0
-                                    ? "any moment"
-                                    : daysLeft == 1 ? "1 day" : daysLeft + " days";
+                                    ? L["any moment"].Value
+                                    : daysLeft == 1 ? L["1 day"].Value : L["{0} days", daysLeft].Value;
                                 <tr>
                                     <td class="row-title">@l.Title</td>
                                     <td class="muted">@(l.OwnerEmail ?? "—")</td>
-                                    <td class="muted">@(l.DeletedAt?.ToString("MMM d, yyyy") ?? "—")</td>
+                                    <td class="muted">@(l.DeletedAt?.ToString("d") ?? "—")</td>
                                     <td>
                                         <span class="badge-status @(soon ? "badge-archived" : "badge-sold")">@daysLabel</span>
                                     </td>
@@ -130,15 +130,16 @@
                                         <div class="row-actions">
                                             <form asp-action="Undelete" method="post">
                                                 <input type="hidden" name="id" value="@l.Id" />
-                                                <button type="submit" class="btn btn-primary btn-sm">Restore</button>
+                                                <button type="submit" class="btn btn-primary btn-sm">@L["Restore"]</button>
                                             </form>
                                             @* The title deliberately stays out of the message: it would
                                                land inside a JavaScript string literal, where an
-                                               apostrophe in an agent's title breaks out of it. *@
+                                               apostrophe in an agent's title breaks out of it. The
+                                               translation is apostrophe-free for the same reason. *@
                                             <form asp-action="Purge" method="post"
-                                                  onsubmit="return confirm('Erase this listing now? Its photos, inquiries and saves go with it. This cannot be undone.');">
+                                                  onsubmit="return confirm('@L["Erase this listing now? Its photos, inquiries and saves go with it. This cannot be undone."]');">
                                                 <input type="hidden" name="id" value="@l.Id" />
-                                                <button type="submit" class="btn btn-danger btn-sm">Erase now</button>
+                                                <button type="submit" class="btn btn-danger btn-sm">@L["Erase now"]</button>
                                             </form>
                                         </div>
                                     </td>
@@ -153,20 +154,20 @@
                     <nav class="pager">
                         @if (Model.HasPreviousPage)
                         {
-                            <a asp-action="Listings" asp-route-deleted="true" asp-route-page="@(Model.PageNumber - 1)">← Prev</a>
+                            <a asp-action="Listings" asp-route-deleted="true" asp-route-page="@(Model.PageNumber - 1)">← @L["Prev"]</a>
                         }
                         else
                         {
-                            <span class="disabled">← Prev</span>
+                            <span class="disabled">← @L["Prev"]</span>
                         }
-                        <span class="current">@Model.PageNumber of @Model.TotalPages</span>
+                        <span class="current">@L["{0} of {1}", Model.PageNumber, Model.TotalPages]</span>
                         @if (Model.HasNextPage)
                         {
-                            <a asp-action="Listings" asp-route-deleted="true" asp-route-page="@(Model.PageNumber + 1)">Next →</a>
+                            <a asp-action="Listings" asp-route-deleted="true" asp-route-page="@(Model.PageNumber + 1)">@L["Next"] →</a>
                         }
                         else
                         {
-                            <span class="disabled">Next →</span>
+                            <span class="disabled">@L["Next"] →</span>
                         }
                     </nav>
                 }
@@ -176,28 +177,32 @@
         {
             <form asp-action="Listings" method="get" class="admin-toolbar">
                 <input type="search" name="search" value="@search" class="listing-search"
-                       placeholder="Search by title or address…" autocomplete="off" />
-                <label style="font-weight:600;font-size:.9rem;">Status</label>
+                       placeholder="@L["Search by title or address…"]" autocomplete="off" />
+                <label style="font-weight:600;font-size:.9rem;">@L["Status"]</label>
                 <select name="status" class="form-select select-inline" onchange="this.form.submit()">
-                    <option value="">All</option>
+                    <option value="">@L["All"]</option>
                     @foreach (var s in Enum.GetValues<ListingStatus>())
                     {
-                        <option value="@s" selected="@(current == s)">@s</option>
+                        <option value="@s" selected="@(current == s)">@L.Localize(s)</option>
                     }
                 </select>
-                <button type="submit" class="btn btn-ghost btn-sm">Search</button>
+                <button type="submit" class="btn btn-ghost btn-sm">@L["Search"]</button>
             </form>
 
             if (!Model.Items.Any())
             {
-                <div class="form-card card-empty">No listings@(current is null ? "" : $" with status {current}").</div>
+                <div class="form-card card-empty">
+                    @(current is null
+                        ? L["No listings."]
+                        : L["No listings with status {0}.", L.Localize(current.Value)])
+                </div>
             }
             else
             {
                 <div class="table-card">
                 <table class="table">
                     <thead>
-                        <tr><th>Title</th><th>Owner</th><th>Status</th><th>Price</th><th></th></tr>
+                        <tr><th>@L["Title"]</th><th>@L["Owner"]</th><th>@L["Status"]</th><th>@L["Price"]</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach (var l in Model.Items)
@@ -205,7 +210,7 @@
                             <tr>
                                 <td class="row-title"><a href="@Url.ListingUrl(l.Id)">@l.Title</a></td>
                                 <td class="muted">@(l.OwnerEmail ?? "—")</td>
-                                <td><span class="badge-status badge-@l.Status.ToString().ToLower()">@l.Status</span></td>
+                                <td><span class="badge-status badge-@l.Status.ToString().ToLower()">@L.Localize(l.Status)</span></td>
                                 <td><span class="value">@l.PriceAmount.ToString("N0") @l.PriceCurrency</span></td>
                                 <td>
                                     <div class="row-actions">
@@ -214,7 +219,7 @@
                                             <form asp-action="Archive" method="post">
                                                 <input type="hidden" name="id" value="@l.Id" />
                                                 <input type="hidden" name="status" value="@current" />
-                                                <button type="submit" class="btn btn-ghost btn-sm">Archive</button>
+                                                <button type="submit" class="btn btn-ghost btn-sm">@L["Archive"]</button>
                                             </form>
                                         }
                                         else
@@ -222,7 +227,7 @@
                                             <form asp-action="Restore" method="post">
                                                 <input type="hidden" name="id" value="@l.Id" />
                                                 <input type="hidden" name="status" value="@current" />
-                                                <button type="submit" class="btn btn-ghost btn-sm">Restore</button>
+                                                <button type="submit" class="btn btn-ghost btn-sm">@L["Restore"]</button>
                                             </form>
                                         }
 
@@ -231,14 +236,15 @@
                                             <form asp-action="Unlock" method="post">
                                                 <input type="hidden" name="id" value="@l.Id" />
                                                 <input type="hidden" name="status" value="@current" />
-                                                <button type="submit" class="btn btn-ghost btn-sm">🔓 Unlock</button>
+                                                <button type="submit" class="btn btn-ghost btn-sm">🔓 @L["Unlock"]</button>
                                             </form>
                                         }
 
-                                        <form asp-action="Delete" method="post" onsubmit="return confirm('Move this listing to the trash? It leaves the site now and can be restored from the Trash tab for @ListingDeletion.RetentionDays days.');">
+                                        @* Apostrophe-free translation, as above — this is a JS string literal. *@
+                                        <form asp-action="Delete" method="post" onsubmit="return confirm('@L["Move this listing to the trash? It leaves the site now and can be restored from the Trash tab for {0} days.", ListingDeletion.RetentionDays]');">
                                             <input type="hidden" name="id" value="@l.Id" />
                                             <input type="hidden" name="status" value="@current" />
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                            <button type="submit" class="btn btn-danger btn-sm">@L["Delete"]</button>
                                         </form>
                                     </div>
 
@@ -246,17 +252,19 @@
                                     {
                                         <button type="button" class="btn btn-ghost btn-sm lock-trigger"
                                                 data-id="@l.Id" data-title="@l.Title">
-                                            🔒 Lock
+                                            🔒 @L["Lock"]
                                         </button>
                                     }
                                     else
                                     {
                                         <div class="lock-note">
-                                            🔒 Locked — @l.LockReason
+                                            🔒 @L["Locked — {0}", l.LockReason ?? "—"]
                                             @if (l.UnlockRequested)
                                             {
                                                 <div class="review-requested-admin">
-                                                    ⏳ Re-review requested@(l.UnlockRequestedAt is null ? "" : $" · {l.UnlockRequestedAt:MMM d, yyyy}")
+                                                    ⏳ @(l.UnlockRequestedAt is null
+                                                        ? L["Re-review requested"]
+                                                        : L["Re-review requested · {0}", l.UnlockRequestedAt.Value.ToString("d")])
                                                     @if (!string.IsNullOrWhiteSpace(l.UnlockRequestNote))
                                                     {
                                                         <span class="rr-note">“@l.UnlockRequestNote”</span>
@@ -277,20 +285,20 @@
                 <nav class="pager">
                     @if (Model.HasPreviousPage)
                     {
-                        <a asp-action="Listings" asp-route-status="@current" asp-route-search="@search" asp-route-page="@(Model.PageNumber - 1)">← Prev</a>
+                        <a asp-action="Listings" asp-route-status="@current" asp-route-search="@search" asp-route-page="@(Model.PageNumber - 1)">← @L["Prev"]</a>
                     }
                     else
                     {
-                        <span class="disabled">← Prev</span>
+                        <span class="disabled">← @L["Prev"]</span>
                     }
-                    <span class="current">@Model.PageNumber of @Model.TotalPages</span>
+                    <span class="current">@L["{0} of {1}", Model.PageNumber, Model.TotalPages]</span>
                     @if (Model.HasNextPage)
                     {
-                        <a asp-action="Listings" asp-route-status="@current" asp-route-search="@search" asp-route-page="@(Model.PageNumber + 1)">Next →</a>
+                        <a asp-action="Listings" asp-route-status="@current" asp-route-search="@search" asp-route-page="@(Model.PageNumber + 1)">@L["Next"] →</a>
                     }
                     else
                     {
-                        <span class="disabled">Next →</span>
+                        <span class="disabled">@L["Next"] →</span>
                     }
                 </nav>
             }
@@ -303,14 +311,14 @@
     <form asp-action="Lock" method="post">
         <input type="hidden" name="id" id="lockId" />
         <input type="hidden" name="status" value="@current" />
-        <h3 class="lock-dialog-title">Lock listing</h3>
-        <p class="lock-dialog-sub" id="lockSubtitle">This takes the listing off the public site and prevents the agent from publishing it until you unlock it.</p>
-        <label class="form-label" for="lockReason">Reason (the agent will see this and be emailed it)</label>
+        <h3 class="lock-dialog-title">@L["Lock listing"]</h3>
+        <p class="lock-dialog-sub" id="lockSubtitle">@L["This takes the listing off the public site and prevents the agent from publishing it until you unlock it."]</p>
+        <label class="form-label" for="lockReason">@L["Reason (the agent will see this and be emailed it)"]</label>
         <textarea name="reason" id="lockReason" class="form-control" rows="4" maxlength="500" required
-                  placeholder="e.g. The photos don't match the described property. Please re-upload accurate images."></textarea>
+                  placeholder="@L["e.g. The photos don't match the described property. Please re-upload accurate images."]"></textarea>
         <div class="lock-dialog-actions">
-            <button type="button" class="btn btn-ghost" id="lockCancel">Cancel</button>
-            <button type="submit" class="btn btn-primary">Lock listing</button>
+            <button type="button" class="btn btn-ghost" id="lockCancel">@L["Cancel"]</button>
+            <button type="submit" class="btn btn-primary">@L["Lock listing"]</button>
         </div>
     </form>
 </dialog>
@@ -318,12 +326,17 @@
 @section Scripts {
     <script>
         (function () {
+            @* Serialized rather than dropped between quotes: this sentence is translated, and
+               Json.Serialize is what guarantees an apostrophe in any language stays inside the
+               string literal instead of ending it. *@
+            var lockTemplate = @Html.Raw(Json.Serialize(L["Locking “{0}”. This takes it off the public site until you unlock it."].Value));
             var dialog = document.getElementById('lockDialog');
             document.querySelectorAll('.lock-trigger').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     document.getElementById('lockId').value = btn.getAttribute('data-id');
+                    // Replaced through a function so a title containing $& or $' is inserted verbatim.
                     document.getElementById('lockSubtitle').textContent =
-                        'Locking “' + btn.getAttribute('data-title') + '”. This takes it off the public site until you unlock it.';
+                        lockTemplate.replace('{0}', function () { return btn.getAttribute('data-title'); });
                     document.getElementById('lockReason').value = '';
                     dialog.showModal();
                 });

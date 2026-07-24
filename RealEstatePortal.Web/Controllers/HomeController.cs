@@ -13,10 +13,10 @@ namespace RealEstatePortal.Web.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        // The browse page is the site's front door: it carries the hero, the search and the map.
+        // There is no separate landing page, and the scaffolded one this used to render was still
+        // the ASP.NET template — which is what the brand link in the header points at.
+        public IActionResult Index() => RedirectToAction("Index", "Listings");
 
         public IActionResult Privacy()
         {
