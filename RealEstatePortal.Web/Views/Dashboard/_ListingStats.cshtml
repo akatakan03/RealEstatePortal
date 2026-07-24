@@ -10,7 +10,7 @@
     var saves30 = Model.Favorites30dEquivalent;
 
     string Ago(DateTimeOffset? when) =>
-        when is null ? L["never"].Value : when.Value.ToString("d");
+        when is null ? L["never"].Value : when.Value.Medium();
 }
 
 <div class="ls-head">
@@ -124,7 +124,7 @@
         <dl class="ls-facts">
             <div><dt>@L["Last view"]</dt><dd>@Ago(Model.LastViewAt)</dd></div>
             <div><dt>@L["Last inquiry"]</dt><dd>@Ago(Model.LastInquiryAt)</dd></div>
-            <div><dt>@L["Published"]</dt><dd>@Model.CreatedAt.ToString("d")</dd></div>
+            <div><dt>@L["Published"]</dt><dd>@Model.CreatedAt.Medium()</dd></div>
             <div><dt>@L["Price changes"]</dt><dd>@Math.Max(Model.PriceHistory.Count - 1, 0)</dd></div>
         </dl>
     </div>

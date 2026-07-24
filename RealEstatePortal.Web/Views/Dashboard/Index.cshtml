@@ -226,7 +226,7 @@
                                                 {
                                                     <small class="review-requested">⏳ @(row.UnlockRequestedAt is null
                                                         ? L["Re-review requested. An admin will take another look."]
-                                                        : L["Re-review requested on {0}. An admin will take another look.", row.UnlockRequestedAt.Value.ToString("d")])</small>
+                                                        : L["Re-review requested on {0}. An admin will take another look.", row.UnlockRequestedAt.Value.Medium()])</small>
                                                 }
                                                 else
                                                 {

@@ -118,7 +118,7 @@
                                 @L["was {0} {1}", listing.PreviousPrice.ToString("N0"), listing.PriceCurrency]
                                 @if (listing.PriceDroppedAt is { } dropped)
                                 {
-                                    <text>· @dropped.ToString("d")</text>
+                                    <text>· @dropped.Medium()</text>
                                 }
                             </span>
                         </div>

@@ -1,4 +1,4 @@
-@using System.Globalization
+﻿@using System.Globalization
 @using RealEstatePortal.Application.Listings.Queries.GetListingDetail
 @model IReadOnlyList<PricePointDto>
 @{
@@ -74,7 +74,7 @@
                        currency]
                 </span>
             }
-            <span class="pts-when">@L["Last changed {0}", latest.ChangedAt.ToString("d")]</span>
+            <span class="pts-when">@L["Last changed {0}", latest.ChangedAt.Medium()]</span>
         </div>
 
         <div class="price-trend">
@@ -98,7 +98,7 @@
                 @foreach (var c in coords)
                 {
                     <circle class="pt-dot" cx="@Fmt(c.x)" cy="@Fmt(c.y)" r="4">
-                        <title>@c.p.ChangedAt.ToString("d"): @c.p.Amount.ToString("N0") @c.p.Currency</title>
+                        <title>@c.p.ChangedAt.Medium(): @c.p.Amount.ToString("N0") @c.p.Currency</title>
                     </circle>
                 }
             </svg>

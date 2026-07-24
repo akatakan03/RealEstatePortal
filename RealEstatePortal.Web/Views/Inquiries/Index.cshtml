@@ -41,7 +41,7 @@
                                 </td>
                                 <td class="row-title">@inq.ListingTitle</td>
                                 <td>@inq.Name</td>
-                                <td class="muted">@inq.Created.ToLocalTime().ToString("g")</td>
+                                <td class="muted">@inq.Created.ToLocalTime().MediumWithTime()</td>
                                 @* "Open", not "View": resource names are matched without regard to
                                    case, so "View" would collide with the "view" unit noun the
                                    dashboard charts use, and one of the two would render in English. *@

@@ -1,4 +1,4 @@
-@using RealEstatePortal.Domain.Constants
+﻿@using RealEstatePortal.Domain.Constants
 @using RealEstatePortal.Domain.Enums
 @model RealEstatePortal.Application.Common.Models.PaginatedList<RealEstatePortal.Application.Admin.Queries.GetListingsForModeration.AdminListingDto>
 @{
@@ -68,7 +68,7 @@
                                     @(p.OwnerEmail ?? "—")
                                     @if (p.UnlockRequestedAt is not null)
                                     {
-                                        <span> · @L["requested {0}", p.UnlockRequestedAt.Value.ToString("d")]</span>
+                                        <span> · @L["requested {0}", p.UnlockRequestedAt.Value.Medium()]</span>
                                     }
                                 </div>
                                 <div class="rq-reason"><strong>@L["Locked for:"]</strong> @p.LockReason</div>
@@ -122,7 +122,7 @@
                                 <tr>
                                     <td class="row-title">@l.Title</td>
                                     <td class="muted">@(l.OwnerEmail ?? "—")</td>
-                                    <td class="muted">@(l.DeletedAt?.ToString("d") ?? "—")</td>
+                                    <td class="muted">@(l.DeletedAt?.Medium() ?? "—")</td>
                                     <td>
                                         <span class="badge-status @(soon ? "badge-archived" : "badge-sold")">@daysLabel</span>
                                     </td>
@@ -264,7 +264,7 @@
                                                 <div class="review-requested-admin">
                                                     ⏳ @(l.UnlockRequestedAt is null
                                                         ? L["Re-review requested"]
-                                                        : L["Re-review requested · {0}", l.UnlockRequestedAt.Value.ToString("d")])
+                                                        : L["Re-review requested · {0}", l.UnlockRequestedAt.Value.Medium()])
                                                     @if (!string.IsNullOrWhiteSpace(l.UnlockRequestNote))
                                                     {
                                                         <span class="rr-note">“@l.UnlockRequestNote”</span>
