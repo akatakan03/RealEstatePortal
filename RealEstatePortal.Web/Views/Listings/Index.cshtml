@@ -173,7 +173,7 @@
             <div class="card-grid">
                 @foreach (var listing in Model.Listings.Items)
                 {
-                    <a class="listing-card rise d1" asp-action="Details" asp-route-id="@listing.Id" asp-route-slug="@listing.Slug">
+                    <a class="listing-card rise d1" href="@Url.ListingUrl(listing.Id, listing.Slug)">
                         <div class="lc-media">
                             @if (User.Identity is not null && User.Identity.IsAuthenticated)
                             {
@@ -293,7 +293,10 @@
         params.set('MaxLng', b.getEast().toFixed(6));
 
         var mine = ++reqToken;
-        fetch('/Listings/MapPoints?' + params.toString())
+        // Both URLs carry the page's own language: hardcoding one would cost a redirect on
+        // every pan, and send the popup's link into the wrong language.
+        var lang = document.documentElement.lang;
+        fetch('/' + lang + '/Listings/MapPoints?' + params.toString())
         .then(function (r) { return r.json(); })
         .then(function (data) {
         if (mine !== reqToken) return; // a newer request already superseded this one
@@ -302,7 +305,7 @@
         var m = L.marker([p.latitude, p.longitude]);
         m.bindPopup('<strong>' + esc(p.title) + '</strong><br/>' +
         esc(p.priceAmount.toLocaleString() + ' ' + p.priceCurrency) +
-        '<br/><a href="/listing/' + p.id + '/' + p.slug + '">View details</a>');
+        '<br/><a href="/' + lang + '/listing/' + p.id + '/' + p.slug + '">' + @Html.Raw(Json.Serialize(L["View details"].Value)) + '</a>');
         return m;
         });
         cluster.addLayers(markers);
@@ -345,7 +348,9 @@
         var id = btn.getAttribute('data-listing-id');
         var token = document.querySelector('#favToken input[name="__RequestVerificationToken"]').value;
 
-        fetch('/Favorites/ToggleAjax', {
+        // Must carry the language: the redirect that rescues bare URLs deliberately skips
+        // POSTs (a redirect would drop the body), so an unprefixed POST just 404s.
+        fetch('/' + document.documentElement.lang + '/Favorites/ToggleAjax', {
         method: 'POST',
         headers: { 'RequestVerificationToken': token, 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'listingId=' + encodeURIComponent(id)

@@ -17,7 +17,8 @@ public class DashboardController : Controller
 
     // The filter arguments narrow the listing table only — the KPIs and charts above it always
     // describe the whole portfolio.
-    [HttpGet("/dashboard")]
+    // Reached through the "dashboard" route: /{culture}/dashboard. See Program.cs.
+    [HttpGet]
     public async Task<IActionResult> Index(
         ListingStatus? status, bool locked = false, string? search = null, int page = 1)
     {
@@ -32,7 +33,8 @@ public class DashboardController : Controller
 
     // The stats panel for a single listing, fetched as HTML and shown in a modal. The query
     // scopes to the caller's own listings, so someone else's id simply 404s.
-    [HttpGet("/dashboard/listing/{id:int}/stats")]
+    // Reached through the "listingStats" route: /{culture}/dashboard/listing/{id}/stats.
+    [HttpGet]
     public async Task<IActionResult> ListingStats(int id)
     {
         var stats = await _sender.Send(new GetListingStatsQuery(id));

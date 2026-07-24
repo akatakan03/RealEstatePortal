@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- ============ Site chrome (header, footer, account menu) ============ -->
+  <data name="Language" xml:space="preserve">
+    <value>Dil</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>İlanlar</value>
+  </data>
+  <data name="New listing" xml:space="preserve">
+    <value>İlan ver</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Hesabım</value>
+  </data>
+  <data name="Saved" xml:space="preserve">
+    <value>Favorilerim</value>
+  </data>
+  <data name="Alerts" xml:space="preserve">
+    <value>Arama alarmları</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Workspace" xml:space="preserve">
+    <value>Çalışma alanı</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Panelim</value>
+  </data>
+  <data name="Inquiries" xml:space="preserve">
+    <value>Gelen talepler</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Yönetim</value>
+  </data>
+  <data name="Manage listings" xml:space="preserve">
+    <value>İlan denetimi</value>
+  </data>
+  <data name="Sign out" xml:space="preserve">
+    <value>Çıkış yap</value>
+  </data>
+  <data name="Sign in" xml:space="preserve">
+    <value>Giriş yap</value>
+  </data>
+  <data name="Sign up" xml:space="preserve">
+    <value>Üye ol</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Kayıt ol</value>
+  </data>
+  <data name="Explore" xml:space="preserve">
+    <value>Keşfet</value>
+  </data>
+  <data name="Browse listings" xml:space="preserve">
+    <value>İlanlara göz at</value>
+  </data>
+  <data name="List a property" xml:space="preserve">
+    <value>İlan yayınla</value>
+  </data>
+  <data name="Developer" xml:space="preserve">
+    <value>Geliştirici</value>
+  </data>
+  <data name="API docs" xml:space="preserve">
+    <value>API belgeleri</value>
+  </data>
+  <data name="Sitemap" xml:space="preserve">
+    <value>Site haritası</value>
+  </data>
+  <data name="Made in İstanbul" xml:space="preserve">
+    <value>İstanbul'da yapıldı</value>
+  </data>
+  <data name="A calmer way to find property in İstanbul — verified listings, local agents, and the details that matter." xml:space="preserve">
+    <value>İstanbul'da ev aramanın sakin yolu — doğrulanmış ilanlar, semtini bilen danışmanlar ve asıl önemli olan ayrıntılar.</value>
+  </data>
+
+  <!-- ============ Listing detail ============ -->
+  <data name="Back to listings" xml:space="preserve">
+    <value>İlanlara dön</value>
+  </data>
+  <data name="Preview — this listing is {0} and isn't visible to the public." xml:space="preserve">
+    <value>Önizleme — bu ilan {0} durumunda, ziyaretçilere görünmüyor.</value>
+  </data>
+  <data name="Previous photo" xml:space="preserve">
+    <value>Önceki fotoğraf</value>
+  </data>
+  <data name="Next photo" xml:space="preserve">
+    <value>Sonraki fotoğraf</value>
+  </data>
+  <data name="thumbnail" xml:space="preserve">
+    <value>küçük görsel</value>
+  </data>
+  <data name="No photos yet" xml:space="preserve">
+    <value>Henüz fotoğraf yok</value>
+  </data>
+  <data name="{0}% lower" xml:space="preserve">
+    <value>%{0} indirim</value>
+  </data>
+  <data name="was {0} {1}" xml:space="preserve">
+    <value>önceki fiyat {0} {1}</value>
+  </data>
+  <data name="New this week" xml:space="preserve">
+    <value>Bu hafta eklendi</value>
+  </data>
+  <data name="{0} views in the last 7 days" xml:space="preserve">
+    <value>son 7 günde {0} görüntülenme</value>
+  </data>
+  <data name="{0} people saved this" xml:space="preserve">
+    <value>{0} kişi favorilerine ekledi</value>
+  </data>
+  <data name="Save to favorites" xml:space="preserve">
+    <value>Favorilere ekle</value>
+  </data>
+  <data name="Sign in to save" xml:space="preserve">
+    <value>Favorilemek için giriş yap</value>
+  </data>
+  <data name="Bedrooms" xml:space="preserve">
+    <value>Oda</value>
+  </data>
+  <data name="Bathrooms" xml:space="preserve">
+    <value>Banyo</value>
+  </data>
+  <data name="m² area" xml:space="preserve">
+    <value>m² alan</value>
+  </data>
+  <data name="Listing" xml:space="preserve">
+    <value>İlan tipi</value>
+  </data>
+  <data name="Features" xml:space="preserve">
+    <value>Özellikler</value>
+  </data>
+  <data name="Heating" xml:space="preserve">
+    <value>Isıtma</value>
+  </data>
+  <data name="Internet" xml:space="preserve">
+    <value>İnternet</value>
+  </data>
+  <data name="Floor" xml:space="preserve">
+    <value>Bulunduğu kat</value>
+  </data>
+  <data name="Building age" xml:space="preserve">
+    <value>Bina yaşı</value>
+  </data>
+  <data name="yrs" xml:space="preserve">
+    <value>yaşında</value>
+  </data>
+  <data name="Monthly dues" xml:space="preserve">
+    <value>Aidat</value>
+  </data>
+  <data name="Furnished" xml:space="preserve">
+    <value>Eşyalı</value>
+  </data>
+  <data name="Balcony" xml:space="preserve">
+    <value>Balkon</value>
+  </data>
+  <data name="Parking" xml:space="preserve">
+    <value>Otopark</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Var</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Yok</value>
+  </data>
+  <data name="About this property" xml:space="preserve">
+    <value>Bu konut hakkında</value>
+  </data>
+  <data name="Listed by" xml:space="preserve">
+    <value>İlan sahibi</value>
+  </data>
+  <data name="Agent" xml:space="preserve">
+    <value>Danışman</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>Konum</value>
+  </data>
+  <data name="View details" xml:space="preserve">
+    <value>İlanı gör</value>
+  </data>
+  <data name="Contact the agent" xml:space="preserve">
+    <value>Danışmana ulaş</value>
+  </data>
+  <data name="Interested? Send a message and the agent will get back to you." xml:space="preserve">
+    <value>İlgilendiniz mi? Mesaj bırakın, danışman size dönüş yapsın.</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Ad soyad</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-posta</value>
+  </data>
+  <data name="Phone (optional)" xml:space="preserve">
+    <value>Telefon (isteğe bağlı)</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Mesajınız</value>
+  </data>
+  <data name="Send message" xml:space="preserve">
+    <value>Mesajı gönder</value>
+  </data>
+
+  <!-- ============ Price history ============ -->
+  <data name="Price history" xml:space="preserve">
+    <value>Fiyat geçmişi</value>
+  </data>
+  <data name="Price history line chart" xml:space="preserve">
+    <value>Fiyat geçmişi çizgi grafiği</value>
+  </data>
+  <data name="Price unchanged in the latest update." xml:space="preserve">
+    <value>Son güncellemede fiyat değişmedi.</value>
+  </data>
+  <data name="{0}% {1} than before — now {2} {3}" xml:space="preserve">
+    <value>öncesine göre %{0} {1} — şimdi {2} {3}</value>
+  </data>
+  <data name="lower" xml:space="preserve">
+    <value>daha ucuz</value>
+  </data>
+  <data name="higher" xml:space="preserve">
+    <value>daha pahalı</value>
+  </data>
+  <data name="Last changed {0}" xml:space="preserve">
+    <value>Son değişiklik {0}</value>
+  </data>
+
+  <!-- ============ Enum members ============
+       Keys are the enum member names, so a member that gains a translation here is
+       automatically localized everywhere it is rendered. -->
+  <data name="Active" xml:space="preserve">
+    <value>Yayında</value>
+  </data>
+  <data name="Draft" xml:space="preserve">
+    <value>Taslak</value>
+  </data>
+  <data name="Archived" xml:space="preserve">
+    <value>Arşivde</value>
+  </data>
+  <data name="Sale" xml:space="preserve">
+    <value>Satılık</value>
+  </data>
+  <data name="Rent" xml:space="preserve">
+    <value>Kiralık</value>
+  </data>
+  <data name="Apartment" xml:space="preserve">
+    <value>Daire</value>
+  </data>
+  <data name="House" xml:space="preserve">
+    <value>Müstakil ev</value>
+  </data>
+  <data name="Land" xml:space="preserve">
+    <value>Arsa</value>
+  </data>
+  <data name="Commercial" xml:space="preserve">
+    <value>İş yeri</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Onay bekliyor</value>
+  </data>
+  <data name="Sold" xml:space="preserve">
+    <value>Satıldı</value>
+  </data>
+  <data name="Rented" xml:space="preserve">
+    <value>Kiralandı</value>
+  </data>
+  <data name="Stove" xml:space="preserve">
+    <value>Soba</value>
+  </data>
+  <data name="NaturalGas" xml:space="preserve">
+    <value>Doğalgaz (kombi)</value>
+  </data>
+  <data name="CentralHeating" xml:space="preserve">
+    <value>Merkezi</value>
+  </data>
+  <data name="UnderfloorHeating" xml:space="preserve">
+    <value>Yerden ısıtma</value>
+  </data>
+  <data name="AirConditioning" xml:space="preserve">
+    <value>Klima</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Diğer</value>
+  </data>
+  <data name="Fiber" xml:space="preserve">
+    <value>Fiber</value>
+  </data>
+</root>

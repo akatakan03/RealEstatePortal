@@ -1,4 +1,4 @@
-@using System.Globalization
+﻿@using System.Globalization
 @model RealEstatePortal.Application.Agents.Queries.GetListingStats.ListingStatsDto
 @{
     var inv = CultureInfo.InvariantCulture;
@@ -29,8 +29,8 @@
             <span>Listed @Model.DaysListed day@(Model.DaysListed == 1 ? "" : "s") ago</span>
         </div>
     </div>
-    <a class="btn btn-ghost btn-sm" asp-controller="Listings" asp-action="Details"
-       asp-route-id="@Model.Id" asp-route-slug="@Model.Slug" target="_blank" rel="noopener">Open listing ↗</a>
+    <a class="btn btn-ghost btn-sm" href="@Url.ListingUrl(Model.Id, Model.Slug)"
+       target="_blank" rel="noopener">Open listing ↗</a>
 </div>
 
 @* The funnel is the story: of everyone who looked, how many cared enough to save, and how

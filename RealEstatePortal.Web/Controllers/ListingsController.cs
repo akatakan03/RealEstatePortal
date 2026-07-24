@@ -25,6 +25,7 @@ using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
 using RealEstatePortal.Web.Helpers;
+using RealEstatePortal.Web.Localization;
 using RealEstatePortal.Web.Models.Listings;
 using System.Security.Claims;
 using ValidationException = RealEstatePortal.Application.Common.Exceptions.ValidationException;
@@ -156,7 +157,8 @@ public class ListingsController : Controller
         return RedirectToAction("Index", "Dashboard");
     }
 
-    [HttpGet("listing/{id:int}/{slug?}")]
+    // Reached through the "listing" route: /{culture}/listing/{id}/{slug}. See Program.cs.
+    [HttpGet]
     public async Task<IActionResult> Details(int id, string? slug)
     {
         // Admins and agents may preview a listing in any status; the public sees only Active.
@@ -170,9 +172,13 @@ public class ListingsController : Controller
             && dto.OwnerId != User.FindFirstValue(ClaimTypes.NameIdentifier))
             return NotFound();
 
-        // Canonicalize: if the slug is missing or wrong, 301 to the correct URL.
-        if (!string.Equals(slug, dto.Slug, StringComparison.Ordinal))
-            return RedirectToActionPermanent(nameof(Details), new { id, slug = dto.Slug });
+        // Canonicalize. A listing is reachable through the catch-all route as well
+        // (/tr/Listings/Details/5), so comparing the whole path rather than just the slug
+        // means there is exactly one address that serves the page and every other form
+        // redirects to it.
+        var canonical = Url.ListingUrl(id, dto.Slug);
+        if (!string.Equals(Request.Path, canonical, StringComparison.Ordinal))
+            return RedirectPermanent(canonical);
 
         // Only count genuine public views — not admin/owner previews of a non-public listing.
         if (dto.Status == ListingStatus.Active)

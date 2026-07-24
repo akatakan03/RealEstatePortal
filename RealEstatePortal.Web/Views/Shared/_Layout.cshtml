@@ -1,9 +1,19 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    var culture = SupportedCultures.CodeOf(System.Globalization.CultureInfo.CurrentUICulture);
+}
+<!DOCTYPE html>
+<html lang="@culture">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - EmlakPortal</title>
+    @* Tells a crawler that this page exists in other languages and where. The sitemap says the
+       same thing, but a page reached by a link rather than by the sitemap needs it here too. *@
+    @foreach (var code in SupportedCultures.Codes)
+    {
+        <link rel="alternate" hreflang="@code" href="@Context.Request.AbsoluteUrlForCulture(code)" />
+    }
+    <link rel="alternate" hreflang="x-default" href="@Context.Request.AbsoluteUrlForCulture(SupportedCultures.Default)" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,21 +28,38 @@
             </a>
 
             <ul class="nav-links">
-                <li><a asp-controller="Listings" asp-action="Index">Browse</a></li>
+                <li><a asp-controller="Listings" asp-action="Index">@L["Browse"]</a></li>
                 @if (User.IsInRole("Agent"))
                 {
                     <li>
                         <a class="nav-cta" asp-controller="Listings" asp-action="Create">
-                            <span class="nav-cta-plus" aria-hidden="true">+</span> New listing
+                            <span class="nav-cta-plus" aria-hidden="true">+</span> @L["New listing"]
                         </a>
                     </li>
                 }
             </ul>
 
             <div class="nav-actions">
+                @* Each language names itself, never translated — someone looking for their own
+                   language scans for the word they already know. *@
+                <nav class="lang-switch" aria-label="@L["Language"]">
+                    @foreach (var code in SupportedCultures.Codes)
+                    {
+                        if (code == culture)
+                        {
+                            <span class="lang-current" aria-current="true">@code.ToUpperInvariant()</span>
+                        }
+                        else
+                        {
+                            <a href="@Context.Request.PathForCulture(code)" hreflang="@code"
+                               title="@SupportedCultures.NameOf(code)">@code.ToUpperInvariant()</a>
+                        }
+                    }
+                </nav>
+
                 @if (User.Identity is not null && User.Identity.IsAuthenticated)
                 {
-                    var displayName = User.Identity.Name ?? "Account";
+                    var displayName = User.Identity.Name ?? L["Account"].Value;
                     var initial = string.IsNullOrWhiteSpace(displayName) ? "?" : displayName.Trim()[..1].ToUpperInvariant();
                     <div class="user-menu" data-user-menu>
                         <button type="button" class="user-trigger" data-user-menu-trigger aria-haspopup="true" aria-expanded="false">
@@ -42,19 +69,19 @@
                         </button>
                         <div class="user-dropdown" data-user-menu-panel role="menu">
                             <div class="menu-section">
-                                <span class="menu-label">Account</span>
-                                <a role="menuitem" asp-controller="Favorites" asp-action="Mine">Saved</a>
-                                <a role="menuitem" asp-controller="SavedSearches" asp-action="Mine">Alerts</a>
-                                <a role="menuitem" asp-controller="Profile" asp-action="Index">Profile</a>
+                                <span class="menu-label">@L["Account"]</span>
+                                <a role="menuitem" asp-controller="Favorites" asp-action="Mine">@L["Saved"]</a>
+                                <a role="menuitem" asp-controller="SavedSearches" asp-action="Mine">@L["Alerts"]</a>
+                                <a role="menuitem" asp-controller="Profile" asp-action="Index">@L["Profile"]</a>
                             </div>
                             @if (User.IsInRole("Agent"))
                             {
                                 <div class="menu-divider"></div>
                                 <div class="menu-section">
-                                    <span class="menu-label">Workspace</span>
-                                    <a role="menuitem" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                                    <span class="menu-label">@L["Workspace"]</span>
+                                    <a role="menuitem" asp-controller="Dashboard" asp-action="Index">@L["Dashboard"]</a>
                                     <a role="menuitem" asp-controller="Inquiries" asp-action="Index" class="menu-item-badge">
-                                        <span>Inquiries</span> @await Component.InvokeAsync("UnreadInquiries")
+                                        <span>@L["Inquiries"]</span> @await Component.InvokeAsync("UnreadInquiries")
                                     </a>
                                 </div>
                             }
@@ -62,21 +89,21 @@
                             {
                                 <div class="menu-divider"></div>
                                 <div class="menu-section">
-                                    <span class="menu-label">Admin</span>
-                                    <a role="menuitem" asp-controller="Admin" asp-action="Listings">Manage listings</a>
+                                    <span class="menu-label">@L["Admin"]</span>
+                                    <a role="menuitem" asp-controller="Admin" asp-action="Listings">@L["Manage listings"]</a>
                                 </div>
                             }
                             <div class="menu-divider"></div>
                             <form asp-controller="Account" asp-action="Logout" method="post">
-                                <button type="submit" class="menu-signout" role="menuitem">Sign out</button>
+                                <button type="submit" class="menu-signout" role="menuitem">@L["Sign out"]</button>
                             </form>
                         </div>
                     </div>
                 }
                 else
                 {
-                    <a class="btn btn-ghost btn-sm" asp-controller="Account" asp-action="Login">Sign in</a>
-                    <a class="btn btn-ink btn-sm" asp-controller="Account" asp-action="Register">Sign up</a>
+                    <a class="btn btn-ghost btn-sm" asp-controller="Account" asp-action="Login">@L["Sign in"]</a>
+                    <a class="btn btn-ink btn-sm" asp-controller="Account" asp-action="Register">@L["Sign up"]</a>
                 }
             </div>
         </div>
@@ -91,27 +118,27 @@
             <div class="foot-grid">
                 <div class="foot-brand">
                     <a class="brand" asp-controller="Home" asp-action="Index"><span class="mark"></span>Emlak<span class="accent">Portal</span></a>
-                    <p>A calmer way to find property in İstanbul — verified listings, local agents, and the details that matter.</p>
+                    <p>@L["A calmer way to find property in İstanbul — verified listings, local agents, and the details that matter."]</p>
                 </div>
                 <div class="foot-col">
-                    <h4>Explore</h4>
-                    <a asp-controller="Listings" asp-action="Index">Browse listings</a>
-                    <a asp-controller="Account" asp-action="Register">List a property</a>
+                    <h4>@L["Explore"]</h4>
+                    <a asp-controller="Listings" asp-action="Index">@L["Browse listings"]</a>
+                    <a asp-controller="Account" asp-action="Register">@L["List a property"]</a>
                 </div>
                 <div class="foot-col">
-                    <h4>Account</h4>
-                    <a asp-controller="Account" asp-action="Login">Sign in</a>
-                    <a asp-controller="Account" asp-action="Register">Register</a>
+                    <h4>@L["Account"]</h4>
+                    <a asp-controller="Account" asp-action="Login">@L["Sign in"]</a>
+                    <a asp-controller="Account" asp-action="Register">@L["Register"]</a>
                 </div>
                 <div class="foot-col">
-                    <h4>Developer</h4>
-                    <a href="/swagger">API docs</a>
-                    <a href="/sitemap.xml">Sitemap</a>
+                    <h4>@L["Developer"]</h4>
+                    <a href="/swagger">@L["API docs"]</a>
+                    <a href="/sitemap.xml">@L["Sitemap"]</a>
                 </div>
             </div>
             <div class="foot-bottom">
                 <span>© @DateTime.Now.Year EmlakPortal</span>
-                <span>Made in İstanbul</span>
+                <span>@L["Made in İstanbul"]</span>
             </div>
         </div>
     </footer>

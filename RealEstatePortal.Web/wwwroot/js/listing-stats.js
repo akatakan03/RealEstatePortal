@@ -10,6 +10,10 @@
     var lastTrigger = null;
     var currentRequest = 0;
 
+    // Every page URL carries a language segment. Taking it from <html lang> keeps the request
+    // on the page's own language and avoids paying for a redirect on every open.
+    var lang = document.documentElement.lang;
+
     function open(id, name, trigger) {
         lastTrigger = trigger;
         title.textContent = name ? name : 'Listing stats';
@@ -21,7 +25,7 @@
         // Ignore anything that comes back for a listing the agent has already moved on from.
         var request = ++currentRequest;
 
-        fetch('/dashboard/listing/' + encodeURIComponent(id) + '/stats', {
+        fetch('/' + lang + '/Dashboard/ListingStats/' + encodeURIComponent(id), {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
             .then(function (res) {

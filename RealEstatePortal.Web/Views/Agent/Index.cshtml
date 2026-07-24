@@ -45,7 +45,7 @@
             <div class="card-grid">
                 @foreach (var listing in Model.Listings)
                 {
-                    <a class="listing-card" asp-controller="Listings" asp-action="Details" asp-route-id="@listing.Id" asp-route-slug="@listing.Slug">
+                    <a class="listing-card" href="@Url.ListingUrl(listing.Id, listing.Slug)">
                         <div class="lc-media">
                             <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@listing.ListingType</span>
                             @{ var cover = ListingImages.CoverOrPlaceholder(listing.CoverThumbnailUrl, listing.Id, Configuration.GetValue<bool>("Demo:PlaceholderImages")); }

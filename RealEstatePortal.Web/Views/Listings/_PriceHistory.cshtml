@@ -10,6 +10,11 @@
     var inv = CultureInfo.InvariantCulture;
     var currency = pts[pts.Count - 1].Currency;
 
+    // `inv` is for SVG geometry only — coordinates must use a dot, whatever the visitor's
+    // language. Anything a person reads (axis labels, dates, the summary) is formatted in the
+    // current culture instead, or a Turkish visitor would see 1,250,000 where they expect
+    // 1.250.000.
+
     // SVG plot geometry (a fixed viewBox scaled responsively by CSS).
     const double W = 720, H = 240;
     const double padL = 78, padR = 20, padT = 22, padB = 42;
@@ -49,38 +54,43 @@
     var arrow = diff < 0 ? "↓" : diff > 0 ? "↑" : "→";
 
     <div class="detail-section">
-        <h3>Price history</h3>
+        <h3>@L["Price history"]</h3>
 
         <div class="price-trend-summary price-trend-@dir">
             <span class="pts-arrow">@arrow</span>
             @if (dir == "flat")
             {
-                <span>Price unchanged in the latest update.</span>
+                <span>@L["Price unchanged in the latest update."]</span>
             }
             else
             {
+                @* One sentence, one resource entry: splitting it into fragments would fall
+                   apart in any language that orders them differently. *@
                 <span>
-                    <strong>@Math.Abs(pct).ToString("0.#", inv)% @(dir == "down" ? "lower" : "higher")</strong>
-                    than before — now @latest.Amount.ToString("N0") @currency
+                    @L["{0}% {1} than before — now {2} {3}",
+                       Math.Abs(pct).ToString("0.#"),
+                       dir == "down" ? L["lower"].Value : L["higher"].Value,
+                       latest.Amount.ToString("N0"),
+                       currency]
                 </span>
             }
-            <span class="pts-when">Last changed @latest.ChangedAt.ToString("MMM d, yyyy", inv)</span>
+            <span class="pts-when">@L["Last changed {0}", latest.ChangedAt.ToString("d")]</span>
         </div>
 
         <div class="price-trend">
             <svg viewBox="0 0 @Fmt(W) @Fmt(H)" role="img"
-                 aria-label="Price history line chart">
+                 aria-label="@L["Price history line chart"]">
                 <!-- top/bottom guide lines -->
                 <line class="ptg" x1="@Fmt(padL)" y1="@Fmt(padT)" x2="@Fmt(padL + plotW)" y2="@Fmt(padT)"></line>
                 <line class="ptg" x1="@Fmt(padL)" y1="@Fmt(padT + plotH)" x2="@Fmt(padL + plotW)" y2="@Fmt(padT + plotH)"></line>
 
                 <!-- y-axis labels: high (top) and low (bottom) -->
-                <text class="ptl" x="@Fmt(padL - 10)" y="@Fmt(padT + 4)" text-anchor="end">@max.ToString("N0", inv)</text>
-                <text class="ptl" x="@Fmt(padL - 10)" y="@Fmt(padT + plotH + 4)" text-anchor="end">@min.ToString("N0", inv)</text>
+                <text class="ptl" x="@Fmt(padL - 10)" y="@Fmt(padT + 4)" text-anchor="end">@max.ToString("N0")</text>
+                <text class="ptl" x="@Fmt(padL - 10)" y="@Fmt(padT + plotH + 4)" text-anchor="end">@min.ToString("N0")</text>
 
                 <!-- x-axis labels: first and last date -->
-                <text class="ptl" x="@Fmt(padL)" y="@Fmt(H - 14)" text-anchor="start">@first.ToString("MMM yyyy", inv)</text>
-                <text class="ptl" x="@Fmt(padL + plotW)" y="@Fmt(H - 14)" text-anchor="end">@last.ToString("MMM yyyy", inv)</text>
+                <text class="ptl" x="@Fmt(padL)" y="@Fmt(H - 14)" text-anchor="start">@first.ToString("MMM yyyy")</text>
+                <text class="ptl" x="@Fmt(padL + plotW)" y="@Fmt(H - 14)" text-anchor="end">@last.ToString("MMM yyyy")</text>
 
                 <polygon class="pt-area" points="@areaPts"></polygon>
                 <polyline class="pt-line" points="@linePts"></polyline>
@@ -88,7 +98,7 @@
                 @foreach (var c in coords)
                 {
                     <circle class="pt-dot" cx="@Fmt(c.x)" cy="@Fmt(c.y)" r="4">
-                        <title>@c.p.ChangedAt.ToString("MMM d, yyyy", inv): @c.p.Amount.ToString("N0") @c.p.Currency</title>
+                        <title>@c.p.ChangedAt.ToString("d"): @c.p.Amount.ToString("N0") @c.p.Currency</title>
                     </circle>
                 }
             </svg>

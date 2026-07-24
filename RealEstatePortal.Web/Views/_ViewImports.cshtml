@@ -1,5 +1,9 @@
 ﻿@using RealEstatePortal.Web
 @using RealEstatePortal.Web.Models
 @using RealEstatePortal.Web.Helpers
+@using RealEstatePortal.Web.Localization
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@* Every view gets the shared resource file as L. Keys are the English text, so an untranslated
+   string renders as correct English rather than as a key. *@
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> L
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

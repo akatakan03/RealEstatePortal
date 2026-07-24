@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -10,6 +11,7 @@ using RealEstatePortal.Infrastructure.Data;
 using RealEstatePortal.Web;
 using RealEstatePortal.Web.Filters;
 using RealEstatePortal.Web.HealthChecks;
+using RealEstatePortal.Web.Localization;
 using RealEstatePortal.Web.Services;
 using Serilog;
 using System.Globalization;
@@ -17,7 +19,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var defaultCulture = new CultureInfo("en-US");
+// The culture a thread starts on when no request has set one — background workers, startup
+// code, the outbox sender. Request threads get theirs from the URL (see RouteCultureProvider).
+var defaultCulture = SupportedCultures.Resolve(SupportedCultures.Default);
 CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
@@ -29,6 +33,24 @@ builder.Host.UseSerilog((context, config) =>
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<DomainExceptionFilter>();
+});
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.Configure<RouteOptions>(options =>
+    options.ConstraintMap[CultureRouteConstraint.Name] = typeof(CultureRouteConstraint));
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var cultures = SupportedCultures.Cultures.ToList();
+    options.DefaultRequestCulture =
+        new RequestCulture(SupportedCultures.Resolve(SupportedCultures.Default));
+    options.SupportedCultures = cultures;
+    options.SupportedUICultures = cultures;
+
+    // The URL decides, and nothing else does. The stock providers would let a cookie or an
+    // Accept-Language header override it, which would mean the same address renders in
+    // different languages for different people — bad for sharing, worse for crawling.
+    options.RequestCultureProviders = new List<IRequestCultureProvider> { new RouteCultureProvider() };
 });
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -166,14 +188,6 @@ var app = builder.Build();
 // Must run before anything that reads the client IP or scheme (rate limiter, HTTPS redirect, logging).
 app.UseForwardedHeaders();
 
-var supportedCultures = new[] { new CultureInfo("en-US") };
-app.UseRequestLocalization(new RequestLocalizationOptions
-{
-    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en-US"),
-    SupportedCultures = supportedCultures,
-    SupportedUICultures = supportedCultures
-});
-
 app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
@@ -195,7 +209,15 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// Before routing: it works off the raw path, and its job is to send anything without a
+// language segment somewhere that has one. After static files, so /css and /js never reach it.
+app.UseMiddleware<CultureRedirectMiddleware>();
+
 app.UseRouting();
+
+// After routing, because the language comes from a route value and route values don't exist
+// until the router has matched. Before anything that renders text.
+app.UseRequestLocalization();
 
 app.UseRateLimiter();
 
@@ -205,9 +227,33 @@ app.UseAuthorization();
 
 app.MapHealthChecks("/health");
 
+// Every page-serving route carries the language. Link generation picks {culture} up from the
+// current request's route values, so asp-action links keep the visitor in their language
+// without a single one of them having to say so.
+//
+// The named routes below used to be [HttpGet("…")] attributes on their actions, and had to
+// move here: ambient route values are not shared across the conventional/attribute boundary,
+// so an asp-action link on a conventionally-routed page could not fill in {culture} for an
+// attribute-routed target. Every page route is conventional now, and the ambient value flows.
+//
+// Order matters for link generation — the first pattern that can consume the supplied values
+// wins, so the specific, shareable URLs come before the catch-all.
+app.MapControllerRoute(
+    name: "listing",
+    pattern: "{culture:culture}/listing/{id:int}/{slug?}",
+    defaults: new { controller = "Listings", action = "Details" });
+
+app.MapControllerRoute(
+    name: "agent",
+    pattern: "{culture:culture}/agent/{id}",
+    defaults: new { controller = "Agent", action = "Index" });
+
+// The dashboard and its stats panel deliberately have no vanity route. They are signed-in
+// pages that nobody shares or indexes, and a named route would only add another place where
+// {culture} has to be threaded through by hand — see CanonicalUrls for why that is a trap.
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{culture:culture}/{controller=Home}/{action=Index}/{id?}");
 app.MapHub<RealEstatePortal.Web.Hubs.NotificationHub>("/hubs/notifications");
 
 using (var scope = app.Services.CreateScope())

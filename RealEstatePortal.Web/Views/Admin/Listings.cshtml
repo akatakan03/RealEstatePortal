@@ -61,7 +61,7 @@
                     {
                         <div class="review-queue-item">
                             <div class="rq-main">
-                                <a class="rq-title" asp-controller="Listings" asp-action="Details" asp-route-id="@p.Id" target="_blank" rel="noopener">@p.Title</a>
+                                <a class="rq-title" href="@Url.ListingUrl(p.Id)" target="_blank" rel="noopener">@p.Title</a>
                                 <div class="rq-meta">
                                     @(p.OwnerEmail ?? "—")
                                     @if (p.UnlockRequestedAt is not null)
@@ -203,7 +203,7 @@
                         @foreach (var l in Model.Items)
                         {
                             <tr>
-                                <td class="row-title"><a asp-controller="Listings" asp-action="Details" asp-route-id="@l.Id">@l.Title</a></td>
+                                <td class="row-title"><a href="@Url.ListingUrl(l.Id)">@l.Title</a></td>
                                 <td class="muted">@(l.OwnerEmail ?? "—")</td>
                                 <td><span class="badge-status badge-@l.Status.ToString().ToLower()">@l.Status</span></td>
                                 <td><span class="value">@l.PriceAmount.ToString("N0") @l.PriceCurrency</span></td>

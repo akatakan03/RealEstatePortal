@@ -45,7 +45,7 @@
         var q = addressInput.value.trim();
         if (!q) { alert('Enter an address first.'); return; }
         btn.disabled = true;
-        fetch('/Listings/Geocode?q=' + encodeURIComponent(q))
+        fetch('/' + document.documentElement.lang + '/Listings/Geocode?q=' + encodeURIComponent(q))
             .then(function (r) { return r.json(); })
             .then(function (d) {
                 if (d.found) { setMarker(d.lat, d.lng, true); }

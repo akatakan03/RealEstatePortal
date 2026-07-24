@@ -1533,6 +1533,40 @@ textarea.form-control {
     color: var(--muted)
 }
 
+/* Language switcher in the header. Two-letter codes rather than flags — a flag names a
+   country, not a language, and gets it wrong for most of them. */
+.lang-switch {
+    display: flex;
+    align-items: center;
+    gap: .1rem;
+    margin-right: .4rem
+}
+
+.lang-switch a,
+.lang-switch .lang-current {
+    padding: .3rem .45rem;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    border-radius: 6px;
+    line-height: 1
+}
+
+.lang-switch a {
+    color: var(--muted);
+    text-decoration: none
+}
+
+.lang-switch a:hover {
+    color: var(--ink);
+    background: rgba(0, 0, 0, .05)
+}
+
+.lang-switch .lang-current {
+    color: var(--ink);
+    cursor: default
+}
+
 /* What actually happens when you delete, under the warning on the confirm screen. */
 .delete-note {
     margin: -.5rem 0 1.5rem;

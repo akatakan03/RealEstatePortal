@@ -7,7 +7,11 @@
         ? listing.Description.Substring(0, 157).TrimEnd() + "…"
         : listing.Description;
     var coverImage = listing.ImageUrls.FirstOrDefault();
-    var canonicalUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/listing/{listing.Id}/{listing.Slug}";
+
+    // The canonical points at this listing *in this language* — the alternates in the layout
+    // are what tie the two versions together for a crawler.
+    var culture = SupportedCultures.CodeOf(System.Globalization.CultureInfo.CurrentUICulture);
+    var canonicalUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/{culture}/listing/{listing.Id}/{listing.Slug}";
 }
 
 @section Head {
@@ -27,12 +31,14 @@
 
 <div class="detail">
     <div class="container">
-        <a class="back-link" asp-action="Index">← Back to listings</a>
+        <a class="back-link" asp-action="Index">← @L["Back to listings"]</a>
 
         @if (listing.Status != RealEstatePortal.Domain.Enums.ListingStatus.Active)
         {
+            @* The status sits inside the sentence rather than beside it: Turkish puts it in a
+               different place, so a split-up version would read as nonsense. *@
             <div class="preview-banner">
-                👁 Preview — this listing is <strong>@listing.Status</strong> and isn't visible to the public.
+                👁 @L["Preview — this listing is {0} and isn't visible to the public.", L.Localize(listing.Status)]
             </div>
         }
 
@@ -48,8 +54,8 @@
                     <img id="mainImage" src="@listing.ImageUrls.First()" alt="@listing.Title" />
                     @if (listing.ImageUrls.Count > 1)
                     {
-                        <button type="button" class="gallery-nav prev" onclick="stepGallery(-1)" aria-label="Previous photo">‹</button>
-                        <button type="button" class="gallery-nav next" onclick="stepGallery(1)" aria-label="Next photo">›</button>
+                        <button type="button" class="gallery-nav prev" onclick="stepGallery(-1)" aria-label="@L["Previous photo"]">‹</button>
+                        <button type="button" class="gallery-nav next" onclick="stepGallery(1)" aria-label="@L["Next photo"]">›</button>
                     }
                 </div>
                 @if (listing.ImageUrls.Count > 1)
@@ -59,7 +65,7 @@
                         {
                             <img src="@listing.ImageUrls[i]" data-full="@listing.ImageUrls[i]"
                                  class="@(i == 0 ? "active" : "")"
-                                 onclick="selectThumb(this)" alt="thumbnail" />
+                                 onclick="selectThumb(this)" alt="@L["thumbnail"]" />
                         }
                     </div>
                 }
@@ -71,8 +77,8 @@
             <div class="gallery">
                 <div class="gallery-main">
                     <img id="mainImage" src="https://loremflickr.com/1200/800/house?lock=@seeds[0]" alt="@listing.Title" />
-                    <button type="button" class="gallery-nav prev" onclick="stepGallery(-1)" aria-label="Previous photo">‹</button>
-                    <button type="button" class="gallery-nav next" onclick="stepGallery(1)" aria-label="Next photo">›</button>
+                    <button type="button" class="gallery-nav prev" onclick="stepGallery(-1)" aria-label="@L["Previous photo"]">‹</button>
+                    <button type="button" class="gallery-nav next" onclick="stepGallery(1)" aria-label="@L["Next photo"]">›</button>
                 </div>
                 <div class="gallery-thumbs">
                     @for (var i = 0; i < seeds.Count; i++)
@@ -81,20 +87,20 @@
                              data-full="https://loremflickr.com/1200/800/house?lock=@seeds[i]"
                              class="@(i == 0 ? "active" : "")"
                              onclick="selectThumb(this)"
-                             alt="thumbnail" loading="lazy" />
+                             alt="@L["thumbnail"]" loading="lazy" />
                     }
                 </div>
             </div>
         }
         else
         {
-            <div class="gallery-none">No photos yet</div>
+            <div class="gallery-none">@L["No photos yet"]</div>
         }
 
         <div class="detail-grid">
             <div>
                 <div class="detail-head">
-                    <span class="eyebrow">@listing.PropertyType · @listing.ListingType</span>
+                    <span class="eyebrow">@L.Localize(listing.PropertyType) · @L.Localize(listing.ListingType)</span>
                     <h1>@listing.Title</h1>
                     <div class="detail-price">@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</div>
 
@@ -105,12 +111,12 @@
                     {
                         <div class="price-drop">
                             <span class="pd-arrow" aria-hidden="true">↓</span>
-                            <strong>@listing.PriceDropPercent.ToString("0.#") % lower</strong>
+                            <strong>@L["{0}% lower", listing.PriceDropPercent.ToString("0.#")]</strong>
                             <span class="pd-was">
-                                was @listing.PreviousPrice.ToString("N0") @listing.PriceCurrency
+                                @L["was {0} {1}", listing.PreviousPrice.ToString("N0"), listing.PriceCurrency]
                                 @if (listing.PriceDroppedAt is { } dropped)
                                 {
-                                    <text>· @dropped.ToString("MMM d, yyyy")</text>
+                                    <text>· @dropped.ToString("d")</text>
                                 }
                             </span>
                         </div>
@@ -121,15 +127,15 @@
                         <ul class="interest-strip">
                             @if (listing.IsNew)
                             {
-                                <li class="int-new">✨ New this week</li>
+                                <li class="int-new">✨ @L["New this week"]</li>
                             }
                             @if (listing.ShowViews)
                             {
-                                <li>👁 @listing.Views7d.ToString("N0") views in the last 7 days</li>
+                                <li>👁 @L["{0} views in the last 7 days", listing.Views7d.ToString("N0")]</li>
                             }
                             @if (listing.ShowSaves)
                             {
-                                <li>♥ @listing.SaveCount.ToString("N0") people saved this</li>
+                                <li>♥ @L["{0} people saved this", listing.SaveCount.ToString("N0")]</li>
                             }
                         </ul>
                     }
@@ -139,54 +145,59 @@
                             <input type="hidden" name="listingId" value="@listing.Id" />
                             <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
                             <button type="submit" class="btn @(Model.IsFavorited ? "btn-primary" : "btn-ghost")">
-                                @(Model.IsFavorited ? "♥ Saved" : "♡ Save to favorites")
+                                @(Model.IsFavorited ? $"♥ {L["Saved"].Value}" : $"♡ {L["Save to favorites"].Value}")
                             </button>
                         </form>
                     }
                     else
                     {
-                        <a asp-controller="Account" asp-action="Login" class="btn btn-ghost" style="margin-bottom:1.5rem;">♡ Sign in to save</a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-ghost" style="margin-bottom:1.5rem;">♡ @L["Sign in to save"]</a>
                     }
                 </div>
 
+                @{
+                    var yes = L["Yes"].Value;
+                    var no = L["No"].Value;
+                }
+
                 <div class="facts">
-                    <div class="fact"><span class="value">@listing.Bedrooms</span><span class="lbl">Bedrooms</span></div>
-                    <div class="fact"><span class="value">@listing.Bathrooms</span><span class="lbl">Bathrooms</span></div>
-                    <div class="fact"><span class="value">@listing.AreaSqMeters.ToString("N0")</span><span class="lbl">m² area</span></div>
-                    <div class="fact"><span class="value" style="font-size:1.05rem;">@listing.ListingType</span><span class="lbl">Listing</span></div>
+                    <div class="fact"><span class="value">@listing.Bedrooms</span><span class="lbl">@L["Bedrooms"]</span></div>
+                    <div class="fact"><span class="value">@listing.Bathrooms</span><span class="lbl">@L["Bathrooms"]</span></div>
+                    <div class="fact"><span class="value">@listing.AreaSqMeters.ToString("N0")</span><span class="lbl">@L["m² area"]</span></div>
+                    <div class="fact"><span class="value" style="font-size:1.05rem;">@L.Localize(listing.ListingType)</span><span class="lbl">@L["Listing"]</span></div>
                 </div>
 
                 <div class="detail-section">
-                    <h3>Features</h3>
+                    <h3>@L["Features"]</h3>
                     <div class="feature-list">
                         @if (listing.Heating is not null && listing.Heating != RealEstatePortal.Domain.Enums.HeatingType.None)
                         {
-                            <div class="feature"><span class="fk">Heating</span><span class="fv">@listing.Heating</span></div>
+                            <div class="feature"><span class="fk">@L["Heating"]</span><span class="fv">@L.Localize(listing.Heating.Value)</span></div>
                         }
                         @if (listing.Internet is not null && listing.Internet != RealEstatePortal.Domain.Enums.InternetInfrastructure.Unknown)
                         {
-                            <div class="feature"><span class="fk">Internet</span><span class="fv">@listing.Internet</span></div>
+                            <div class="feature"><span class="fk">@L["Internet"]</span><span class="fv">@L.Localize(listing.Internet.Value)</span></div>
                         }
                         @if (listing.FloorNumber is not null)
                         {
-                            <div class="feature"><span class="fk">Floor</span><span class="fv value">@listing.FloorNumber@(listing.TotalFloors is not null ? $" / {listing.TotalFloors}" : "")</span></div>
+                            <div class="feature"><span class="fk">@L["Floor"]</span><span class="fv value">@listing.FloorNumber@(listing.TotalFloors is not null ? $" / {listing.TotalFloors}" : "")</span></div>
                         }
                         @if (listing.BuildingAge is not null)
                         {
-                            <div class="feature"><span class="fk">Building age</span><span class="fv"><span class="value">@listing.BuildingAge</span> yrs</span></div>
+                            <div class="feature"><span class="fk">@L["Building age"]</span><span class="fv"><span class="value">@listing.BuildingAge</span> @L["yrs"]</span></div>
                         }
                         @if (listing.MonthlyDues is not null)
                         {
-                            <div class="feature"><span class="fk">Monthly dues</span><span class="fv"><span class="value">@listing.MonthlyDues.Value.ToString("N0")</span> @listing.PriceCurrency</span></div>
+                            <div class="feature"><span class="fk">@L["Monthly dues"]</span><span class="fv"><span class="value">@listing.MonthlyDues.Value.ToString("N0")</span> @listing.PriceCurrency</span></div>
                         }
-                        <div class="feature"><span class="fk">Furnished</span><span class="fv">@(listing.IsFurnished ? "Yes" : "No")</span></div>
-                        <div class="feature"><span class="fk">Balcony</span><span class="fv">@(listing.HasBalcony ? "Yes" : "No")</span></div>
-                        <div class="feature"><span class="fk">Parking</span><span class="fv">@(listing.HasParking ? "Yes" : "No")</span></div>
+                        <div class="feature"><span class="fk">@L["Furnished"]</span><span class="fv">@(listing.IsFurnished ? yes : no)</span></div>
+                        <div class="feature"><span class="fk">@L["Balcony"]</span><span class="fv">@(listing.HasBalcony ? yes : no)</span></div>
+                        <div class="feature"><span class="fk">@L["Parking"]</span><span class="fv">@(listing.HasParking ? yes : no)</span></div>
                     </div>
                 </div>
 
                 <div class="detail-section">
-                    <h3>About this property</h3>
+                    <h3>@L["About this property"]</h3>
                     <p class="detail-desc">@listing.Description</p>
                 </div>
 
@@ -194,7 +205,7 @@
 
                 @if (!string.IsNullOrEmpty(listing.OwnerId))
                 {
-                    <a class="listed-by" asp-controller="Agent" asp-action="Index" asp-route-id="@listing.OwnerId">
+                    <a class="listed-by" href="@Url.AgentUrl(listing.OwnerId)">
                         <div class="lb-avatar">
                             @if (listing.OwnerAvatarUrl is not null)
                             {
@@ -206,14 +217,14 @@
                             }
                         </div>
                         <div>
-                            <div class="lb-label">Listed by</div>
-                            <div class="lb-name">@(listing.OwnerName ?? "Agent")</div>
+                            <div class="lb-label">@L["Listed by"]</div>
+                            <div class="lb-name">@(listing.OwnerName ?? L["Agent"].Value)</div>
                         </div>
                     </a>
                 }
 
                 <div class="detail-section">
-                    <h3>Location</h3>
+                    <h3>@L["Location"]</h3>
                     <p class="addr-line">@listing.Address</p>
                     @if (listing.Latitude is not null && listing.Longitude is not null)
                     {
@@ -224,33 +235,33 @@
 
             <aside>
                 <div class="contact-card">
-                    <h3>Contact the agent</h3>
-                    <p class="sub">Interested? Send a message and the agent will get back to you.</p>
+                    <h3>@L["Contact the agent"]</h3>
+                    <p class="sub">@L["Interested? Send a message and the agent will get back to you."]</p>
                     <form asp-action="Inquire" method="post">
                         <input type="hidden" asp-for="Inquiry.ListingId" />
                         <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:.8rem;"></div>
 
                         <div class="field-group">
-                            <label asp-for="Inquiry.Name" class="form-label">Name</label>
+                            <label asp-for="Inquiry.Name" class="form-label">@L["Name"]</label>
                             <input asp-for="Inquiry.Name" class="form-control" />
                             <span asp-validation-for="Inquiry.Name" class="text-danger"></span>
                         </div>
                         <div class="field-group">
-                            <label asp-for="Inquiry.Email" class="form-label">Email</label>
+                            <label asp-for="Inquiry.Email" class="form-label">@L["Email"]</label>
                             <input asp-for="Inquiry.Email" class="form-control" />
                             <span asp-validation-for="Inquiry.Email" class="text-danger"></span>
                         </div>
                         <div class="field-group">
-                            <label asp-for="Inquiry.Phone" class="form-label">Phone (optional)</label>
+                            <label asp-for="Inquiry.Phone" class="form-label">@L["Phone (optional)"]</label>
                             <input asp-for="Inquiry.Phone" class="form-control" />
                             <span asp-validation-for="Inquiry.Phone" class="text-danger"></span>
                         </div>
                         <div class="field-group">
-                            <label asp-for="Inquiry.Message" class="form-label">Message</label>
+                            <label asp-for="Inquiry.Message" class="form-label">@L["Message"]</label>
                             <textarea asp-for="Inquiry.Message" class="form-control" rows="4"></textarea>
                             <span asp-validation-for="Inquiry.Message" class="text-danger"></span>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%;">Send message</button>
+                        <button type="submit" class="btn btn-primary" style="width:100%;">@L["Send message"]</button>
                     </form>
                 </div>
             </aside>
