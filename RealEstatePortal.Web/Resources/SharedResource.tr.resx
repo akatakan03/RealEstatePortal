@@ -1138,4 +1138,8 @@
   <data name="Unknown" xml:space="preserve">
     <value>Bilinmiyor</value>
   </data>
+  <!-- Client-side validation. The framework message names the property; this one is given the same display name the label uses. -->
+  <data name="Please enter a valid number." xml:space="preserve">
+    <value>Lütfen geçerli bir sayı girin.</value>
+  </data>
 </root>

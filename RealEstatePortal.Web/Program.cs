@@ -45,6 +45,12 @@ builder.Services.AddControllersWithViews(options =>
 .AddDataAnnotationsLocalization(options =>
     options.DataAnnotationLocalizerProvider = (_, factory) => factory.Create(typeof(SharedResource)));
 
+// The numeric client-side message is the one piece of validation text the framework will not hand
+// to a localizer. Inserted at the front so it writes data-val-number before the built-in provider
+// gets there — that one merges rather than overwrites, so first past the post wins.
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.MvcViewOptions>(options =>
+    options.ClientModelValidatorProviders.Insert(0, new LocalizedNumericClientModelValidatorProvider()));
+
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.Configure<RouteOptions>(options =>
     options.ConstraintMap[CultureRouteConstraint.Name] = typeof(CultureRouteConstraint));

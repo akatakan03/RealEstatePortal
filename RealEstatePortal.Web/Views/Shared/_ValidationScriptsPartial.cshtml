@@ -1,2 +1,50 @@
-﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+@{
+    var numberFormat = System.Globalization.CultureInfo.CurrentCulture.NumberFormat;
+}
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    // jquery-validation hard-codes the English number format: comma for thousands, dot for the
+    // decimal. The server renders and parses these fields in the request culture, so in Turkish it
+    // fills a price box with "19600000,00" and the client then refuses to submit the form it was
+    // just given. Nothing is wrong with the value — the two ends simply disagree on the format.
+    //
+    // Teaching the client the server's separators fixes it for every culture at once, and keeps
+    // the agent typing prices the way they read them.
+    (function ($) {
+        var decimalSeparator = @Html.Raw(Json.Serialize(numberFormat.NumberDecimalSeparator));
+        var groupSeparator = @Html.Raw(Json.Serialize(numberFormat.NumberGroupSeparator));
+
+        function toNumber(value) {
+            if (typeof value === "number") { return value; }
+            if (typeof value !== "string") { return NaN; }
+
+            var trimmed = value.trim();
+            if (trimmed === "") { return NaN; }
+
+            // split/join rather than replace: the separators are literal text, and a regex would
+            // have to escape "." — which is exactly the character Turkish groups with.
+            var normalized = trimmed.split(groupSeparator).join("").split(decimalSeparator).join(".");
+            return /^-?\d*\.?\d+$/.test(normalized) ? Number(normalized) : NaN;
+        }
+
+        $.validator.methods.number = function (value, element) {
+            return this.optional(element) || !isNaN(toNumber(value));
+        };
+
+        // range, min and max compare the raw string, which JavaScript coerces to NaN as soon as it
+        // contains a comma — so they have to read the value the same way.
+        $.validator.methods.range = function (value, element, param) {
+            var number = toNumber(value);
+            return this.optional(element) || (number >= param[0] && number <= param[1]);
+        };
+
+        $.validator.methods.min = function (value, element, param) {
+            return this.optional(element) || toNumber(value) >= param;
+        };
+
+        $.validator.methods.max = function (value, element, param) {
+            return this.optional(element) || toNumber(value) <= param;
+        };
+    })(jQuery);
+</script>
