@@ -2,7 +2,7 @@
 @using RealEstatePortal.Application.Listings.Queries.GetPublicListings
 @model RealEstatePortal.Web.Models.Listings.ListingBrowseViewModel
 @{
-    ViewData["Title"] = "Browse Listings";
+    ViewData["Title"] = L["Browse Listings"].Value;
     var routeData = Model.CurrentFilter();
     var hasCenter = Model.Filter.CenterLat.HasValue && Model.Filter.CenterLng.HasValue;
     var currentRadius = Model.Filter.RadiusKm ?? 10;
@@ -19,85 +19,87 @@
 
 <section class="browse-hero">
     <div class="container">
-        <span class="eyebrow">İstanbul property, curated</span>
-        <h1>Find the place that <em>feels</em> like yours.</h1>
-        <p class="lead">Verified listings from local agents — filter by area, type, and price to find your next home.</p>
+        <span class="eyebrow">@L["İstanbul property, curated"]</span>
+        @* The emphasised word is a placeholder rather than markup baked into the sentence:
+           it lands in a different place in Turkish, and only the translator knows where. *@
+        <h1>@Html.Raw(L["Find the place that {0} like yours.", $"<em>{L["feels"].Value}</em>"])</h1>
+        <p class="lead">@L["Verified listings from local agents — filter by area, type, and price to find your next home."]</p>
 
         <div class="console-wrap rise d1">
             <form asp-action="Index" method="get">
                 <div class="console">
                     <div class="field">
-                        <label>Location</label>
-                        <input name="Keyword" value="@Model.Filter.Keyword" placeholder="Neighbourhood or address" />
+                        <label>@L["Location"]</label>
+                        <input name="Keyword" value="@Model.Filter.Keyword" placeholder="@L["Neighbourhood or address"]" />
                     </div>
                     <div class="field">
-                        <label>Type</label>
+                        <label>@L["Type"]</label>
                         <select name="ListingType">
-                            <option value="">Any type</option>
+                            <option value="">@L["Any type"]</option>
                             @foreach (var t in Enum.GetValues<ListingType>())
                             {
-                                <option value="@t" selected="@(Model.Filter.ListingType == t)">@t</option>
+                                <option value="@t" selected="@(Model.Filter.ListingType == t)">@L.Localize(t)</option>
                             }
                         </select>
                     </div>
                     <div class="field">
-                        <label>Property</label>
+                        <label>@L["Property"]</label>
                         <select name="PropertyType">
-                            <option value="">Any property</option>
+                            <option value="">@L["Any property"]</option>
                             @foreach (var p in Enum.GetValues<PropertyType>())
                             {
-                                <option value="@p" selected="@(Model.Filter.PropertyType == p)">@p</option>
+                                <option value="@p" selected="@(Model.Filter.PropertyType == p)">@L.Localize(p)</option>
                             }
                         </select>
                     </div>
                     <div class="field">
-                        <label>Max price</label>
-                        <input name="MaxPrice" value="@Model.Filter.MaxPrice" placeholder="Any" />
+                        <label>@L["Max price"]</label>
+                        <input name="MaxPrice" value="@Model.Filter.MaxPrice" placeholder="@L["Any"]" />
                     </div>
                     <div class="search-cell">
-                        <button type="submit" class="btn btn-primary">Search</button>
+                        <button type="submit" class="btn btn-primary">@L["Search"]</button>
                     </div>
                 </div>
 
                 @* Gelişmiş Filtreler Paneli *@
                 <details class="more-filters" @(HasAdvancedFilter(Model.Filter) ? "open" : "")>
-                    <summary>More filters</summary>
+                    <summary>@L["More filters"]</summary>
                     <div class="filter-grid">
                         <div class="mb-field">
-                            <label class="form-label">Heating</label>
+                            <label class="form-label">@L["Heating"]</label>
                             <select name="Heating" class="form-select">
-                                <option value="">Any</option>
+                                <option value="">@L["Any"]</option>
                                 @foreach (var h in Enum.GetValues<RealEstatePortal.Domain.Enums.HeatingType>())
                                 {
-                                    <option value="@h" selected="@(Model.Filter.Heating == h)">@h</option>
+                                    <option value="@h" selected="@(Model.Filter.Heating == h)">@L.Localize(h)</option>
                                 }
                             </select>
                         </div>
                         <div class="mb-field">
-                            <label class="form-label">Internet</label>
+                            <label class="form-label">@L["Internet"]</label>
                             <select name="Internet" class="form-select">
-                                <option value="">Any</option>
+                                <option value="">@L["Any"]</option>
                                 @foreach (var i in Enum.GetValues<RealEstatePortal.Domain.Enums.InternetInfrastructure>())
                                 {
-                                    <option value="@i" selected="@(Model.Filter.Internet == i)">@i</option>
+                                    <option value="@i" selected="@(Model.Filter.Internet == i)">@L.Localize(i)</option>
                                 }
                             </select>
                         </div>
                         <div class="mb-field">
-                            <label class="form-label">Min bedrooms</label>
-                            <input name="MinBedrooms" value="@Model.Filter.MinBedrooms" class="form-control" placeholder="Any" />
+                            <label class="form-label">@L["Min bedrooms"]</label>
+                            <input name="MinBedrooms" value="@Model.Filter.MinBedrooms" class="form-control" placeholder="@L["Any"]" />
                         </div>
                         <div class="mb-field">
-                            <label class="form-label">Max monthly dues</label>
-                            <input name="MaxDues" value="@Model.Filter.MaxDues" class="form-control" placeholder="Any" />
+                            <label class="form-label">@L["Max monthly dues"]</label>
+                            <input name="MaxDues" value="@Model.Filter.MaxDues" class="form-control" placeholder="@L["Any"]" />
                         </div>
                     </div>
                     <div class="filter-checks">
-                        <label><input type="checkbox" name="Furnished" value="true" @(Model.Filter.Furnished == true ? "checked" : "") /> Furnished</label>
-                        <label><input type="checkbox" name="Parking" value="true" @(Model.Filter.Parking == true ? "checked" : "") /> Parking</label>
-                        <label><input type="checkbox" name="Balcony" value="true" @(Model.Filter.Balcony == true ? "checked" : "") /> Balcony</label>
+                        <label><input type="checkbox" name="Furnished" value="true" @(Model.Filter.Furnished == true ? "checked" : "") /> @L["Furnished"]</label>
+                        <label><input type="checkbox" name="Parking" value="true" @(Model.Filter.Parking == true ? "checked" : "") /> @L["Parking"]</label>
+                        <label><input type="checkbox" name="Balcony" value="true" @(Model.Filter.Balcony == true ? "checked" : "") /> @L["Balcony"]</label>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:1rem;">Apply filters</button>
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:1rem;">@L["Apply filters"]</button>
                 </details>
 
                 @if (hasCenter)
@@ -123,49 +125,55 @@
                     <input type="hidden" name="PropertyType" value="@Model.Filter.PropertyType" />
                     <input type="hidden" name="MaxPrice" value="@Model.Filter.MaxPrice" />
                     <input type="hidden" name="MinBedrooms" value="@Model.Filter.MinBedrooms" />
-                    <input name="Name" class="form-control" style="max-width:260px;" placeholder="Name this search (e.g. Kadıköy flats)" />
-                    <button type="submit" class="btn btn-ghost btn-sm">🔔 Save this search</button>
+                    <input name="Name" class="form-control" style="max-width:260px;" placeholder="@L["Name this search (e.g. Kadıköy flats)"]" />
+                    <button type="submit" class="btn btn-ghost btn-sm">🔔 @L["Save this search"]</button>
                 </form>
             }
-            <label>Search on the map:</label>
+            <label>@L["Search on the map:"]</label>
             <select id="radiusSelect" class="form-select select-inline">
                 @foreach (var km in new[] { 1, 5, 10, 25, 50 })
                 {
                     <option value="@km" selected="@(currentRadius == km)">@km km</option>
                 }
             </select>
-            <button type="button" id="searchAreaBtn" class="btn btn-ghost btn-sm">Search this area</button>
+            <button type="button" id="searchAreaBtn" class="btn btn-ghost btn-sm">@L["Search this area"]</button>
             @if (hasCenter)
             {
-                <a class="btn btn-ghost btn-sm" asp-action="Index" asp-all-route-data="routeData">Clear area</a>
-                <span class="note">Within @currentRadius km of the marked area.</span>
+                <a class="btn btn-ghost btn-sm" asp-action="Index" asp-all-route-data="routeData">@L["Clear area"]</a>
+                <span class="note">@L["Within {0} km of the marked area.", currentRadius]</span>
             }
             else
             {
-                <span class="note">Pan the map, then search its current area.</span>
+                <span class="note">@L["Pan the map, then search its current area."]</span>
             }
         </div>
 
         <div id="browseMap"></div>
 
         <div class="sec-head">
-            <h2>Homes on the market</h2>
+            <h2>@L["Homes on the market"]</h2>
             <div class="sec-head-right">
-                <select id="sortSelect" class="form-select select-inline" onchange="applySort(this.value)" aria-label="Sort listings">
-                    <option value="Newest" selected="@(Model.Filter.Sort == ListingSort.Newest)">Newest</option>
-                    <option value="PriceAsc" selected="@(Model.Filter.Sort == ListingSort.PriceAsc)">Price: low to high</option>
-                    <option value="PriceDesc" selected="@(Model.Filter.Sort == ListingSort.PriceDesc)">Price: high to low</option>
-                    <option value="AreaDesc" selected="@(Model.Filter.Sort == ListingSort.AreaDesc)">Area: largest first</option>
+                <select id="sortSelect" class="form-select select-inline" onchange="applySort(this.value)" aria-label="@L["Sort listings"]">
+                    <option value="Newest" selected="@(Model.Filter.Sort == ListingSort.Newest)">@L["Newest"]</option>
+                    <option value="PriceAsc" selected="@(Model.Filter.Sort == ListingSort.PriceAsc)">@L["Price: low to high"]</option>
+                    <option value="PriceDesc" selected="@(Model.Filter.Sort == ListingSort.PriceDesc)">@L["Price: high to low"]</option>
+                    <option value="AreaDesc" selected="@(Model.Filter.Sort == ListingSort.AreaDesc)">@L["Area: largest first"]</option>
                 </select>
-                <span class="count">@Model.Listings.TotalCount listing@(Model.Listings.TotalCount == 1 ? "" : "s")</span>
+                @* Two keys rather than one with a suffix: English needs the plural "s",
+                   Turkish never adds anything after a number. *@
+                <span class="count">
+                    @(Model.Listings.TotalCount == 1
+                        ? L["{0} listing", Model.Listings.TotalCount]
+                        : L["{0} listings", Model.Listings.TotalCount])
+                </span>
             </div>
         </div>
 
         @if (!Model.Listings.Items.Any())
         {
             <div class="empty-state">
-                <span class="value">No matches</span>
-                Try widening your filters or clearing the map area.
+                <span class="value">@L["No matches"]</span>
+                @L["Try widening your filters or clearing the map area."]
             </div>
         }
         else
@@ -180,12 +188,12 @@
                                 <button type="button"
                                         class="lc-fav @(listing.IsFavorited ? "is-fav" : "")"
                                         data-listing-id="@listing.Id"
-                                        aria-label="Save listing"
+                                        aria-label="@L["Save listing"]"
                                         onclick="toggleFav(event, this)">
                                     @(listing.IsFavorited ? "♥" : "♡")
                                 </button>
                             }
-                            <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@listing.ListingType</span>
+                            <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@L.Localize(listing.ListingType)</span>
                             @{ var cover = ListingImages.CoverOrPlaceholder(listing.CoverThumbnailUrl, listing.Id, Configuration.GetValue<bool>("Demo:PlaceholderImages")); }
                             @if (!string.IsNullOrEmpty(cover))
                             {
@@ -193,14 +201,14 @@
                             }
                             else
                             {
-                                <div class="noimg">No photo yet</div>
+                                <div class="noimg">@L["No photo yet"]</div>
                             }
                         </div>
                         <div class="lc-body">
-                            <div class="lc-loc">@listing.PropertyType</div>
+                            <div class="lc-loc">@L.Localize(listing.PropertyType)</div>
                             <div class="lc-title">@listing.Title</div>
                             <div class="lc-meta">
-                                <span><span class="value">@listing.Bedrooms</span> bd</span>
+                                <span><span class="value">@listing.Bedrooms</span> @L["bd"]</span>
                                 <span><span class="value">@listing.AreaSqMeters.ToString("N0")</span> m²</span>
                             </div>
                             <div class="lc-price">
@@ -214,20 +222,20 @@
             <nav class="pager">
                 @if (Model.Listings.HasPreviousPage)
                 {
-                    <a asp-action="Index" asp-all-route-data="routeData" asp-route-pageNumber="@(Model.Listings.PageNumber - 1)">← Prev</a>
+                    <a asp-action="Index" asp-all-route-data="routeData" asp-route-pageNumber="@(Model.Listings.PageNumber - 1)">← @L["Prev"]</a>
                 }
                 else
                 {
-                    <span class="disabled">← Prev</span>
+                    <span class="disabled">← @L["Prev"]</span>
                 }
-                <span class="current">@Model.Listings.PageNumber of @Model.Listings.TotalPages</span>
+                <span class="current">@L["{0} of {1}", Model.Listings.PageNumber, Model.Listings.TotalPages]</span>
                 @if (Model.Listings.HasNextPage)
                 {
-                    <a asp-action="Index" asp-all-route-data="routeData" asp-route-pageNumber="@(Model.Listings.PageNumber + 1)">Next →</a>
+                    <a asp-action="Index" asp-all-route-data="routeData" asp-route-pageNumber="@(Model.Listings.PageNumber + 1)">@L["Next"] →</a>
                 }
                 else
                 {
-                    <span class="disabled">Next →</span>
+                    <span class="disabled">@L["Next"] →</span>
                 }
             </nav>
         }

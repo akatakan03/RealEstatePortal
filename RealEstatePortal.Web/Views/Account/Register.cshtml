@@ -1,27 +1,27 @@
 ﻿@model RealEstatePortal.Web.Models.Account.RegisterViewModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = L["Register"].Value;
 }
 
 <div class="form-page">
     <div class="container">
         <div class="form-shell narrow">
             <div class="auth-lead">
-                <h1>List your property</h1>
-                <p>Create an agent account to publish and manage listings.</p>
+                <h1>@L["List your property"]</h1>
+                <p>@L["Create an agent account to publish and manage listings."]</p>
             </div>
             <div class="form-card">
                 <form asp-action="Register" method="post">
                     <div asp-validation-summary="All" class="text-danger" style="margin-bottom:1rem;"></div>
 
                     <div class="mb-field">
-                        <label class="form-label">I'm here to…</label>
+                        <label class="form-label">@L["I'm here to…"]</label>
                         <div style="display:flex;gap:1rem;">
                             <label class="choice-box">
-                                <input type="radio" asp-for="Role" value="Member" /> Find a property
+                                <input type="radio" asp-for="Role" value="Member" /> @L["Find a property"]
                             </label>
                             <label class="choice-box">
-                                <input type="radio" asp-for="Role" value="Agent" /> List properties
+                                <input type="radio" asp-for="Role" value="Agent" /> @L["List properties"]
                             </label>
                         </div>
                     </div>
@@ -40,10 +40,10 @@
                         <input asp-for="ConfirmPassword" class="form-control" />
                         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:.5rem;">Create account</button>
+                    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:.5rem;">@L["Create account"]</button>
                 </form>
             </div>
-            <p class="auth-alt">Already have an account? <a asp-action="Login">Sign in</a></p>
+            <p class="auth-alt">@L["Already have an account?"] <a asp-action="Login">@L["Sign in"]</a></p>
         </div>
     </div>
 </div>

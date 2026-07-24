@@ -258,6 +258,183 @@
     <value>Mesajı gönder</value>
   </data>
 
+  <!-- ============ Browse listings ============ -->
+  <data name="Browse Listings" xml:space="preserve">
+    <value>İlanlar</value>
+  </data>
+  <data name="İstanbul property, curated" xml:space="preserve">
+    <value>İstanbul'dan seçilmiş ilanlar</value>
+  </data>
+  <data name="Find the place that {0} like yours." xml:space="preserve">
+    <value>Kendinizi ait {0} yeri bulun.</value>
+    <comment>{0} is an emphasised word — see "feels".</comment>
+  </data>
+  <data name="feels" xml:space="preserve">
+    <value>hissedeceğiniz</value>
+  </data>
+  <data name="Verified listings from local agents — filter by area, type, and price to find your next home." xml:space="preserve">
+    <value>Semtini bilen danışmanlardan doğrulanmış ilanlar — bölgeye, tipe ve fiyata göre süzün, yeni evinizi bulun.</value>
+  </data>
+  <data name="Neighbourhood or address" xml:space="preserve">
+    <value>Semt veya adres</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="Any type" xml:space="preserve">
+    <value>Tümü</value>
+  </data>
+  <data name="Property" xml:space="preserve">
+    <value>Konut tipi</value>
+  </data>
+  <data name="Any property" xml:space="preserve">
+    <value>Tümü</value>
+  </data>
+  <data name="Max price" xml:space="preserve">
+    <value>En yüksek fiyat</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Farketmez</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Ara</value>
+  </data>
+  <data name="More filters" xml:space="preserve">
+    <value>Daha fazla filtre</value>
+  </data>
+  <data name="Min bedrooms" xml:space="preserve">
+    <value>En az oda sayısı</value>
+  </data>
+  <data name="Max monthly dues" xml:space="preserve">
+    <value>En yüksek aidat</value>
+  </data>
+  <data name="Apply filters" xml:space="preserve">
+    <value>Filtreleri uygula</value>
+  </data>
+  <data name="Name this search (e.g. Kadıköy flats)" xml:space="preserve">
+    <value>Bu aramaya bir ad verin (ör. Kadıköy daireleri)</value>
+  </data>
+  <data name="Save this search" xml:space="preserve">
+    <value>Aramayı kaydet</value>
+  </data>
+  <data name="Search on the map:" xml:space="preserve">
+    <value>Haritada ara:</value>
+  </data>
+  <data name="Search this area" xml:space="preserve">
+    <value>Bu bölgede ara</value>
+  </data>
+  <data name="Clear area" xml:space="preserve">
+    <value>Bölgeyi temizle</value>
+  </data>
+  <data name="Within {0} km of the marked area." xml:space="preserve">
+    <value>İşaretli bölgenin {0} km çevresinde.</value>
+  </data>
+  <data name="Pan the map, then search its current area." xml:space="preserve">
+    <value>Haritayı kaydırın, sonra o bölgede arayın.</value>
+  </data>
+  <data name="Homes on the market" xml:space="preserve">
+    <value>Satıştaki konutlar</value>
+  </data>
+  <data name="Sort listings" xml:space="preserve">
+    <value>İlanları sırala</value>
+  </data>
+  <data name="Newest" xml:space="preserve">
+    <value>En yeni</value>
+  </data>
+  <data name="Price: low to high" xml:space="preserve">
+    <value>Fiyat: düşükten yükseğe</value>
+  </data>
+  <data name="Price: high to low" xml:space="preserve">
+    <value>Fiyat: yüksekten düşüğe</value>
+  </data>
+  <data name="Area: largest first" xml:space="preserve">
+    <value>Alan: büyükten küçüğe</value>
+  </data>
+  <data name="{0} listing" xml:space="preserve">
+    <value>{0} ilan</value>
+  </data>
+  <data name="{0} listings" xml:space="preserve">
+    <value>{0} ilan</value>
+    <comment>Turkish adds no plural suffix after a number.</comment>
+  </data>
+  <data name="No matches" xml:space="preserve">
+    <value>Sonuç yok</value>
+  </data>
+  <data name="Try widening your filters or clearing the map area." xml:space="preserve">
+    <value>Filtreleri genişletmeyi veya harita bölgesini temizlemeyi deneyin.</value>
+  </data>
+  <data name="Save listing" xml:space="preserve">
+    <value>İlanı favorilere ekle</value>
+  </data>
+  <data name="No photo yet" xml:space="preserve">
+    <value>Fotoğraf yok</value>
+  </data>
+  <data name="bd" xml:space="preserve">
+    <value>oda</value>
+  </data>
+  <data name="Prev" xml:space="preserve">
+    <value>Önceki</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Sonraki</value>
+  </data>
+  <data name="{0} of {1}" xml:space="preserve">
+    <value>{1} sayfadan {0}.</value>
+  </data>
+
+  <!-- ============ Sign in / register ============ -->
+  <data name="Welcome back" xml:space="preserve">
+    <value>Tekrar hoş geldiniz</value>
+  </data>
+  <data name="Sign in to manage your listings and inquiries." xml:space="preserve">
+    <value>İlanlarınızı ve gelen talepleri yönetmek için giriş yapın.</value>
+  </data>
+  <data name="Remember me" xml:space="preserve">
+    <value>Beni hatırla</value>
+  </data>
+  <data name="New here?" xml:space="preserve">
+    <value>İlk kez mi geldiniz?</value>
+  </data>
+  <data name="Create an account" xml:space="preserve">
+    <value>Hesap oluşturun</value>
+  </data>
+  <data name="List your property" xml:space="preserve">
+    <value>Mülkünüzü ilana çıkarın</value>
+  </data>
+  <data name="Create an agent account to publish and manage listings." xml:space="preserve">
+    <value>İlan yayınlamak ve yönetmek için danışman hesabı oluşturun.</value>
+  </data>
+  <data name="I'm here to…" xml:space="preserve">
+    <value>Buraya geliş amacım…</value>
+  </data>
+  <data name="Find a property" xml:space="preserve">
+    <value>Konut aramak</value>
+  </data>
+  <data name="List properties" xml:space="preserve">
+    <value>İlan yayınlamak</value>
+  </data>
+  <data name="Create account" xml:space="preserve">
+    <value>Hesap oluştur</value>
+  </data>
+  <data name="Already have an account?" xml:space="preserve">
+    <value>Zaten hesabınız var mı?</value>
+  </data>
+  <data name="Confirm password" xml:space="preserve">
+    <value>Şifre tekrarı</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Şifre</value>
+  </data>
+  <data name="The passwords do not match." xml:space="preserve">
+    <value>Şifreler eşleşmiyor.</value>
+  </data>
+  <data name="Access Denied" xml:space="preserve">
+    <value>Erişim reddedildi</value>
+  </data>
+  <data name="You do not have permission to access this resource." xml:space="preserve">
+    <value>Bu sayfaya erişim yetkiniz yok.</value>
+  </data>
+
   <!-- ============ Price history ============ -->
   <data name="Price history" xml:space="preserve">
     <value>Fiyat geçmişi</value>

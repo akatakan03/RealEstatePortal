@@ -33,7 +33,11 @@ builder.Host.UseSerilog((context, config) =>
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<DomainExceptionFilter>();
-});
+})
+// Sends [Display] names and DataAnnotations messages through the same resource file the
+// views use, so a form label is translated once rather than at every <label> that renders it.
+.AddDataAnnotationsLocalization(options =>
+    options.DataAnnotationLocalizerProvider = (_, factory) => factory.Create(typeof(SharedResource)));
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.Configure<RouteOptions>(options =>

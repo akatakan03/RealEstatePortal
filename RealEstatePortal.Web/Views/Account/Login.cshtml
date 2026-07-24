@@ -1,14 +1,14 @@
 ﻿@model RealEstatePortal.Web.Models.Account.LoginViewModel
 @{
-    ViewData["Title"] = "Sign in";
+    ViewData["Title"] = L["Sign in"].Value;
 }
 
 <div class="form-page">
     <div class="container">
         <div class="form-shell narrow">
             <div class="auth-lead">
-                <h1>Welcome back</h1>
-                <p>Sign in to manage your listings and inquiries.</p>
+                <h1>@L["Welcome back"]</h1>
+                <p>@L["Sign in to manage your listings and inquiries."]</p>
             </div>
             <div class="form-card">
                 <form asp-action="Login" method="post">
@@ -26,12 +26,12 @@
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
                     <label style="display:flex;align-items:center;gap:.5rem;font-size:.92rem;">
-                        <input asp-for="RememberMe" /> Remember me
+                        <input asp-for="RememberMe" /> @L["Remember me"]
                     </label>
-                    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1.2rem;">Sign in</button>
+                    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1.2rem;">@L["Sign in"]</button>
                 </form>
             </div>
-            <p class="auth-alt">New here? <a asp-action="Register">Create an account</a></p>
+            <p class="auth-alt">@L["New here?"] <a asp-action="Register">@L["Create an account"]</a></p>
         </div>
     </div>
 </div>

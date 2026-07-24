@@ -10,6 +10,7 @@ public class RegisterViewModel
 
     [Required, StringLength(100, MinimumLength = 6)]
     [DataType(DataType.Password)]
+    [Display(Name = "Password")]
     public string Password { get; set; } = string.Empty;
 
     [DataType(DataType.Password)]
