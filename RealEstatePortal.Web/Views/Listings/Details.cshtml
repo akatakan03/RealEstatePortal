@@ -156,10 +156,16 @@
                         <a asp-controller="Account" asp-action="Login" class="btn btn-ghost" style="margin-bottom:1.5rem;">♡ @L["Sign in to save"]</a>
                     }
 
-                    @* Adds this listing to the compare set and jumps straight to the comparison.
-                       Needs no account, so it sits outside the sign-in branch above. *@
-                    <button type="button" class="btn btn-ghost" style="margin-bottom:1.5rem;"
-                            onclick="compareAddAndGo(@listing.Id)">⇄ @L["Compare"]</button>
+                    @* Adds this listing to the compare set and shows the floating compare bar,
+                       exactly like the toggle on a listing card. Needs no account, so it sits
+                       outside the sign-in branch above. compare.js swaps the label via the
+                       data-label attributes and reflects the saved state on load. *@
+                    <button type="button" class="btn btn-ghost btn-compare-detail"
+                            style="margin-bottom:1.5rem;"
+                            data-compare-id="@listing.Id"
+                            data-label="⇄ @L["Compare"]"
+                            data-label-active="✓ @L["In comparison"]"
+                            onclick="compareToggle(event, this)">⇄ @L["Compare"]</button>
                 </div>
 
                 @{

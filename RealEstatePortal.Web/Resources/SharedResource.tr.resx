@@ -379,6 +379,9 @@
   <data name="Compare listings" xml:space="preserve">
     <value>İlanları karşılaştır</value>
   </data>
+  <data name="In comparison" xml:space="preserve">
+    <value>Karşılaştırmada</value>
+  </data>
   <data name="Property type" xml:space="preserve">
     <value>Konut tipi</value>
   </data>

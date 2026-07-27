@@ -1938,6 +1938,13 @@ textarea.form-control {
         color: #fff
     }
 
+/* The detail page's text Compare button, once the listing is in the set */
+.btn-compare-detail.is-active {
+    background: var(--brass);
+    border-color: var(--brass);
+    color: #fff;
+}
+
 /* ===== compare bar (site-wide, follows the buyer) ===== */
 .compare-bar {
     position: fixed;

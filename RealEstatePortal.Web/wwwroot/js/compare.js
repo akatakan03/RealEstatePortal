@@ -53,7 +53,15 @@
         var ids = read();
         document.querySelectorAll('[data-compare-id]').forEach(function (btn) {
             var id = parseInt(btn.getAttribute('data-compare-id'), 10);
-            btn.classList.toggle('is-active', ids.indexOf(id) !== -1);
+            var active = ids.indexOf(id) !== -1;
+            btn.classList.toggle('is-active', active);
+
+            // Buttons that carry their own labels (the text button on the detail page) swap them
+            // to reflect selection. The icon-only card buttons set neither attribute, so their
+            // content is left untouched.
+            var on = btn.getAttribute('data-label-active');
+            var off = btn.getAttribute('data-label');
+            if (on && off) btn.textContent = active ? on : off;
         });
     }
 
@@ -84,18 +92,6 @@
         var ids = read().filter(function (x) { return x !== id; });
         write(ids);
         window.location = ids.length < 2 ? '/' + lang() + '/Listings' : compareUrl(ids);
-    };
-
-    // Used by the detail page's Compare button: put this listing at the front of the set (so it
-    // is guaranteed to appear, dropping the oldest extra if that would exceed the cap) and go
-    // straight to the comparison.
-    window.compareAddAndGo = function (id) {
-        if (!Number.isInteger(id)) return;
-        var ids = read().filter(function (x) { return x !== id; });
-        ids.unshift(id);
-        ids = ids.slice(0, MAX);
-        write(ids);
-        window.location = compareUrl(ids);
     };
 
     document.addEventListener('DOMContentLoaded', function () {
