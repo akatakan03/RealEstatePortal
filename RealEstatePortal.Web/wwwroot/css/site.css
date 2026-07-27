@@ -1923,6 +1923,149 @@ textarea.form-control {
         color: var(--brass)
     }
 
+/* compare toggle on the card — mirrors the fav button, opposite corner */
+.lc-compare {
+    position: absolute;
+    top: .7rem;
+    left: .7rem;
+    z-index: 3;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    background: rgba(255,255,255,.92);
+    color: var(--ink);
+    font-size: 1.05rem;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    transition: background .18s,color .18s,transform .18s;
+    box-shadow: var(--shadow-sm);
+}
+
+    .lc-compare:hover {
+        background: #fff;
+        transform: scale(1.1)
+    }
+
+    .lc-compare.is-active {
+        background: var(--brass);
+        color: #fff
+    }
+
+/* ===== compare bar (site-wide, follows the buyer) ===== */
+.compare-bar {
+    position: fixed;
+    left: 50%;
+    bottom: 1.2rem;
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: .7rem 1.1rem;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 999px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.22);
+}
+
+    .compare-bar[hidden] { display: none; }
+
+    .compare-bar .cmp-bar-count { font-weight: 600; font-size: .95rem; }
+
+    .compare-bar .cmp-bar-actions { display: flex; gap: .5rem; }
+
+    .compare-bar .is-disabled {
+        opacity: .5;
+        pointer-events: none;
+    }
+
+/* ===== compare page ===== */
+.compare-page { padding: 2rem 0 3rem; }
+
+.compare-scroll { overflow-x: auto; }
+
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+}
+
+    .compare-table th,
+    .compare-table td {
+        padding: .85rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        vertical-align: middle;
+    }
+
+    /* Attribute names down the left, listings across the top */
+    .compare-table tbody th[scope="row"] {
+        color: var(--muted);
+        font-weight: 600;
+        white-space: nowrap;
+        width: 160px;
+    }
+
+    .compare-table .cmp-col {
+        position: relative;
+        min-width: 180px;
+        vertical-align: top;
+    }
+
+.cmp-remove {
+    position: absolute;
+    top: .3rem;
+    right: .3rem;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    background: var(--paper);
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+    .cmp-remove:hover { background: var(--danger); color: #fff; }
+
+.cmp-card { display: block; text-decoration: none; color: inherit; }
+
+.cmp-media {
+    display: block;
+    aspect-ratio: 4 / 3;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--brass-soft);
+    margin-bottom: .5rem;
+}
+
+    .cmp-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .cmp-media .noimg {
+        display: grid;
+        place-items: center;
+        height: 100%;
+        color: var(--muted);
+        font-size: .85rem;
+    }
+
+.cmp-title { font-weight: 600; line-height: 1.3; }
+
+.compare-table .cmp-price { font-weight: 700; }
+
+.compare-table .cmp-addr { color: var(--muted); }
+
+/* The standout cell — lowest price, largest area */
+.compare-table td.cmp-best {
+    background: var(--brass-soft);
+    color: var(--brass-dk);
+    font-weight: 700;
+}
+
 /* ===== profile ===== */
 .profile-grid {
     display: grid;

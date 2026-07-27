@@ -10,6 +10,11 @@
 }
 <a class="listing-card rise d1" href="@Url.ListingUrl(Model.Id, Model.Slug)">
     <div class="lc-media">
+        @* Comparison needs no account, so the toggle is always shown. compare.js reflects the
+           saved state on load and keeps the site-wide compare bar in sync. *@
+        <button type="button" class="lc-compare" data-compare-id="@Model.Id"
+                aria-label="@L["Compare"]" title="@L["Compare"]"
+                onclick="compareToggle(event, this)">⇄</button>
         @if (canFavorite)
         {
             <button type="button"

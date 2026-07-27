@@ -22,6 +22,7 @@ using RealEstatePortal.Application.Listings.Queries.GetListingForEdit;
 using RealEstatePortal.Application.Listings.Queries.GetListingImages;
 using RealEstatePortal.Application.Listings.Queries.GetListingMapPoints;
 using RealEstatePortal.Application.Listings.Queries.GetListings;
+using RealEstatePortal.Application.Listings.Queries.GetListingsForCompare;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
 using RealEstatePortal.Application.Listings.Queries.GetSimilarListings;
 using RealEstatePortal.Domain.Constants;
@@ -60,6 +61,15 @@ public class ListingsController : Controller
     {
         var points = await _sender.Send(query);
         return Json(points);
+    }
+
+    // Side-by-side comparison of the listings the buyer selected. The ids come from the compare
+    // bar (kept in the browser), so this is a plain public GET with no server-side state.
+    [HttpGet]
+    public async Task<IActionResult> Compare([FromQuery] int[] ids)
+    {
+        var listings = await _sender.Send(new GetListingsForCompareQuery(ids ?? Array.Empty<int>()));
+        return View(listings);
     }
 
     [HttpGet]

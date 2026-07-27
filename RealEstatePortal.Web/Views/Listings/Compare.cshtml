@@ -1,0 +1,178 @@
+@using RealEstatePortal.Domain.Enums
+@model IReadOnlyList<RealEstatePortal.Application.Listings.Queries.GetListingsForCompare.CompareListingDto>
+@{
+    ViewData["Title"] = L["Compare listings"].Value;
+    var yes = L["Yes"].Value;
+    var no = L["No"].Value;
+
+    // Best-value highlights: the lowest asking price and the largest floor area stand out, since
+    // spotting those at a glance is the whole point of lining listings up. Only meaningful once
+    // there are at least two to compare.
+    var lowestPrice = Model.Count > 1 ? Model.Min(l => l.PriceAmount) : (decimal?)null;
+    var largestArea = Model.Count > 1 ? Model.Max(l => l.AreaSqMeters) : (decimal?)null;
+
+    string Dues(decimal? d, string cur) => d is null ? "—" : $"{d.Value.ToString("N0")} {cur}";
+    string Floor(int? f, int? total) => f is null ? "—" : (total is null ? f.Value.ToString() : $"{f} / {total}");
+}
+
+<div class="compare-page">
+    <div class="container">
+        <div class="dash-head">
+            <div>
+                <span class="eyebrow">@L["Compare"]</span>
+                <h1 class="page-title">@L["Compare listings"]</h1>
+            </div>
+            <a class="btn btn-ghost" asp-action="Index">← @L["Back to listings"]</a>
+        </div>
+
+        @if (Model.Count < 2)
+        {
+            <div class="empty-state">
+                <span class="value">@L["Nothing to compare yet"]</span>
+                @L["Pick two or more listings — use the “Compare” button on any listing card."]
+            </div>
+        }
+        else
+        {
+            <div class="compare-scroll">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th class="cmp-rowhead"></th>
+                            @foreach (var l in Model)
+                            {
+                                var cover = ListingImages.CoverOrPlaceholder(l.CoverThumbnailUrl, l.Id, Configuration.GetValue<bool>("Demo:PlaceholderImages"));
+                                <th class="cmp-col">
+                                    <button type="button" class="cmp-remove" aria-label="@L["Remove"]"
+                                            onclick="compareRemoveAndReload(@l.Id)">×</button>
+                                    <a class="cmp-card" href="@Url.ListingUrl(l.Id, l.Slug)">
+                                        <span class="cmp-media">
+                                            @if (!string.IsNullOrEmpty(cover))
+                                            {
+                                                <img src="@cover" alt="@l.Title" loading="lazy" />
+                                            }
+                                            else
+                                            {
+                                                <span class="noimg">@L["No photo yet"]</span>
+                                            }
+                                        </span>
+                                        <span class="cmp-title">@l.Title</span>
+                                    </a>
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">@L["Price"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td class="cmp-price @(l.PriceAmount == lowestPrice ? "cmp-best" : "")">
+                                    @l.PriceAmount.ToString("N0") @l.PriceCurrency
+                                </td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Listing type"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@L.Localize(l.ListingType)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Property type"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@L.Localize(l.PropertyType)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["m² area"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td class="@(l.AreaSqMeters == largestArea ? "cmp-best" : "")">@l.AreaSqMeters.ToString("N0")</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Bedrooms"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@l.Bedrooms</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Bathrooms"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@l.Bathrooms</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Heating"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@(l.Heating is null || l.Heating == HeatingType.None ? "—" : L.Localize(l.Heating.Value))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Internet"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@(l.Internet is null || l.Internet == InternetInfrastructure.Unknown ? "—" : L.Localize(l.Internet.Value))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Floor"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@Floor(l.FloorNumber, l.TotalFloors)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Building age"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@(l.BuildingAge is null ? "—" : $"{l.BuildingAge} {L["yrs"].Value}")</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Monthly dues"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@Dues(l.MonthlyDues, l.PriceCurrency)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Furnished"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@(l.IsFurnished ? yes : no)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Balcony"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@(l.HasBalcony ? yes : no)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Parking"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td>@(l.HasParking ? yes : no)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <th scope="row">@L["Location"]</th>
+                            @foreach (var l in Model)
+                            {
+                                <td class="cmp-addr">@l.Address</td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

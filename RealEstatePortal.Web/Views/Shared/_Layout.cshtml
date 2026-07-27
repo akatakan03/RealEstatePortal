@@ -116,6 +116,16 @@
         @RenderBody()
     </main>
 
+    @* Follows the buyer across the site while they collect listings to compare. Hidden until
+       something is selected; compare.js fills the count and the link and handles Clear. *@
+    <div id="compareBar" class="compare-bar" hidden>
+        <span class="cmp-bar-count"><span data-compare-count>0</span> @L["selected"]</span>
+        <div class="cmp-bar-actions">
+            <a class="btn btn-primary btn-sm" data-compare-go>@L["Compare"]</a>
+            <button type="button" class="btn btn-ghost btn-sm" data-compare-clear>@L["Clear"]</button>
+        </div>
+    </div>
+
     <footer class="site-footer">
         <div class="container">
             <div class="foot-grid">
@@ -154,6 +164,7 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/user-menu.js" asp-append-version="true"></script>
+    <script src="~/js/compare.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

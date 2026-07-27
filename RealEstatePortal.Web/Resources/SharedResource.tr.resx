@@ -373,6 +373,27 @@
   <data name="Similar listings" xml:space="preserve">
     <value>Benzer ilanlar</value>
   </data>
+  <data name="Compare" xml:space="preserve">
+    <value>Karşılaştır</value>
+  </data>
+  <data name="Compare listings" xml:space="preserve">
+    <value>İlanları karşılaştır</value>
+  </data>
+  <data name="Property type" xml:space="preserve">
+    <value>Konut tipi</value>
+  </data>
+  <data name="selected" xml:space="preserve">
+    <value>seçili</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Temizle</value>
+  </data>
+  <data name="Nothing to compare yet" xml:space="preserve">
+    <value>Henüz karşılaştırılacak bir şey yok</value>
+  </data>
+  <data name="Pick two or more listings — use the “Compare” button on any listing card." xml:space="preserve">
+    <value>İki veya daha fazla ilan seçin — herhangi bir ilan kartındaki “Karşılaştır” düğmesini kullanın.</value>
+  </data>
   <data name="bd" xml:space="preserve">
     <value>oda</value>
   </data>
