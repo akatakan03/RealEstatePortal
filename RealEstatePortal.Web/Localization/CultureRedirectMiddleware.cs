@@ -1,4 +1,6 @@
-﻿namespace RealEstatePortal.Web.Localization;
+﻿using Microsoft.AspNetCore.Diagnostics;
+
+namespace RealEstatePortal.Web.Localization;
 
 // Every page lives under a language segment (/tr/listings, /en/listings). This sends anything
 // that arrives without one — an old bookmark, a typed address, a link from before this change —
@@ -40,6 +42,18 @@ public class CultureRedirectMiddleware
             // The URL already says which language this is; remember it so a later visit to a
             // bare address doesn't have to guess again.
             RememberChoice(context, first!);
+            await _next(context);
+            return;
+        }
+
+        // An error page is re-executed on the pipeline with the failed request's status already
+        // set — a 500 from UseExceptionHandler. Redirecting it would replace that status with a
+        // 302, and an uptime check or a crawler would read the failure as success. Put the
+        // language in by rewriting the path in place instead: routing runs after this middleware,
+        // so it matches the rewritten path, the error view renders here, and the 500 stands.
+        if (context.Features.Get<IExceptionHandlerPathFeature>() is not null)
+        {
+            context.Request.Path = $"/{PreferredCulture(context)}{path.Value}";
             await _next(context);
             return;
         }

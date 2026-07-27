@@ -1322,4 +1322,7 @@
   <data name="The language we email you in. To change the language you are reading, use the switcher at the top of the page." xml:space="preserve">
     <value>Size gönderdiğimiz e-postaların dili. Okuduğunuz dili değiştirmek için sayfanın üstündeki anahtarı kullanın.</value>
   </data>
+  <data name="Site default" xml:space="preserve">
+    <value>Site varsayılanı</value>
+  </data>
 </root>

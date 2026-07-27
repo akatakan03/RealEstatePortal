@@ -49,7 +49,11 @@
                         <label asp-for="PreferredCulture" class="form-label"></label>
                         @* Each language names itself, never translated — the same rule the header
                            switcher follows. *@
+                        @* An empty value is a real choice — "no preference", stored as null, which
+                           every reader treats as the site default. Without it the first language
+                           would be posted for an account that never picked one. *@
                         <select asp-for="PreferredCulture" class="form-select">
+                            <option value="">@L["Site default"]</option>
                             @foreach (var code in SupportedCultures.Codes)
                             {
                                 <option value="@code">@SupportedCultures.NameOf(code)</option>
