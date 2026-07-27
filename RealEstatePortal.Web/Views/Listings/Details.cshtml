@@ -155,6 +155,11 @@
                     {
                         <a asp-controller="Account" asp-action="Login" class="btn btn-ghost" style="margin-bottom:1.5rem;">♡ @L["Sign in to save"]</a>
                     }
+
+                    @* Adds this listing to the compare set and jumps straight to the comparison.
+                       Needs no account, so it sits outside the sign-in branch above. *@
+                    <button type="button" class="btn btn-ghost" style="margin-bottom:1.5rem;"
+                            onclick="compareAddAndGo(@listing.Id)">⇄ @L["Compare"]</button>
                 </div>
 
                 @{

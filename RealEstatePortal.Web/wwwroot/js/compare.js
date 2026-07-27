@@ -86,6 +86,18 @@
         window.location = ids.length < 2 ? '/' + lang() + '/Listings' : compareUrl(ids);
     };
 
+    // Used by the detail page's Compare button: put this listing at the front of the set (so it
+    // is guaranteed to appear, dropping the oldest extra if that would exceed the cap) and go
+    // straight to the comparison.
+    window.compareAddAndGo = function (id) {
+        if (!Number.isInteger(id)) return;
+        var ids = read().filter(function (x) { return x !== id; });
+        ids.unshift(id);
+        ids = ids.slice(0, MAX);
+        write(ids);
+        window.location = compareUrl(ids);
+    };
+
     document.addEventListener('DOMContentLoaded', function () {
         var bar = document.getElementById('compareBar');
         if (bar) {
