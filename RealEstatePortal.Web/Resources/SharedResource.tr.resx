@@ -1030,6 +1030,24 @@
   <data name="Add photos" xml:space="preserve">
     <value>Fotoğraf ekle</value>
   </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Uygula</value>
+  </data>
+  <data name="Zoom" xml:space="preserve">
+    <value>Yakınlaştır</value>
+  </data>
+  <data name="Edit photo" xml:space="preserve">
+    <value>Fotoğrafı düzenle</value>
+  </data>
+  <data name="Adjust photo" xml:space="preserve">
+    <value>Fotoğrafı ayarla</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Sıfırla</value>
+  </data>
+  <data name="Drag to reposition and use the slider to zoom. The frame shows how the cover will be cropped." xml:space="preserve">
+    <value>Sürükleyerek konumlandırın, yakınlaştırmak için kaydırıcıyı kullanın. Çerçeve, kapağın nasıl kırpılacağını gösterir.</value>
+  </data>
   <data name="Uploaded when you save." xml:space="preserve">
     <value>Kaydettiğinizde yüklenir.</value>
   </data>

@@ -213,7 +213,19 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/photo-picker.js"></script>
-    <script>initPhotoPicker('newPhotos', 'previewArea');</script>
+    <script>
+        initPhotoPicker('newPhotos', 'previewArea', {
+            aspect: 16 / 9,
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+                edit = L["Edit photo"].Value,
+                title = L["Adjust photo"].Value,
+                hint = L["Drag to reposition and use the slider to zoom. The frame shows how the cover will be cropped."].Value,
+                zoom = L["Zoom"].Value,
+                apply = L["Apply"].Value,
+                cancel = L["Cancel"].Value
+            }))
+        });
+    </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/location-picker.js"></script>
     <script>
