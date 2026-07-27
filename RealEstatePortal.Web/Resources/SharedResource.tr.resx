@@ -330,9 +330,6 @@
   <data name="Within {0} km of the marked area." xml:space="preserve">
     <value>İşaretli bölgenin {0} km çevresinde.</value>
   </data>
-  <data name="Pan the map, then search its current area." xml:space="preserve">
-    <value>Haritayı kaydırın, sonra o bölgede arayın.</value>
-  </data>
   <data name="Homes on the market" xml:space="preserve">
     <value>Satıştaki konutlar</value>
   </data>
@@ -372,6 +369,9 @@
   </data>
   <data name="Similar listings" xml:space="preserve">
     <value>Benzer ilanlar</value>
+  </data>
+  <data name="Click a point on the map to set the exact centre, then search around it." xml:space="preserve">
+    <value>Haritada bir noktaya tıklayarak tam merkezi belirleyin, sonra çevresinde arama yapın.</value>
   </data>
   <data name="Compare" xml:space="preserve">
     <value>Karşılaştır</value>

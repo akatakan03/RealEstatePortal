@@ -144,7 +144,7 @@
             }
             else
             {
-                <span class="note">@L["Pan the map, then search its current area."]</span>
+                <span class="note">@L["Click a point on the map to set the exact centre, then search around it."]</span>
             }
         </div>
 
@@ -237,15 +237,45 @@
         var cluster = L.markerClusterGroup({ chunkedLoading: true });
         map.addLayer(cluster);
 
+        // The exact search centre the user picks by clicking (or dragging) on the map. A circle
+        // shows the area covered by the selected radius before they commit to a search.
+        var chosenLatLng = null, chosenMarker = null, chosenCircle = null;
+
+        function currentRadiusKm() {
+        return parseFloat(document.getElementById('radiusSelect').value) || 1;
+        }
+
+        function setChosen(latlng) {
+        chosenLatLng = latlng;
+        if (!chosenMarker) {
+        chosenMarker = L.marker(latlng, { draggable: true }).addTo(map);
+        chosenMarker.on('dragend', function () { setChosen(chosenMarker.getLatLng()); });
+        chosenCircle = L.circle(latlng, {
+        radius: currentRadiusKm() * 1000, color:'#B08A4F', weight:1, fillColor:'#B08A4F', fillOpacity:.06
+        }).addTo(map);
+        } else {
+        chosenMarker.setLatLng(latlng);
+        chosenCircle.setLatLng(latlng);
+        }
+        chosenCircle.setRadius(currentRadiusKm() * 1000);
+        }
+
         if (hasCenter) {
         map.setView([searchCenter.lat, searchCenter.lng], 12);
-        L.circle([searchCenter.lat, searchCenter.lng], {
-        radius: searchRadiusKm * 1000, color:'#B08A4F', weight:1, fillColor:'#B08A4F', fillOpacity:.06
-        }).addTo(map);
+        // Pre-place the marker at the active centre so it can be nudged rather than re-picked.
+        setChosen(L.latLng(searchCenter.lat, searchCenter.lng));
         } else {
         // Default to İstanbul; pins for whatever area the user pans to load on demand.
         map.setView([41.01, 28.97], 11);
         }
+
+        // Click anywhere to drop the search point exactly there.
+        map.on('click', function (e) { setChosen(e.latlng); });
+
+        // Resize the preview circle live when the radius changes, so the area is visible first.
+        document.getElementById('radiusSelect').addEventListener('change', function () {
+        if (chosenCircle) chosenCircle.setRadius(currentRadiusKm() * 1000);
+        });
 
         // Carry the active list filters (keyword, type, price, …) into the pin request,
         // minus paging/area params the map manages itself.
@@ -296,7 +326,8 @@
         loadPins();
 
         document.getElementById('searchAreaBtn').addEventListener('click', function () {
-        var c = map.getCenter();
+        // The point the user placed; if they never clicked, fall back to the map's centre.
+        var c = chosenLatLng || map.getCenter();
         var radius = document.getElementById('radiusSelect').value;
         var params = new URLSearchParams(window.location.search);
         params.set('CenterLat', c.lat.toFixed(6));
