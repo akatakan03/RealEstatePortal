@@ -16,7 +16,7 @@
             <h1 class="page-title" style="margin-bottom:1.5rem;">@L["Create a listing"]</h1>
 
             <div class="form-card">
-                <form asp-action="Create" method="post">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
                     <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:1rem;"></div>
 
                     <div class="mb-field">
@@ -140,6 +140,12 @@
                     <span asp-validation-for="Latitude" class="text-danger"></span>
                     <span asp-validation-for="Longitude" class="text-danger"></span>
                     <div id="pickerMap"></div>
+
+                    <h3 class="form-section-title">@L["Photos"]</h3>
+                    <div class="mb-field">
+                        <input type="file" name="photos" accept="image/*" multiple class="form-control" />
+                        <p class="form-hint">@L["Add photos now, or later from the edit page. The first becomes the cover."]</p>
+                    </div>
 
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">@L["Create listing"]</button>

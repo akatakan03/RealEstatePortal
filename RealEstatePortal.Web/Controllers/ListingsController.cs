@@ -80,18 +80,43 @@ public class ListingsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = Roles.Agent)]
-    public async Task<IActionResult> Create(CreateListingCommand command)
+    [RequestSizeLimit(52_428_800)] // 50 MB for the whole submission
+    public async Task<IActionResult> Create(CreateListingCommand command, List<IFormFile>? photos)
     {
+        // Read the photos before creating anything: if one isn't an image, re-show the form
+        // rather than leave a new listing behind.
+        var images = await ReadImagesAsync(photos);
+        if (images is null) return View(command);
+
+        int id;
         try
         {
-            await _sender.Send(command);
-            return RedirectToAction(nameof(Index));
+            id = await _sender.Send(command);
         }
         catch (ValidationException ex)
         {
+            // Nothing was created, so re-showing the form is safe.
             ModelState.AddValidationErrors(ex, _localizer);
             return View(command);
         }
+
+        // The listing now exists. If a photo fails (a corrupt file, say), sending the agent back
+        // to a blank create form would invite a resubmit and a duplicate listing — take them to
+        // the new listing's edit page with a note instead, where photos can be added properly.
+        if (images.Count > 0)
+        {
+            try
+            {
+                await _sender.Send(new AddListingImagesCommand(id, images));
+            }
+            catch (ValidationException)
+            {
+                TempData["PhotoError"] = "Your listing was saved, but a photo couldn't be added. You can add it here.";
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 
     // The agent's listing table now lives on the dashboard, next to the numbers it belongs
@@ -121,29 +146,15 @@ public class ListingsController : Controller
         {
             await _sender.Send(command);
 
-            if (newPhotos is { Count: > 0 })
+            var images = await ReadImagesAsync(newPhotos);
+            if (images is null)
             {
-                var images = new List<ImageUploadDto>();
-                foreach (var file in newPhotos)
-                {
-                    if (file.Length == 0) continue;
-
-                    if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-                    {
-                        ModelState.AddModelError(string.Empty,
-                            _localizer["\"{0}\" is not an image.", file.FileName]);
-                        await LoadPhotosAsync(command.Id);
-                        return View(command);
-                    }
-
-                    using var ms = new MemoryStream();
-                    await file.CopyToAsync(ms);
-                    images.Add(new ImageUploadDto(ms.ToArray(), file.FileName, file.ContentType));
-                }
-
-                if (images.Count > 0)
-                    await _sender.Send(new AddListingImagesCommand(command.Id, images));
+                await LoadPhotosAsync(command.Id);
+                return View(command);
             }
+
+            if (images.Count > 0)
+                await _sender.Send(new AddListingImagesCommand(command.Id, images));
 
             return RedirectToAction(nameof(Edit), new { id = command.Id });
         }
@@ -273,6 +284,33 @@ public class ListingsController : Controller
     private async Task LoadPhotosAsync(int listingId)
     {
         ViewBag.Photos = await _sender.Send(new GetListingImagesQuery(listingId));
+    }
+
+    // Reads uploaded image files into upload DTOs, skipping empty entries. Returns null (and
+    // records a model error) if any file isn't an image, so the caller can re-render the form.
+    // Shared by Create and Edit so both validate uploads the same way.
+    private async Task<List<ImageUploadDto>?> ReadImagesAsync(List<IFormFile>? files)
+    {
+        var images = new List<ImageUploadDto>();
+        if (files is null) return images;
+
+        foreach (var file in files)
+        {
+            if (file.Length == 0) continue;
+
+            if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            {
+                ModelState.AddModelError(string.Empty,
+                    _localizer["\"{0}\" is not an image.", file.FileName]);
+                return null;
+            }
+
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            images.Add(new ImageUploadDto(ms.ToArray(), file.FileName, file.ContentType));
+        }
+
+        return images;
     }
 
     private const string ViewerCookie = "vk";

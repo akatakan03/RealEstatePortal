@@ -1,15 +1,31 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
 
 namespace RealEstatePortal.Web.Localization;
 
-public static class LocalizationExtensions
+public static partial class LocalizationExtensions
 {
-    // Enum members are already English words ("Active", "Apartment", "Sale"), so they go through
-    // the same resource file as everything else and fall back to the member name untranslated.
+    // Enum members go through the same resource file as everything else. Most are single English
+    // words ("Active", "Sale"), but some are PascalCase compounds ("NaturalGas", "CentralHeating").
+    // When there's no translation (i.e. English, which is the key itself), those would render as
+    // the raw identifier, so we split them into words — "Natural Gas" — instead of showing the
+    // member name. A translated culture (Turkish) keeps its resource value untouched.
     public static string Localize<TEnum>(this IStringLocalizer localizer, TEnum value)
-        where TEnum : struct, Enum =>
-        localizer[value.ToString()!];
+        where TEnum : struct, Enum
+    {
+        var name = value.ToString()!;
+        var localized = localizer[name];
+        return localized.ResourceNotFound ? Humanize(name) : localized.Value;
+    }
+
+    // "NaturalGas" -> "Natural Gas". Inserts a space between a lower-case letter and the
+    // upper-case letter that follows it; leaves single words and acronyms alone.
+    private static string Humanize(string pascalCase) =>
+        PascalBoundary().Replace(pascalCase, "$1 $2");
+
+    [GeneratedRegex("([a-z])([A-Z])")]
+    private static partial Regex PascalBoundary();
 
     // Html.GetEnumSelectList takes its option text from [Display] on the enum members and never
     // consults the localizer, so a dropdown built with it stays English however complete the

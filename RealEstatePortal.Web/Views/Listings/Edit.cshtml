@@ -13,6 +13,13 @@
             <span class="eyebrow">@L["Agent dashboard"]</span>
             <h1 class="page-title" style="margin-bottom:1.5rem;">@L["Edit listing"]</h1>
 
+            @* Set when a listing was created but its photo couldn't be attached — translated here,
+               where the request culture is known, after surviving the redirect from Create. *@
+            @if (TempData["PhotoError"] is string photoErr)
+            {
+                <div class="alert alert-danger" style="margin-bottom:1.5rem;">@L[photoErr]</div>
+            }
+
             <div class="form-card">
                 <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     <input type="hidden" asp-for="Id" />

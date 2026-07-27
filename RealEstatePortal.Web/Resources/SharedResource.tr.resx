@@ -370,6 +370,15 @@
   <data name="Similar listings" xml:space="preserve">
     <value>Benzer ilanlar</value>
   </data>
+  <data name="Photos" xml:space="preserve">
+    <value>Fotoğraflar</value>
+  </data>
+  <data name="Your listing was saved, but a photo couldn't be added. You can add it here." xml:space="preserve">
+    <value>İlanınız kaydedildi, ancak bir fotoğraf eklenemedi. Buradan ekleyebilirsiniz.</value>
+  </data>
+  <data name="Add photos now, or later from the edit page. The first becomes the cover." xml:space="preserve">
+    <value>Fotoğrafları şimdi ekleyin ya da sonra düzenleme sayfasından. İlki kapak olur.</value>
+  </data>
   <data name="Click a point on the map to set the exact centre, then search around it." xml:space="preserve">
     <value>Haritada bir noktaya tıklayarak tam merkezi belirleyin, sonra çevresinde arama yapın.</value>
   </data>
