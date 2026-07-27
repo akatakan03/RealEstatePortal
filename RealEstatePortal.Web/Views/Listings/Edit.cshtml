@@ -212,19 +212,8 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        document.getElementById('newPhotos').addEventListener('change', function (e) {
-            var area = document.getElementById('previewArea');
-            area.innerHTML = '';
-            for (const file of e.target.files) {
-                if (!file.type.startsWith('image/')) continue;
-                var img = document.createElement('img');
-                img.className = 'preview-thumb';
-                img.src = URL.createObjectURL(file);
-                area.appendChild(img);
-            }
-        });
-    </script>
+    <script src="~/js/photo-picker.js"></script>
+    <script>initPhotoPicker('newPhotos', 'previewArea');</script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/location-picker.js"></script>
     <script>

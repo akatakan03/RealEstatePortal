@@ -1687,6 +1687,30 @@ textarea.form-control {
     border: 1px solid var(--line)
 }
 
+/* a chosen-but-not-yet-uploaded photo, with its own remove button */
+.preview-item {
+    position: relative;
+    line-height: 0
+}
+
+    .preview-item .preview-remove {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: #c0392b;
+        color: #fff;
+        font-size: .7rem;
+        line-height: 20px;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0,0,0,.3)
+    }
+
 /* ===== dashboard ===== */
 .dash {
     padding: clamp(2rem,5vw,3.5rem) 0
