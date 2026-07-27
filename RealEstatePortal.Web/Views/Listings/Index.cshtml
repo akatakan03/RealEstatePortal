@@ -241,6 +241,9 @@
         // shows the area covered by the selected radius before they commit to a search.
         var chosenLatLng = null, chosenMarker = null, chosenCircle = null;
 
+        // A distinct brass marker so the search centre never reads as just another listing pin.
+        var centreIcon = L.divIcon({ className: 'search-centre-pin', iconSize: [24, 24], iconAnchor: [12, 12] });
+
         function currentRadiusKm() {
         return parseFloat(document.getElementById('radiusSelect').value) || 1;
         }
@@ -248,7 +251,7 @@
         function setChosen(latlng) {
         chosenLatLng = latlng;
         if (!chosenMarker) {
-        chosenMarker = L.marker(latlng, { draggable: true }).addTo(map);
+        chosenMarker = L.marker(latlng, { draggable: true, icon: centreIcon, zIndexOffset: 1000 }).addTo(map);
         chosenMarker.on('dragend', function () { setChosen(chosenMarker.getLatLng()); });
         chosenCircle = L.circle(latlng, {
         radius: currentRadiusKm() * 1000, color:'#B08A4F', weight:1, fillColor:'#B08A4F', fillOpacity:.06
