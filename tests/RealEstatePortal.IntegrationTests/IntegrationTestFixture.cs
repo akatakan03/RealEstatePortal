@@ -88,12 +88,6 @@ public class IntegrationTestFixture : IAsyncLifetime
             DbAdapter = DbAdapter.SqlServer,
             TablesToIgnore = new Table[] { new Table("__EFMigrationsHistory") }
         });
-        // Both: the moderation screens ask only for an address, notifications ask for the
-        // address and the language to write in.
-        IdentityService.GetUserEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns("owner@test.local");
-        IdentityService.GetEmailRecipientAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new EmailRecipient("owner@test.local", null));
     }
 
     public async Task ResetStateAsync()
@@ -106,6 +100,16 @@ public class IntegrationTestFixture : IAsyncLifetime
         EmailService.ClearReceivedCalls();
         FileStorage.ClearReceivedCalls();
         GeocodingService.ClearReceivedCalls();
+
+        // IdentityService is a shared singleton, so its stubs leak between tests. Re-establish the
+        // defaults before every test: the moderation screens ask only for an address, notifications
+        // ask for the address and the language to write in. A test that needs a different recipient
+        // reconfigures this in-place (NSubstitute honours the last matching setup), and the next
+        // test gets the default back regardless of discovery order.
+        IdentityService.GetUserEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns("owner@test.local");
+        IdentityService.GetEmailRecipientAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new EmailRecipient("owner@test.local", null));
     }
 
     public async Task<TResult> SendAsync<TResult>(IRequest<TResult> request)

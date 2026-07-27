@@ -1315,6 +1315,12 @@
   <data name="A new listing matches your saved search:" xml:space="preserve">
     <value>Kayıtlı aramanıza uyan yeni bir ilan var:</value>
   </data>
+  <data name="Price drop: {0}" xml:space="preserve">
+    <value>Fiyat düştü: {0}</value>
+  </data>
+  <data name="A listing you saved is now cheaper:" xml:space="preserve">
+    <value>Favorilerinize eklediğiniz bir ilan artık daha uygun:</value>
+  </data>
   <!-- Language preference on the profile page. -->
   <data name="Your language preference has been saved." xml:space="preserve">
     <value>Dil tercihiniz kaydedildi.</value>

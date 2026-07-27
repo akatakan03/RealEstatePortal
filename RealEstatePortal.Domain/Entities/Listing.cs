@@ -31,19 +31,33 @@ public class Listing : BaseAuditableEntity
     // changes. A new listing starts at the default 0, so the first real price is captured too.
     public void SetPrice(Money price, DateTimeOffset at)
     {
-        var changed = Price is null
-            || Price.Amount != price.Amount
-            || Price.Currency != price.Currency;
+        var previous = Price;
+        var changed = previous is null
+            || previous.Amount != price.Amount
+            || previous.Currency != price.Currency;
 
         Price = price;
 
-        if (changed)
-            PriceHistory.Add(new ListingPriceChange
-            {
-                Amount = price.Amount,
-                Currency = price.Currency,
-                ChangedAt = at
-            });
+        if (!changed)
+            return;
+
+        PriceHistory.Add(new ListingPriceChange
+        {
+            Amount = price.Amount,
+            Currency = price.Currency,
+            ChangedAt = at
+        });
+
+        // Tell everyone who saved this listing when a live price genuinely drops. Same currency
+        // only — "cheaper" is meaningless across currencies — and only while the listing is
+        // Active, so a draft edit or the very first price on a new listing raises nothing.
+        if (Status == ListingStatus.Active
+            && previous is not null
+            && previous.Currency == price.Currency
+            && price.Amount < previous.Amount)
+        {
+            AddDomainEvent(new ListingPriceReducedEvent(this, previous.Amount, price.Amount, price.Currency));
+        }
     }
 
     // Points to the Identity user (agent) once auth exists. Null until then.

@@ -148,6 +148,64 @@ public class ListingTests
         listing.PriceHistory.Count.ShouldBe(1);   // no phantom point for an unchanged price
     }
 
+    // A live listing whose first real price is already set — the starting point for the
+    // price-drop tests below.
+    private static Listing ActiveListingAt(decimal amount, string currency = "TRY")
+    {
+        var listing = new Listing();
+        listing.Publish();
+        listing.SetPrice(new Money(amount, currency), DateTimeOffset.UtcNow);
+        listing.ClearDomainEvents();   // drop the publish/first-price noise; tests assert on the drop
+        return listing;
+    }
+
+    [Fact]
+    public void SetPrice_WhenPriceDropsOnActiveListing_RaisesPriceReducedEvent()
+    {
+        var listing = ActiveListingAt(100_000);
+
+        listing.SetPrice(new Money(90_000, "TRY"), DateTimeOffset.UtcNow);
+
+        var evt = listing.DomainEvents.OfType<ListingPriceReducedEvent>().Single();
+        evt.OldAmount.ShouldBe(100_000);
+        evt.NewAmount.ShouldBe(90_000);
+        evt.Currency.ShouldBe("TRY");
+    }
+
+    [Fact]
+    public void SetPrice_WhenPriceRises_RaisesNoPriceReducedEvent()
+    {
+        var listing = ActiveListingAt(100_000);
+
+        listing.SetPrice(new Money(120_000, "TRY"), DateTimeOffset.UtcNow);
+
+        listing.DomainEvents.OfType<ListingPriceReducedEvent>().ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void SetPrice_WhenListingIsDraft_RaisesNoPriceReducedEvent()
+    {
+        // Not published — a draft edit is invisible to the public, so no one is alerted.
+        var listing = new Listing();
+        listing.SetPrice(new Money(100_000, "TRY"), DateTimeOffset.UtcNow);
+        listing.ClearDomainEvents();
+
+        listing.SetPrice(new Money(90_000, "TRY"), DateTimeOffset.UtcNow);
+
+        listing.DomainEvents.OfType<ListingPriceReducedEvent>().ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void SetPrice_WhenCurrencyDiffers_RaisesNoPriceReducedEvent()
+    {
+        // A smaller number in a different currency isn't a price cut.
+        var listing = ActiveListingAt(100_000, "TRY");
+
+        listing.SetPrice(new Money(90_000, "USD"), DateTimeOffset.UtcNow);
+
+        listing.DomainEvents.OfType<ListingPriceReducedEvent>().ShouldBeEmpty();
+    }
+
     [Fact]
     public void RequestUnlock_WhenLocked_RecordsTheRequestAndNote()
     {
