@@ -117,14 +117,18 @@
     </main>
 
     @* Follows the buyer across the site while they collect listings to compare. Hidden until
-       something is selected; compare.js fills the count and the link and handles Clear. *@
-    <div id="compareBar" class="compare-bar" hidden>
-        <span class="cmp-bar-count"><span data-compare-count>0</span> @L["selected"]</span>
-        <div class="cmp-bar-actions">
-            <a class="btn btn-primary btn-sm" data-compare-go>@L["Compare"]</a>
-            <button type="button" class="btn btn-ghost btn-sm" data-compare-clear>@L["Clear"]</button>
+       something is selected; compare.js fills the count and the link and handles Clear. Omitted
+       on the comparison page itself, where it would only get in the way. *@
+    @if (ViewData["HideCompareBar"] as bool? != true)
+    {
+        <div id="compareBar" class="compare-bar" hidden>
+            <span class="cmp-bar-count"><span data-compare-count>0</span> @L["selected"]</span>
+            <div class="cmp-bar-actions">
+                <a class="btn btn-primary btn-sm" data-compare-go>@L["Compare"]</a>
+                <button type="button" class="btn btn-ghost btn-sm" data-compare-clear>@L["Clear"]</button>
+            </div>
         </div>
-    </div>
+    }
 
     <footer class="site-footer">
         <div class="container">

@@ -1894,11 +1894,18 @@ textarea.form-control {
     color: inherit
 }
 
-.lc-fav {
+/* Top-right action stack: sits opposite the sale/rent tag, so the two never overlap. */
+.lc-actions {
     position: absolute;
     top: .7rem;
     right: .7rem;
     z-index: 3;
+    display: flex;
+    gap: .4rem;
+}
+
+.lc-fav,
+.lc-compare {
     width: 38px;
     height: 38px;
     border-radius: 999px;
@@ -1906,7 +1913,6 @@ textarea.form-control {
     cursor: pointer;
     background: rgba(255,255,255,.92);
     color: var(--ink);
-    font-size: 1.1rem;
     line-height: 1;
     display: grid;
     place-items: center;
@@ -1914,39 +1920,17 @@ textarea.form-control {
     box-shadow: var(--shadow-sm);
 }
 
-    .lc-fav:hover {
+.lc-fav { font-size: 1.1rem; }
+.lc-compare { font-size: 1.05rem; }
+
+    .lc-fav:hover,
+    .lc-compare:hover {
         background: #fff;
         transform: scale(1.1)
     }
 
     .lc-fav.is-fav {
         color: var(--brass)
-    }
-
-/* compare toggle on the card — mirrors the fav button, opposite corner */
-.lc-compare {
-    position: absolute;
-    top: .7rem;
-    left: .7rem;
-    z-index: 3;
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
-    border: none;
-    cursor: pointer;
-    background: rgba(255,255,255,.92);
-    color: var(--ink);
-    font-size: 1.05rem;
-    line-height: 1;
-    display: grid;
-    place-items: center;
-    transition: background .18s,color .18s,transform .18s;
-    box-shadow: var(--shadow-sm);
-}
-
-    .lc-compare:hover {
-        background: #fff;
-        transform: scale(1.1)
     }
 
     .lc-compare.is-active {
@@ -1981,6 +1965,19 @@ textarea.form-control {
         opacity: .5;
         pointer-events: none;
     }
+
+    /* The ghost button is built for light surfaces; restyle it to read on the dark bar. */
+    .compare-bar [data-compare-clear] {
+        background: transparent;
+        color: rgba(255,255,255,.85);
+        border: 1px solid rgba(255,255,255,.35);
+    }
+
+        .compare-bar [data-compare-clear]:hover {
+            background: rgba(255,255,255,.12);
+            color: #fff;
+            border-color: rgba(255,255,255,.55);
+        }
 
 /* ===== compare page ===== */
 .compare-page { padding: 2rem 0 3rem; }

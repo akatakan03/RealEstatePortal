@@ -2,6 +2,8 @@
 @model IReadOnlyList<RealEstatePortal.Application.Listings.Queries.GetListingsForCompare.CompareListingDto>
 @{
     ViewData["Title"] = L["Compare listings"].Value;
+    // This page IS the comparison, so the floating "collect listings" bar would be redundant here.
+    ViewData["HideCompareBar"] = true;
     var yes = L["Yes"].Value;
     var no = L["No"].Value;
 
