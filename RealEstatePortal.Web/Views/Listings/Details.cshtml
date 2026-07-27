@@ -168,6 +168,12 @@
                             onclick="compareToggle(event, this)">⇄ @L["Compare"]</button>
                 </div>
 
+                @* A rental isn't financed with a mortgage, so the calculator is for sales only. *@
+                @if (listing.ListingType == RealEstatePortal.Domain.Enums.ListingType.Sale)
+                {
+                    <partial name="_MortgageCalculator" model="listing" />
+                }
+
                 @{
                     var yes = L["Yes"].Value;
                     var no = L["No"].Value;
@@ -304,6 +310,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/mortgage.js" asp-append-version="true"></script>
     <script>
         function selectThumb(el){
             document.getElementById('mainImage').src = el.dataset.full;

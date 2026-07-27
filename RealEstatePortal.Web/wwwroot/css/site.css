@@ -2070,6 +2070,82 @@ textarea.form-control {
     font-weight: 700;
 }
 
+/* ===== mortgage calculator (detail page) ===== */
+.mortgage {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 0;
+    margin-bottom: 1.5rem;
+    background: var(--surface);
+}
+
+.mortgage-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+}
+
+    .mortgage-summary::-webkit-details-marker { display: none; }
+
+.mortgage-chev { transition: transform .18s; color: var(--muted); }
+
+.mortgage[open] .mortgage-chev { transform: rotate(180deg); }
+
+.mortgage-body { padding: 0 1.2rem 1.2rem; }
+
+.mortgage-inputs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .9rem;
+    margin-bottom: 1.2rem;
+}
+
+.mortgage-out {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: .7rem 1.2rem;
+    margin: 0;
+}
+
+    .mortgage-out div {
+        display: flex;
+        flex-direction: column;
+        gap: .15rem;
+        padding: .6rem .8rem;
+        border-radius: 10px;
+        background: var(--paper);
+    }
+
+    .mortgage-out dt { color: var(--muted); font-size: .82rem; }
+
+    .mortgage-out dd { margin: 0; font-weight: 700; font-size: 1.05rem; }
+
+    /* The number the buyer actually came for */
+    .mortgage-out .mortgage-headline {
+        background: var(--brass-soft);
+    }
+
+        .mortgage-out .mortgage-headline dd {
+            color: var(--brass-dk);
+            font-size: 1.35rem;
+        }
+
+.mortgage-note {
+    margin: 1rem 0 0;
+    font-size: .8rem;
+    color: var(--muted);
+}
+
+@media (max-width: 560px) {
+    .mortgage-inputs { grid-template-columns: 1fr; }
+    .mortgage-out { grid-template-columns: 1fr; }
+}
+
 /* ===== profile ===== */
 .profile-grid {
     display: grid;

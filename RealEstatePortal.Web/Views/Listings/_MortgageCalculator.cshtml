@@ -1,0 +1,63 @@
+@model RealEstatePortal.Application.Listings.Queries.GetListingDetail.ListingDetailDto
+@{
+    // Seeds the rate field. Editable by the buyer; Stage 2 will refresh this default from the
+    // TCMB EVDS sector average. Only sale listings get a calculator — you don't finance a rental.
+    var defaultRate = Configuration.GetValue("Mortgage:DefaultMonthlyRate", 3.0m);
+    // An <input type="number"> value must use a period decimal regardless of the page language —
+    // the browser handles the localized *display*, but the attribute has to be invariant.
+    var rateValue = defaultRate.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+}
+
+<details class="mortgage detail-section" data-mortgage
+         data-price="@Model.PriceAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+         data-currency="@Model.PriceCurrency">
+    <summary class="mortgage-summary">
+        <span>@L["Mortgage calculator"]</span>
+        <span class="mortgage-chev" aria-hidden="true">▾</span>
+    </summary>
+
+    <div class="mortgage-body">
+        <div class="mortgage-inputs">
+            <div class="mb-field">
+                <label class="form-label" for="mDown">@L["Down payment"] (%)</label>
+                <input class="form-control" id="mDown" type="number" inputmode="numeric"
+                       min="0" max="90" step="1" value="20" data-m-down />
+            </div>
+            <div class="mb-field">
+                <label class="form-label" for="mTerm">@L["Term"]</label>
+                <select class="form-select" id="mTerm" data-m-term>
+                    @foreach (var m in new[] { 12, 24, 36, 48, 60, 72, 84, 96, 108, 120 })
+                    {
+                        <option value="@m" selected="@(m == 120)">@m @L["months"]</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-field">
+                <label class="form-label" for="mRate">@L["Monthly interest rate"] (%)</label>
+                <input class="form-control" id="mRate" type="number" inputmode="decimal"
+                       min="0" step="0.01" value="@rateValue" data-m-rate />
+            </div>
+        </div>
+
+        <dl class="mortgage-out">
+            <div>
+                <dt>@L["Loan amount"]</dt>
+                <dd data-m-loan>—</dd>
+            </div>
+            <div class="mortgage-headline">
+                <dt>@L["Monthly payment"]</dt>
+                <dd data-m-payment>—</dd>
+            </div>
+            <div>
+                <dt>@L["Total repayment"]</dt>
+                <dd data-m-total>—</dd>
+            </div>
+            <div>
+                <dt>@L["Total interest"]</dt>
+                <dd data-m-interest>—</dd>
+            </div>
+        </dl>
+
+        <p class="mortgage-note">@L["Indicative only — your bank's actual rate and fees will differ."]</p>
+    </div>
+</details>

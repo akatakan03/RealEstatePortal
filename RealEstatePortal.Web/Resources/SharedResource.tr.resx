@@ -382,6 +382,36 @@
   <data name="In comparison" xml:space="preserve">
     <value>Karşılaştırmada</value>
   </data>
+  <data name="Mortgage calculator" xml:space="preserve">
+    <value>Kredi hesaplama</value>
+  </data>
+  <data name="Down payment" xml:space="preserve">
+    <value>Peşinat</value>
+  </data>
+  <data name="Term" xml:space="preserve">
+    <value>Vade</value>
+  </data>
+  <data name="months" xml:space="preserve">
+    <value>ay</value>
+  </data>
+  <data name="Monthly interest rate" xml:space="preserve">
+    <value>Aylık faiz oranı</value>
+  </data>
+  <data name="Loan amount" xml:space="preserve">
+    <value>Kredi tutarı</value>
+  </data>
+  <data name="Monthly payment" xml:space="preserve">
+    <value>Aylık taksit</value>
+  </data>
+  <data name="Total repayment" xml:space="preserve">
+    <value>Toplam geri ödeme</value>
+  </data>
+  <data name="Total interest" xml:space="preserve">
+    <value>Toplam faiz</value>
+  </data>
+  <data name="Indicative only — your bank's actual rate and fees will differ." xml:space="preserve">
+    <value>Yalnızca gösterge — bankanızın gerçek oranı ve masrafları farklılık gösterir.</value>
+  </data>
   <data name="Property type" xml:space="preserve">
     <value>Konut tipi</value>
   </data>
