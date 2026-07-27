@@ -1,8 +1,10 @@
 @model RealEstatePortal.Application.Listings.Queries.GetListingDetail.ListingDetailDto
 @{
-    // Seeds the rate field. Editable by the buyer; Stage 2 will refresh this default from the
-    // TCMB EVDS sector average. Only sale listings get a calculator — you don't finance a rental.
-    var defaultRate = Configuration.GetValue("Mortgage:DefaultMonthlyRate", 3.0m);
+    // Seeds the rate field. The controller supplies the live EVDS sector average (falling back to
+    // the configured default) via ViewData; the buyer can still edit it. Config is only a last
+    // resort if the view is ever rendered without that value.
+    var defaultRate = ViewData["MortgageRate"] as decimal?
+        ?? Configuration.GetValue("Mortgage:DefaultMonthlyRate", 3.0m);
     // An <input type="number"> value must use a period decimal regardless of the page language —
     // the browser handles the localized *display*, but the attribute has to be invariant.
     var rateValue = defaultRate.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);

@@ -25,6 +25,7 @@ using RealEstatePortal.Application.Listings.Queries.GetListings;
 using RealEstatePortal.Application.Listings.Queries.GetListingsForCompare;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
 using RealEstatePortal.Application.Listings.Queries.GetSimilarListings;
+using RealEstatePortal.Application.Mortgage.Queries.GetDefaultMortgageRate;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
 using RealEstatePortal.Web.Helpers;
@@ -207,6 +208,10 @@ public class ListingsController : Controller
             Inquiry = new CreateInquiryCommand { ListingId = id },
             Similar = await _sender.Send(new GetSimilarListingsQuery(id))
         };
+
+        // Only sales get a loan calculator, so only sales need the rate looked up.
+        if (dto.ListingType == ListingType.Sale)
+            vm.MortgageMonthlyRate = await _sender.Send(new GetDefaultMortgageRateQuery());
 
         if (User.Identity?.IsAuthenticated == true)
             vm.IsFavorited = await _sender.Send(new IsListingFavoritedQuery(id));

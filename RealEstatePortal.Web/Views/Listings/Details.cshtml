@@ -171,6 +171,7 @@
                 @* A rental isn't financed with a mortgage, so the calculator is for sales only. *@
                 @if (listing.ListingType == RealEstatePortal.Domain.Enums.ListingType.Sale)
                 {
+                    ViewData["MortgageRate"] = Model.MortgageMonthlyRate;
                     <partial name="_MortgageCalculator" model="listing" />
                 }
 

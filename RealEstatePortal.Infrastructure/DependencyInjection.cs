@@ -11,6 +11,7 @@ using RealEstatePortal.Infrastructure.Email;
 using RealEstatePortal.Infrastructure.Geocoding;
 using RealEstatePortal.Infrastructure.Identity;
 using RealEstatePortal.Infrastructure.Imaging;
+using RealEstatePortal.Infrastructure.Mortgage;
 using RealEstatePortal.Infrastructure.Storage;
 using RealEstatePortal.Infrastructure.Spatial;
 
@@ -102,6 +103,17 @@ public static class DependencyInjection
         services.AddScoped<IGeocodingService>(sp => new CachingGeocodingService(
             sp.GetRequiredService<NominatimGeocodingService>(),
             sp.GetRequiredService<IMemoryCache>()));
+
+        // Loan-calculator default rate, from the TCMB EVDS sector average (cached; falls back to
+        // the configured default when the API key is absent or EVDS is unreachable).
+        services.Configure<MortgageSettings>(configuration.GetSection("Mortgage"));
+        var mortgageSettings = configuration.GetSection("Mortgage").Get<MortgageSettings>() ?? new MortgageSettings();
+        services.AddHttpClient<EvdsMortgageRateService>(client =>
+        {
+            client.BaseAddress = new Uri(mortgageSettings.Evds.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(8);
+        });
+        services.AddScoped<IMortgageRateService>(sp => sp.GetRequiredService<EvdsMortgageRateService>());
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 
