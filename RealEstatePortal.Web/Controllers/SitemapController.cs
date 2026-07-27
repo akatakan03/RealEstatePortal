@@ -34,8 +34,10 @@ public class SitemapController : Controller
             writer.WriteStartElement("urlset", "http://www.sitemaps.org/schemas/sitemap/0.9");
             writer.WriteAttributeString("xmlns", "xhtml", null, XhtmlNamespace);
 
-            WriteLocalized(writer, baseUrl, string.Empty);      // home
-            WriteLocalized(writer, baseUrl, "/Listings");       // browse
+            // The site root (/{culture}) redirects to the browse page, so browse is the canonical
+            // front door. Listing both would hand a crawler two URLs for one page, half of them
+            // redirects — the very duplication the hreflang alternates exist to avoid.
+            WriteLocalized(writer, baseUrl, "/Listings");       // browse — the site's front door
 
             // Each active listing at its canonical slug URL.
             foreach (var e in entries)
