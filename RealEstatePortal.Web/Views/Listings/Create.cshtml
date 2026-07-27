@@ -127,8 +127,14 @@
                         <p class="form-hint">@L["Type the address and use the locate button, then drag the pin to the exact spot."]</p>
                     </div>
 
-                    <input type="hidden" asp-for="Latitude" />
-                    <input type="hidden" asp-for="Longitude" />
+                    @* Machine values, always dot-decimal — render them invariant so they round-trip
+                       with InvariantDoubleModelBinder even under tr-TR, where asp-for would emit
+                       "40,99" and the binder (invariant) would reject it. asp-for is dropped here
+                       precisely because it formats with the request culture. *@
+                    <input type="hidden" name="Latitude"
+                           value="@Model.Latitude?.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                    <input type="hidden" name="Longitude"
+                           value="@Model.Longitude?.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                     @* The coordinates are hidden, so without these the form would just refuse to
                        submit with nothing on the page marked wrong. *@
                     <span asp-validation-for="Latitude" class="text-danger"></span>

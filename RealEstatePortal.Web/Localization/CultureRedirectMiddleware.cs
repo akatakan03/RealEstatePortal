@@ -68,7 +68,13 @@ public class CultureRedirectMiddleware
         }
 
         var culture = PreferredCulture(context);
-        var target = $"/{culture}{path.Value}{context.Request.QueryString}";
+        // Rebuild through PathString/QueryString so the language rides on a properly encoded path,
+        // and keep the app's base path so this stays inside a virtual-directory deployment rather
+        // than redirecting to the server root.
+        var localized = new PathString($"/{culture}{path.Value}");
+        var target = context.Request.PathBase.ToUriComponent()
+                   + localized.ToUriComponent()
+                   + context.Request.QueryString.ToUriComponent();
 
         // Found, not permanent: a visitor's language can change, and this address genuinely
         // resolves to different pages for different people. Only the canonical listing URLs
@@ -76,8 +82,12 @@ public class CultureRedirectMiddleware
         context.Response.Redirect(target, permanent: false);
     }
 
+    // Match whole segments, not raw prefixes: "/api" ignores /api and /api/listings, but a future
+    // page at /apartments must not slip through unlocalized (and then 404 on the culture route).
     private static bool IsIgnored(string path) =>
-        Ignored.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase));
+        Ignored.Any(p =>
+            path.Equals(p, StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase));
 
     private static string? FirstSegment(string path)
     {

@@ -35,7 +35,13 @@ public static class LocalizationExtensions
         if (SupportedCultures.IsSupported(first))
             rest = slash < 0 ? string.Empty : rest[(slash + 1)..];
 
-        return $"/{culture}/{rest}{request.QueryString}";
+        // Wrap the swapped path back into a PathString so it re-encodes, and keep the app's base
+        // path — otherwise an hreflang link under a virtual directory points outside the app and
+        // a path with non-ASCII or reserved characters is emitted raw.
+        var swapped = new PathString($"/{culture}/{rest}");
+        return request.PathBase.ToUriComponent()
+             + swapped.ToUriComponent()
+             + request.QueryString.ToUriComponent();
     }
 
     // hreflang has to be fully qualified — a relative href there is ignored.

@@ -1,4 +1,6 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -111,7 +113,33 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
+
+    // These paths carry no language. The cookie handler builds its redirect from them, and
+    // CultureRedirectMiddleware would otherwise bounce that a second time to add one — two
+    // redirects, and the sign-in form in the cookie's language rather than the page the visitor
+    // was actually on. Put that page's language on the redirect here so it lands right at once.
+    options.Events.OnRedirectToLogin = RedirectWithCulture;
+    options.Events.OnRedirectToLogout = RedirectWithCulture;
+    options.Events.OnRedirectToAccessDenied = RedirectWithCulture;
 });
+
+static Task RedirectWithCulture(RedirectContext<CookieAuthenticationOptions> context)
+{
+    var culture = context.HttpContext.Request.RouteValues[CultureRouteConstraint.Name]?.ToString();
+    if (!SupportedCultures.IsSupported(culture))
+        culture = SupportedCultures.Default;
+
+    // RedirectUri already includes the app's base path (…/Account/Login?ReturnUrl=…). Insert
+    // /{culture} right after that base, so the base is kept and only the language is added.
+    var basePath = context.Request.PathBase.ToUriComponent();
+    var rest = context.RedirectUri;
+    if (basePath.Length > 0 && rest.StartsWith(basePath, StringComparison.Ordinal))
+        rest = rest[basePath.Length..];
+
+    context.Response.Redirect($"{basePath}/{culture}{rest}");
+    return Task.CompletedTask;
+}
+
 builder.Services.AddWebServices();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

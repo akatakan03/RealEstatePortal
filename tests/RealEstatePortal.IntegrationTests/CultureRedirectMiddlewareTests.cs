@@ -67,4 +67,41 @@ public class CultureRedirectMiddlewareTests
         context.Response.StatusCode.ShouldBe(302);
         context.Response.Headers.Location.ToString().ShouldBe("/tr/listings");
     }
+
+    [Fact]
+    public async Task Redirect_KeepsTheAppBasePath_SoAVirtualDirectoryStaysInsideTheApp()
+    {
+        var context = GetRequest("/listings");
+        context.Request.PathBase = "/app";
+
+        var middleware = new CultureRedirectMiddleware(_ => Task.CompletedTask);
+        await middleware.InvokeAsync(context);
+
+        context.Response.StatusCode.ShouldBe(302);
+        context.Response.Headers.Location.ToString().ShouldBe("/app/tr/listings");
+    }
+
+    [Fact]
+    public async Task IgnoredPrefix_MatchesWholeSegments_NotBareStringPrefixes()
+    {
+        // "/apartments" merely starts with "/api" but is a real page: it must be localized, not
+        // waved through to 404 on the culture route.
+        var page = GetRequest("/apartments");
+        var pageNext = false;
+        await new CultureRedirectMiddleware(_ => { pageNext = true; return Task.CompletedTask; })
+            .InvokeAsync(page);
+
+        pageNext.ShouldBeFalse();
+        page.Response.StatusCode.ShouldBe(302);
+        page.Response.Headers.Location.ToString().ShouldBe("/tr/apartments");
+
+        // "/api/listings" is genuinely under the ignored /api segment and passes through untouched.
+        var api = GetRequest("/api/listings");
+        var apiNext = false;
+        await new CultureRedirectMiddleware(_ => { apiNext = true; return Task.CompletedTask; })
+            .InvokeAsync(api);
+
+        apiNext.ShouldBeTrue();
+        api.Response.StatusCode.ShouldBe(200);
+    }
 }

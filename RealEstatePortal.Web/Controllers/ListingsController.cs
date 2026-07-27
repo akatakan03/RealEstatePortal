@@ -176,13 +176,15 @@ public class ListingsController : Controller
             && dto.OwnerId != User.FindFirstValue(ClaimTypes.NameIdentifier))
             return NotFound();
 
-        // Canonicalize. A listing is reachable through the catch-all route as well
-        // (/tr/Listings/Details/5), so comparing the whole path rather than just the slug
-        // means there is exactly one address that serves the page and every other form
-        // redirects to it.
-        var canonical = Url.ListingUrl(id, dto.Slug);
-        if (!string.Equals(Request.Path, canonical, StringComparison.Ordinal))
-            return RedirectPermanent(canonical);
+        // Canonicalize to /{culture}/listing/{id}/{slug}. A listing is reachable through the
+        // catch-all route as well (/tr/Listings/Details/5, no slug value), and through the pretty
+        // route with a stale or missing slug. Compare the decoded slug route value against the
+        // real slug rather than reconstructing and string-matching the whole path: the latter
+        // compared Request.Path (base-less, decoded) against a generated URL (base-included,
+        // encoded), which self-redirects forever under a path base or a non-ASCII slug.
+        var currentSlug = Request.RouteValues["slug"] as string;
+        if (!string.Equals(currentSlug, dto.Slug, StringComparison.Ordinal))
+            return RedirectPermanent(Url.ListingUrl(id, dto.Slug));
 
         // Only count genuine public views — not admin/owner previews of a non-public listing.
         if (dto.Status == ListingStatus.Active)
