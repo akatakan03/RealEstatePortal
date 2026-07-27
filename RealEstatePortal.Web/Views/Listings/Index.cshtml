@@ -181,41 +181,7 @@
             <div class="card-grid">
                 @foreach (var listing in Model.Listings.Items)
                 {
-                    <a class="listing-card rise d1" href="@Url.ListingUrl(listing.Id, listing.Slug)">
-                        <div class="lc-media">
-                            @if (User.Identity is not null && User.Identity.IsAuthenticated)
-                            {
-                                <button type="button"
-                                        class="lc-fav @(listing.IsFavorited ? "is-fav" : "")"
-                                        data-listing-id="@listing.Id"
-                                        aria-label="@L["Save listing"]"
-                                        onclick="toggleFav(event, this)">
-                                    @(listing.IsFavorited ? "♥" : "♡")
-                                </button>
-                            }
-                            <span class="lc-tag @(listing.ListingType == ListingType.Rent ? "rent" : "")">@L.Localize(listing.ListingType)</span>
-                            @{ var cover = ListingImages.CoverOrPlaceholder(listing.CoverThumbnailUrl, listing.Id, Configuration.GetValue<bool>("Demo:PlaceholderImages")); }
-                            @if (!string.IsNullOrEmpty(cover))
-                            {
-                                <img src="@cover" alt="@listing.Title" loading="lazy" />
-                            }
-                            else
-                            {
-                                <div class="noimg">@L["No photo yet"]</div>
-                            }
-                        </div>
-                        <div class="lc-body">
-                            <div class="lc-loc">@L.Localize(listing.PropertyType)</div>
-                            <div class="lc-title">@listing.Title</div>
-                            <div class="lc-meta">
-                                <span><span class="value">@listing.Bedrooms</span> @L["bd"]</span>
-                                <span><span class="value">@listing.AreaSqMeters.ToString("N0")</span> m²</span>
-                            </div>
-                            <div class="lc-price">
-                                <span class="value">@listing.PriceAmount.ToString("N0") @listing.PriceCurrency</span>
-                            </div>
-                        </div>
-                    </a>
+                    <partial name="_ListingCard" model="listing" />
                 }
             </div>
 

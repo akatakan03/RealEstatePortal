@@ -23,6 +23,7 @@ using RealEstatePortal.Application.Listings.Queries.GetListingImages;
 using RealEstatePortal.Application.Listings.Queries.GetListingMapPoints;
 using RealEstatePortal.Application.Listings.Queries.GetListings;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
+using RealEstatePortal.Application.Listings.Queries.GetSimilarListings;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
 using RealEstatePortal.Web.Helpers;
@@ -193,7 +194,8 @@ public class ListingsController : Controller
         var vm = new ListingDetailViewModel
         {
             Listing = dto,
-            Inquiry = new CreateInquiryCommand { ListingId = id }
+            Inquiry = new CreateInquiryCommand { ListingId = id },
+            Similar = await _sender.Send(new GetSimilarListingsQuery(id))
         };
 
         if (User.Identity?.IsAuthenticated == true)

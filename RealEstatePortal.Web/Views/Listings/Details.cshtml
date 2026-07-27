@@ -270,6 +270,24 @@
                 </div>
             </aside>
         </div>
+
+        @* Discovery aid, not personalisation: these are chosen from this listing's own type,
+           neighbourhood and price. Hidden entirely when nothing close enough turns up rather
+           than padded with weak matches. The cards skip the save-heart — this page carries no
+           AJAX favourite plumbing, and a click lands on the listing where Save lives. *@
+        @if (Model.Similar.Any())
+        {
+            <section class="detail-section similar-listings">
+                <h3>@L["Similar listings"]</h3>
+                <div class="card-grid">
+                    @{ ViewData["ShowFavorite"] = false; }
+                    @foreach (var similar in Model.Similar)
+                    {
+                        <partial name="_ListingCard" model="similar" />
+                    }
+                </div>
+            </section>
+        }
     </div>
 </div>
 

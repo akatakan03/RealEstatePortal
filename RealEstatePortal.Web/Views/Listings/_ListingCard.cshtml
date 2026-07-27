@@ -1,0 +1,44 @@
+@using RealEstatePortal.Domain.Enums
+@model RealEstatePortal.Application.Listings.Queries.GetListings.ListingBriefDto
+@{
+    // The interactive save-heart belongs to the browse grid, which ships the AJAX toggle and its
+    // antiforgery token. Places that reuse this card without that plumbing (the "similar listings"
+    // strip) pass ShowFavorite = false and rely on the target page's own Save button.
+    var showFavorite = ViewData["ShowFavorite"] as bool? ?? true;
+    var canFavorite = showFavorite && User.Identity is { IsAuthenticated: true };
+    var cover = ListingImages.CoverOrPlaceholder(Model.CoverThumbnailUrl, Model.Id, Configuration.GetValue<bool>("Demo:PlaceholderImages"));
+}
+<a class="listing-card rise d1" href="@Url.ListingUrl(Model.Id, Model.Slug)">
+    <div class="lc-media">
+        @if (canFavorite)
+        {
+            <button type="button"
+                    class="lc-fav @(Model.IsFavorited ? "is-fav" : "")"
+                    data-listing-id="@Model.Id"
+                    aria-label="@L["Save listing"]"
+                    onclick="toggleFav(event, this)">
+                @(Model.IsFavorited ? "♥" : "♡")
+            </button>
+        }
+        <span class="lc-tag @(Model.ListingType == ListingType.Rent ? "rent" : "")">@L.Localize(Model.ListingType)</span>
+        @if (!string.IsNullOrEmpty(cover))
+        {
+            <img src="@cover" alt="@Model.Title" loading="lazy" />
+        }
+        else
+        {
+            <div class="noimg">@L["No photo yet"]</div>
+        }
+    </div>
+    <div class="lc-body">
+        <div class="lc-loc">@L.Localize(Model.PropertyType)</div>
+        <div class="lc-title">@Model.Title</div>
+        <div class="lc-meta">
+            <span><span class="value">@Model.Bedrooms</span> @L["bd"]</span>
+            <span><span class="value">@Model.AreaSqMeters.ToString("N0")</span> m²</span>
+        </div>
+        <div class="lc-price">
+            <span class="value">@Model.PriceAmount.ToString("N0") @Model.PriceCurrency</span>
+        </div>
+    </div>
+</a>

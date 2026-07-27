@@ -370,6 +370,9 @@
   <data name="No photo yet" xml:space="preserve">
     <value>Fotoğraf yok</value>
   </data>
+  <data name="Similar listings" xml:space="preserve">
+    <value>Benzer ilanlar</value>
+  </data>
   <data name="bd" xml:space="preserve">
     <value>oda</value>
   </data>
