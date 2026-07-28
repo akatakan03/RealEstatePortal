@@ -10,6 +10,7 @@ public class GeminiSettings
     public string? ApiKey { get; set; }
 
     // A fast, free-tier model is plenty for this extraction task; left configurable so a model
-    // change is a settings edit, not a redeploy.
-    public string Model { get; set; } = "gemini-2.0-flash";
+    // change is a settings edit, not a redeploy. "gemini-flash-latest" tracks the current free
+    // fast model (the dated gemini-2.0-flash free tier has been zeroed on new keys).
+    public string Model { get; set; } = "gemini-flash-latest";
 }
