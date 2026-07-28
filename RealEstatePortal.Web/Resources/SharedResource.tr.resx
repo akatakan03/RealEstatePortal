@@ -1048,6 +1048,24 @@
   <data name="AI search is off right now — searched by keyword instead." xml:space="preserve">
     <value>Yapay zekâ araması şu an kapalı — anahtar kelimeyle arandı.</value>
   </data>
+  <data name="Pick up where you left off:" xml:space="preserve">
+    <value>Kaldığın yerden devam et:</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Devam et</value>
+  </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="your last search" xml:space="preserve">
+    <value>son araman</value>
+  </data>
+  <data name="selected map area" xml:space="preserve">
+    <value>haritada seçili alan</value>
+  </data>
+  <data name="{0}+ rooms" xml:space="preserve">
+    <value>{0}+ oda</value>
+  </data>
   <data name="Bold" xml:space="preserve">
     <value>Kalın</value>
   </data>

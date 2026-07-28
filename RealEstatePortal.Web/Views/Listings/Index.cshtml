@@ -12,6 +12,18 @@
         f.ListingType.HasValue || f.PropertyType.HasValue || f.MinPrice.HasValue || f.MaxPrice.HasValue ||
         f.Heating.HasValue || f.Internet.HasValue || f.Furnished == true ||
         f.Parking == true || f.Balcony == true || f.MaxDues.HasValue || f.MinBedrooms.HasValue;
+
+    // A short, localized description of the current search — stored client-side so the visitor can
+    // pick up where they left off (see resume-search.js). Only the highlights, not every filter.
+    var summaryParts = new List<string>();
+    var summaryQuery = Model.AiSearchQuery ?? Model.Filter.Keyword;
+    if (!string.IsNullOrWhiteSpace(summaryQuery)) { summaryParts.Add($"“{summaryQuery.Trim()}”"); }
+    if (Model.Filter.ListingType.HasValue) { summaryParts.Add(L.Localize(Model.Filter.ListingType.Value)); }
+    if (Model.Filter.PropertyType.HasValue) { summaryParts.Add(L.Localize(Model.Filter.PropertyType.Value)); }
+    if (Model.Filter.MaxPrice.HasValue) { summaryParts.Add("≤ " + Model.Filter.MaxPrice.Value.ToString("N0")); }
+    if (Model.Filter.MinBedrooms.HasValue) { summaryParts.Add(L["{0}+ rooms", Model.Filter.MinBedrooms.Value].Value); }
+    if (hasCenter) { summaryParts.Add(L["selected map area"].Value); }
+    var filterSummary = string.Join(" · ", summaryParts);
 }
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -20,6 +32,18 @@
 
 <section class="browse-hero">
     <div class="container">
+        @* Hidden until resume-search.js decides to offer restoring the last search. On an active
+           search it instead stores this summary + the query string, then stays hidden. *@
+        <div id="resumeBar" class="resume-bar" hidden
+             data-summary="@filterSummary"
+             data-fallback="@L["your last search"]">
+            <span class="resume-text">🔎 @L["Pick up where you left off:"] <strong class="resume-summary"></strong></span>
+            <span class="resume-actions">
+                <button type="button" class="btn btn-primary btn-sm resume-continue">@L["Continue"]</button>
+                <button type="button" class="btn btn-ghost btn-sm resume-dismiss">@L["Dismiss"]</button>
+            </span>
+        </div>
+
         <span class="eyebrow">@L["İstanbul property, curated"]</span>
         @* The emphasised word is a placeholder rather than markup baked into the sentence:
            it lands in a different place in Turkish, and only the translator knows where. *@
@@ -235,6 +259,7 @@
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="~/js/resume-search.js"></script>
     <script>
         (function () {
         var hasCenter = @(hasCenter ? "true" : "false");

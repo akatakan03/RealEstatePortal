@@ -1841,6 +1841,36 @@ textarea.form-control {
         font-style: italic
     }
 
+/* ===== "pick up where you left off" bar ===== */
+.resume-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 0 0 1.1rem;
+    padding: .7rem 1rem;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 12px;
+    color: rgba(255,255,255,.9);
+    font-size: .92rem
+}
+
+    .resume-bar[hidden] {
+        display: none
+    }
+
+    .resume-bar .resume-summary {
+        color: #fff
+    }
+
+    .resume-bar .resume-actions {
+        display: flex;
+        gap: .5rem;
+        flex-shrink: 0
+    }
+
 /* ===== photo crop editor ===== */
 .ph-modal {
     position: fixed;
