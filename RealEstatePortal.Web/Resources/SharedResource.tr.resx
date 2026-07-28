@@ -1147,6 +1147,24 @@
   <data name="Photos aren’t saved in the draft — you’ll need to add them again." xml:space="preserve">
     <value>Fotoğraflar taslakta saklanmaz — bunları yeniden eklemen gerekir.</value>
   </data>
+  <data name="Availability" xml:space="preserve">
+    <value>Müsaitlik</value>
+  </data>
+  <data name="Viewing availability" xml:space="preserve">
+    <value>Görüşme müsaitliği</value>
+  </data>
+  <data name="Set the weekly hours when you can show properties. Customers book viewings in these hours, and you confirm each one." xml:space="preserve">
+    <value>Mülk gösterebileceğin haftalık saatleri belirle. Müşteriler bu saatlerde randevu alır, sen her birini onaylarsın.</value>
+  </data>
+  <data name="Your availability has been saved." xml:space="preserve">
+    <value>Müsaitliğin kaydedildi.</value>
+  </data>
+  <data name="Save availability" xml:space="preserve">
+    <value>Müsaitliği kaydet</value>
+  </data>
+  <data name="Back to dashboard" xml:space="preserve">
+    <value>Panele dön</value>
+  </data>
   <data name="Bold" xml:space="preserve">
     <value>Kalın</value>
   </data>

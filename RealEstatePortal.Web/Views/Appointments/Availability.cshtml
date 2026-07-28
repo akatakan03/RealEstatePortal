@@ -1,0 +1,66 @@
+@using System.Globalization
+@model RealEstatePortal.Web.Models.Appointments.AvailabilityFormModel
+@{
+    ViewData["Title"] = L["Viewing availability"].Value;
+    var culture = CultureInfo.CurrentCulture;
+}
+
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell">
+            <span class="eyebrow">@L["Agent dashboard"]</span>
+            <h1 class="page-title" style="margin-bottom:.4rem;">@L["Viewing availability"]</h1>
+            <p class="lead" style="margin-bottom:1.5rem;">@L["Set the weekly hours when you can show properties. Customers book viewings in these hours, and you confirm each one."]</p>
+
+            @if (TempData["Success"] is string ok)
+            {
+                <div class="alert alert-success">@L[ok]</div>
+            }
+
+            <div class="form-card">
+                <form asp-action="Availability" method="post">
+                    <div asp-validation-summary="All" class="text-danger" style="margin-bottom:1rem;"></div>
+
+                    <div class="availability-grid">
+                        @for (var i = 0; i < Model.Days.Count; i++)
+                        {
+                            var day = Model.Days[i];
+                            var name = culture.DateTimeFormat.GetDayName(day.Day);
+                            <input type="hidden" asp-for="Days[i].Day" />
+                            <div class="availability-row">
+                                <label class="availability-day">
+                                    <input type="checkbox" asp-for="Days[i].Enabled" />
+                                    <span>@culture.TextInfo.ToTitleCase(name)</span>
+                                </label>
+                                <div class="availability-times">
+                                    <input type="time" asp-for="Days[i].Start" class="form-control" />
+                                    <span class="availability-dash">–</span>
+                                    <input type="time" asp-for="Days[i].End" class="form-control" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">@L["Save availability"]</button>
+                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-ghost">@L["Back to dashboard"]</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Dim a day's time inputs until it's checked, so the row reads as on/off at a glance.
+        document.querySelectorAll('.availability-row').forEach(function (row) {
+            var check = row.querySelector('input[type=checkbox]');
+            var times = row.querySelector('.availability-times');
+            function sync() { times.style.opacity = check.checked ? '1' : '.4'; }
+            check.addEventListener('change', sync);
+            sync();
+        });
+    </script>
+}

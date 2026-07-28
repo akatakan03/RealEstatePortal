@@ -22,7 +22,10 @@
                 <h1>@L["Dashboard"]</h1>
                 <p class="lead">@L["How your listings are performing."]</p>
             </div>
-            <a class="btn btn-primary" asp-controller="Listings" asp-action="Create">+ @L["New listing"]</a>
+            <div class="dash-hero-actions">
+                <a class="btn btn-ghost" asp-controller="Appointments" asp-action="Availability">🗓 @L["Availability"]</a>
+                <a class="btn btn-primary" asp-controller="Listings" asp-action="Create">+ @L["New listing"]</a>
+            </div>
         </div>
 
         @* Translated here rather than in the controller: the message has survived a redirect,

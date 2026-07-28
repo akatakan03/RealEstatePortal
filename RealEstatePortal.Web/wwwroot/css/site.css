@@ -1740,6 +1740,48 @@ textarea.form-control {
         border-top: none
     }
 
+.dash-hero-actions {
+    display: flex;
+    gap: .6rem;
+    flex-wrap: wrap
+}
+
+/* ===== availability editor ===== */
+.availability-grid {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem
+}
+
+.availability-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: .6rem .2rem;
+    border-bottom: 1px solid var(--line)
+}
+
+.availability-day {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 600;
+    min-width: 140px
+}
+
+.availability-times {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    transition: opacity .15s ease
+}
+
+    .availability-times .form-control { width: auto }
+
+.availability-dash { color: var(--muted) }
+
 /* ===== autosave / draft recovery ===== */
 .draft-status {
     font-size: .82rem;
