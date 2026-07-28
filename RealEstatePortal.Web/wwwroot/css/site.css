@@ -1839,6 +1839,79 @@ textarea.form-control {
     .appt-badge.is-completed { background: var(--brass-soft); color: var(--brass-dk) }
 
 /* ===== book a viewing ===== */
+.appt-cta-sub {
+    color: var(--muted);
+    font-size: .92rem;
+    margin: -.3rem 0 .9rem
+}
+
+.appt-modal {
+    width: min(560px, calc(100vw - 2rem));
+    max-height: calc(100vh - 3rem);
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface, #fff);
+    color: var(--ink);
+    overflow: hidden
+}
+
+    .appt-modal::backdrop {
+        background: rgba(22, 26, 24, .45)
+    }
+
+.appt-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 1
+}
+
+    .appt-modal-head h2 {
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 0
+    }
+
+.appt-modal-close {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    border-radius: 8px;
+    width: 2rem;
+    height: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    flex: none
+}
+
+    .appt-modal-close:hover {
+        color: var(--ink);
+        border-color: var(--ink)
+    }
+
+.appt-modal-body {
+    padding: 1.4rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 8rem)
+}
+
+.appt-modal-status {
+    color: var(--muted);
+    margin: 0;
+    padding: 2rem 0;
+    text-align: center
+}
+
+    .appt-modal-status.is-error { color: var(--danger) }
+
 .appt-days {
     display: flex;
     flex-direction: column;

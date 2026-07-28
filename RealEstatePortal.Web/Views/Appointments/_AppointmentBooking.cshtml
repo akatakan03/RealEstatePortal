@@ -7,8 +7,6 @@
     var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
 }
 
-<h3>@L["Book a viewing"]</h3>
-
 @if (!Model.AgentHasAvailability)
 {
     <p class="ni-fail">@L["The agent hasn’t published viewing hours yet — use the message form to get in touch."]</p>

@@ -1168,6 +1168,9 @@
   <data name="Book a viewing" xml:space="preserve">
     <value>Randevu al</value>
   </data>
+  <data name="Pick a time in the next two weeks and the agent will confirm it." xml:space="preserve">
+    <value>Önümüzdeki iki hafta içinden bir saat seç, danışman onaylasın.</value>
+  </data>
   <data name="The agent hasn’t published viewing hours yet — use the message form to get in touch." xml:space="preserve">
     <value>Danışman henüz görüşme saati yayımlamadı — iletişim için mesaj formunu kullanın.</value>
   </data>

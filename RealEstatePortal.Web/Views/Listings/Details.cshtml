@@ -1,7 +1,14 @@
-﻿@model RealEstatePortal.Web.Models.Listings.ListingDetailViewModel
+﻿@using System.Security.Claims
+@using RealEstatePortal.Domain.Enums
+@model RealEstatePortal.Web.Models.Listings.ListingDetailViewModel
 @{
     var listing = Model.Listing;
     ViewData["Title"] = listing.Title;
+
+    // Show the "book a viewing" button to everyone except the listing's own agent (who can't book
+    // their own listing) and only while the listing is actually bookable.
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var canBook = listing.Status == ListingStatus.Active && currentUserId != listing.OwnerId;
 
     // The description is rich text now — strip it to plain text for the meta/OG tags, which
     // must never carry markup, before truncating.
@@ -259,9 +266,27 @@
                     <div class="alert alert-danger">@L[apptErr]</div>
                 }
 
-                @* Book a viewing. Loaded lazily as a partial (open slots come from our own DB, so
-                   it's quick) — kept off the initial render to keep this busy page lean. *@
-                <div class="detail-section" id="appointmentBooking" data-listing-id="@listing.Id" hidden></div>
+                @* Book a viewing — a button that opens a modal. The open-slot list (next two weeks)
+                   is fetched into the dialog the first time it's opened, so the page doesn't pay for
+                   it up front and only bookable viewers ever load it. *@
+                @if (canBook)
+                {
+                    <div class="detail-section appt-cta">
+                        <h3>@L["Book a viewing"]</h3>
+                        <p class="appt-cta-sub">@L["Pick a time in the next two weeks and the agent will confirm it."]</p>
+                        <button type="button" class="btn btn-primary" data-appt-for="@listing.Id">🗓 @L["Book a viewing"]</button>
+                    </div>
+
+                    <dialog id="apptModal" class="appt-modal" aria-labelledby="apptModalTitle">
+                        <div class="appt-modal-head">
+                            <h2 id="apptModalTitle">@L["Book a viewing"]</h2>
+                            <button type="button" class="appt-modal-close" data-appt-close aria-label="@L["Close"]">✕</button>
+                        </div>
+                        <div class="appt-modal-body" id="apptModalBody">
+                            <p class="appt-modal-status">@L["Loading…"]</p>
+                        </div>
+                    </dialog>
+                }
 
                 <div class="detail-section">
                     <h3>@L["Location"]</h3>
@@ -424,39 +449,8 @@
                 });
         })();
 
-        // Lazily load the "book a viewing" panel (open slots come from our DB). Wire up slot
-        // selection after injecting, since the partial's markup arrives after this script runs.
-        (function () {
-            var box = document.getElementById('appointmentBooking');
-            if (!box) return;
-            var id = encodeURIComponent(box.getAttribute('data-listing-id'));
-            var lang = document.documentElement.lang;
-            fetch('/' + lang + '/Appointments/Slots?listingId=' + id)
-                .then(function (r) { return r.status === 200 ? r.text() : null; })
-                .then(function (html) {
-                    if (!html) return;
-                    box.innerHTML = html;
-                    box.hidden = false;
-                    wireSlots(box);
-                })
-                .catch(function () { /* leave the panel hidden on failure */ });
-
-            function wireSlots(root) {
-                var form = root.querySelector('#apptForm');
-                if (!form) return;
-                var hidden = form.querySelector('#apptStart');
-                var submit = form.querySelector('#apptSubmit');
-                form.querySelectorAll('.appt-slot').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        form.querySelectorAll('.appt-slot').forEach(function (b) { b.classList.remove('is-selected'); });
-                        btn.classList.add('is-selected');
-                        hidden.value = btn.getAttribute('data-start');
-                        if (submit) submit.disabled = false;
-                    });
-                });
-            }
-        })();
     </script>
+    <script src="~/js/appointment-modal.js"></script>
     @if (listing.Latitude is not null && listing.Longitude is not null)
     {
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
