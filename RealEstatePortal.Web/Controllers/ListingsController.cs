@@ -48,34 +48,53 @@ public class ListingsController : Controller
         _localizer = localizer;
     }
 
+    // The single search surface. `filter` binds the structured selects; `q` is the free-text
+    // sentence from the same search box. When a sentence is present it's parsed into a filter and
+    // the explicit selects are layered on top, so one box does both plain and structured search.
     [HttpGet]
-    public async Task<IActionResult> Index([FromQuery] GetPublicListingsQuery filter)
+    public async Task<IActionResult> Index([FromQuery] GetPublicListingsQuery filter, string? q)
     {
-        var listings = await _sender.Send(filter);
+        var vm = new ListingBrowseViewModel { Filter = filter };
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            var parsed = await _sender.Send(new ParseNaturalSearchQuery(q));
+            filter = MergeExplicitOverAi(parsed.Filter, filter);
+            vm.Filter = filter;
+            vm.AiSearchQuery = q.Trim();
+            vm.AiUnmatched = parsed.UnmatchedCriteria;
+            vm.AiApplied = parsed.AiApplied;
+        }
 
         // Map pins are loaded lazily by viewport via the MapPoints endpoint (see the view).
-        return View(new ListingBrowseViewModel { Listings = listings, Filter = filter });
+        vm.Listings = await _sender.Send(filter);
+        return View(vm);
     }
 
-    // Natural-language search: turn the sentence into a filter, then render the normal browse
-    // page with it. Filters land in the same form the user can then tweak by hand.
-    [HttpGet]
-    public async Task<IActionResult> Search(string? q)
+    // Start from what the sentence implied, then let any select the visitor actually set win —
+    // an unset select stays null and keeps the AI value. Sort/paging always come from the request.
+    private static GetPublicListingsQuery MergeExplicitOverAi(
+        GetPublicListingsQuery ai, GetPublicListingsQuery manual)
     {
-        if (string.IsNullOrWhiteSpace(q))
-            return RedirectToAction(nameof(Index));
-
-        var result = await _sender.Send(new ParseNaturalSearchQuery(q));
-        var listings = await _sender.Send(result.Filter);
-
-        return View(nameof(Index), new ListingBrowseViewModel
-        {
-            Listings = listings,
-            Filter = result.Filter,
-            AiSearchQuery = q.Trim(),
-            AiUnmatched = result.UnmatchedCriteria,
-            AiApplied = result.AiApplied
-        });
+        ai.Keyword = string.IsNullOrWhiteSpace(manual.Keyword) ? ai.Keyword : manual.Keyword;
+        ai.ListingType = manual.ListingType ?? ai.ListingType;
+        ai.PropertyType = manual.PropertyType ?? ai.PropertyType;
+        ai.MinPrice = manual.MinPrice ?? ai.MinPrice;
+        ai.MaxPrice = manual.MaxPrice ?? ai.MaxPrice;
+        ai.MinBedrooms = manual.MinBedrooms ?? ai.MinBedrooms;
+        ai.Heating = manual.Heating ?? ai.Heating;
+        ai.Internet = manual.Internet ?? ai.Internet;
+        ai.Furnished = manual.Furnished ?? ai.Furnished;
+        ai.Parking = manual.Parking ?? ai.Parking;
+        ai.Balcony = manual.Balcony ?? ai.Balcony;
+        ai.MaxDues = manual.MaxDues ?? ai.MaxDues;
+        ai.CenterLat = manual.CenterLat ?? ai.CenterLat;
+        ai.CenterLng = manual.CenterLng ?? ai.CenterLng;
+        ai.RadiusKm = manual.RadiusKm ?? ai.RadiusKm;
+        ai.Sort = manual.Sort;
+        ai.PageNumber = manual.PageNumber;
+        ai.PageSize = manual.PageSize;
+        return ai;
     }
 
     // Returns map pins for the current viewport; called by the browse map as the user pans/zooms.

@@ -25,15 +25,6 @@
         <h1>@Html.Raw(L["Find the place that {0} like yours.", $"<em>{L["feels"].Value}</em>"])</h1>
         <p class="lead">@L["Verified listings from local agents — filter by area, type, and price to find your next home."]</p>
 
-        @* Natural-language search: one sentence instead of the filter grid. It resolves to the same
-           filters below, which the visitor can then fine-tune by hand. *@
-        <form asp-action="Search" method="get" class="ai-search rise d1">
-            <span class="ai-search-badge">@L["AI"]</span>
-            <input name="q" value="@Model.AiSearchQuery" class="ai-search-input"
-                   placeholder="@L["Describe your ideal home — e.g. Kadıköy’de balkonlu 3+1"]" />
-            <button type="submit" class="btn btn-primary btn-sm">@L["Search"]</button>
-        </form>
-
         @if (!string.IsNullOrEmpty(Model.AiSearchQuery))
         {
             <div class="ai-search-note">
@@ -55,9 +46,13 @@
         <div class="console-wrap rise d1">
             <form asp-action="Index" method="get">
                 <div class="console">
-                    <div class="field">
-                        <label>@L["Location"]</label>
-                        <input name="Keyword" value="@Model.Filter.Keyword" placeholder="@L["Neighbourhood or address"]" />
+                    @* The main field understands plain sentences: whatever is typed here is run
+                       through the natural-language parser, and the selects below refine the result.
+                       Named "q" so the Index action routes it to that parser. *@
+                    <div class="field field-search">
+                        <label>@L["Search"] <span class="ai-hint">@L["AI"]</span></label>
+                        <input name="q" value="@(Model.AiSearchQuery ?? Model.Filter.Keyword)"
+                               placeholder="@L["Describe your ideal home — e.g. Kadıköy’de balkonlu 3+1"]" />
                     </div>
                     <div class="field">
                         <label>@L["Type"]</label>

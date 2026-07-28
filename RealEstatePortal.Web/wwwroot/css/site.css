@@ -1805,44 +1805,24 @@ textarea.form-control {
     }
 
 /* ===== natural-language (AI) search ===== */
-.ai-search {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    max-width: 720px;
-    margin: 1.1rem 0 .2rem;
-    background: rgba(255,255,255,.12);
-    border: 1px solid rgba(255,255,255,.28);
-    border-radius: 999px;
-    padding: .35rem .35rem .35rem .9rem
-}
-
-.ai-search-badge {
-    flex: 0 0 auto;
-    font-size: .68rem;
+/* The main search field understands plain sentences; a small badge on its label hints at that. */
+.ai-hint {
+    font-size: .6rem;
     font-weight: 700;
     letter-spacing: .04em;
     text-transform: uppercase;
     color: var(--brass, #c9a86a);
-    background: rgba(0,0,0,.18);
-    padding: .2rem .5rem;
-    border-radius: 999px
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: .04rem .34rem;
+    margin-left: .35rem;
+    vertical-align: middle
 }
 
-.ai-search-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    border: none;
-    background: transparent;
-    color: #fff;
-    font-size: .98rem;
-    padding: .45rem .2rem;
-    outline: none
+/* Let the sentence field breathe — it's the primary input now. */
+.console .field-search {
+    flex: 1 1 240px
 }
-
-    .ai-search-input::placeholder {
-        color: rgba(255,255,255,.6)
-    }
 
 .ai-search-note {
     max-width: 720px;
