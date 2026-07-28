@@ -2,6 +2,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using RealEstatePortal.Application.Appointments.EventHandlers;
 using RealEstatePortal.Application.Common.Behaviours;
 
 namespace RealEstatePortal.Application;
@@ -13,6 +14,9 @@ public static class DependencyInjection
         var assembly = Assembly.GetExecutingAssembly();
 
         services.AddValidatorsFromAssembly(assembly);
+
+        // Shared composer for the appointment event handlers.
+        services.AddScoped<AppointmentNotifier>();
 
         services.AddMediatR(cfg =>
         {

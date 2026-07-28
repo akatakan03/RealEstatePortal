@@ -1267,6 +1267,39 @@
   <data name="Cancel request" xml:space="preserve">
     <value>Talebi iptal et</value>
   </data>
+  <data name="New viewing request for {0}" xml:space="preserve">
+    <value>{0} için yeni randevu talebi</value>
+  </data>
+  <data name="A customer requested a viewing of {0} for {1}. Open your viewing requests to approve, decline, or suggest another time." xml:space="preserve">
+    <value>Bir müşteri {1} için {0} ilanını görmek üzere randevu istedi. Onaylamak, reddetmek veya başka bir saat önermek için randevu taleplerini açın.</value>
+  </data>
+  <data name="Your viewing for {0} is confirmed" xml:space="preserve">
+    <value>{0} için randevun onaylandı</value>
+  </data>
+  <data name="Your viewing of {0} is confirmed for {1}." xml:space="preserve">
+    <value>{0} için randevun {1} olarak onaylandı.</value>
+  </data>
+  <data name="Your viewing request for {0} was declined" xml:space="preserve">
+    <value>{0} için randevu talebin reddedildi</value>
+  </data>
+  <data name="Your viewing request for {0} ({1}) was declined. You can book another time from the listing." xml:space="preserve">
+    <value>{0} için ({1}) randevu talebin reddedildi. İlan üzerinden başka bir saat seçebilirsin.</value>
+  </data>
+  <data name="A new time was proposed for {0}" xml:space="preserve">
+    <value>{0} için yeni bir saat önerildi</value>
+  </data>
+  <data name="The agent proposed a new time for {0}: {1}. Accept or decline it under My viewings." xml:space="preserve">
+    <value>Danışman {0} için yeni bir saat önerdi: {1}. Randevularım bölümünden kabul veya ret edebilirsin.</value>
+  </data>
+  <data name="The customer accepted your proposed time for {0}: {1}. The viewing is confirmed." xml:space="preserve">
+    <value>Müşteri {0} için önerdiğin saati kabul etti: {1}. Randevu onaylandı.</value>
+  </data>
+  <data name="The viewing for {0} was cancelled" xml:space="preserve">
+    <value>{0} için randevu iptal edildi</value>
+  </data>
+  <data name="The viewing of {0} on {1} was cancelled." xml:space="preserve">
+    <value>{1} tarihli {0} randevusu iptal edildi.</value>
+  </data>
   <data name="Bold" xml:space="preserve">
     <value>Kalın</value>
   </data>

@@ -11,6 +11,11 @@
         bumpBadge();
     });
 
+    // A viewing appointment changed state (request, approval, decline, proposal, cancellation).
+    connection.on("appointmentUpdate", function (data) {
+        showAppointmentToast(data);
+    });
+
     connection.start().catch(function (err) { console.error("SignalR:", err); });
 
     function bumpBadge() {
@@ -46,6 +51,30 @@
             '<div class="toast-title">New inquiry</div>' +
             '<div class="toast-body"><strong>' + escapeHtml(data.fromName) +
             '</strong> asked about “' + escapeHtml(data.listingTitle) + '”</div>';
+        wrap.appendChild(toast);
+
+        setTimeout(function () { toast.classList.add("show"); }, 20);
+        setTimeout(function () {
+            toast.classList.remove("show");
+            setTimeout(function () { toast.remove(); }, 300);
+        }, 6000);
+    }
+
+    // The appointment headline is already localized server-side, so it's shown as-is (escaped).
+    function showAppointmentToast(data) {
+        var wrap = document.getElementById("toastWrap");
+        if (!wrap) {
+            wrap = document.createElement("div");
+            wrap.id = "toastWrap";
+            wrap.className = "toast-wrap";
+            document.body.appendChild(wrap);
+        }
+        var toast = document.createElement("a");
+        toast.className = "toast";
+        toast.href = data.url || "/Appointments";
+        toast.innerHTML =
+            '<div class="toast-title">📅</div>' +
+            '<div class="toast-body">' + escapeHtml(data.headline) + '</div>';
         wrap.appendChild(toast);
 
         setTimeout(function () { toast.classList.add("show"); }, 20);

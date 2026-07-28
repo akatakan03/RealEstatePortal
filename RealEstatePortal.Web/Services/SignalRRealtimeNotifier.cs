@@ -20,4 +20,16 @@ public class SignalRRealtimeNotifier : IRealtimeNotifier
             url = "/Inquiries"
         }, cancellationToken);
     }
+
+    public async Task NotifyAppointmentAsync(
+        string userId, string listingTitle, string headline, string url,
+        CancellationToken cancellationToken = default)
+    {
+        await _hub.Clients.User(userId).SendAsync("appointmentUpdate", new
+        {
+            listingTitle,
+            headline,
+            url
+        }, cancellationToken);
+    }
 }
