@@ -1195,6 +1195,78 @@
   <data name="You can't book a viewing on your own listing." xml:space="preserve">
     <value>Kendi ilanına randevu alamazsın.</value>
   </data>
+  <data name="Awaiting response" xml:space="preserve">
+    <value>Yanıt bekliyor</value>
+  </data>
+  <data name="Confirmed" xml:space="preserve">
+    <value>Onaylandı</value>
+  </data>
+  <data name="Declined" xml:space="preserve">
+    <value>Reddedildi</value>
+  </data>
+  <data name="New time proposed" xml:space="preserve">
+    <value>Yeni saat önerildi</value>
+  </data>
+  <data name="Cancelled by customer" xml:space="preserve">
+    <value>Müşteri iptal etti</value>
+  </data>
+  <data name="Cancelled by agent" xml:space="preserve">
+    <value>Danışman iptal etti</value>
+  </data>
+  <data name="Completed" xml:space="preserve">
+    <value>Tamamlandı</value>
+  </data>
+  <data name="Viewing requests" xml:space="preserve">
+    <value>Randevu talepleri</value>
+  </data>
+  <data name="Approve, decline, or offer a different time for each viewing request." xml:space="preserve">
+    <value>Her randevu talebini onayla, reddet veya farklı bir saat öner.</value>
+  </data>
+  <data name="No requests yet" xml:space="preserve">
+    <value>Henüz talep yok</value>
+  </data>
+  <data name="When a customer books a viewing, it will appear here." xml:space="preserve">
+    <value>Bir müşteri randevu aldığında burada görünecek.</value>
+  </data>
+  <data name="You proposed" xml:space="preserve">
+    <value>Önerdiğin saat</value>
+  </data>
+  <data name="waiting for the customer" xml:space="preserve">
+    <value>müşteri bekleniyor</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>Onayla</value>
+  </data>
+  <data name="Decline" xml:space="preserve">
+    <value>Reddet</value>
+  </data>
+  <data name="Propose this time" xml:space="preserve">
+    <value>Bu saati öner</value>
+  </data>
+  <data name="Cancel appointment" xml:space="preserve">
+    <value>Randevuyu iptal et</value>
+  </data>
+  <data name="My viewings" xml:space="preserve">
+    <value>Randevularım</value>
+  </data>
+  <data name="Your viewing requests and their status." xml:space="preserve">
+    <value>Randevu taleplerin ve durumları.</value>
+  </data>
+  <data name="No viewings yet" xml:space="preserve">
+    <value>Henüz randevu yok</value>
+  </data>
+  <data name="Book a viewing from any listing and it will show up here." xml:space="preserve">
+    <value>Herhangi bir ilandan randevu al, burada görünsün.</value>
+  </data>
+  <data name="The agent proposed a new time:" xml:space="preserve">
+    <value>Danışman yeni bir saat önerdi:</value>
+  </data>
+  <data name="Accept new time" xml:space="preserve">
+    <value>Yeni saati kabul et</value>
+  </data>
+  <data name="Cancel request" xml:space="preserve">
+    <value>Talebi iptal et</value>
+  </data>
   <data name="Bold" xml:space="preserve">
     <value>Kalın</value>
   </data>

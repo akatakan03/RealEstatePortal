@@ -1,0 +1,105 @@
+@using System.Globalization
+@using RealEstatePortal.Application.Appointments
+@using RealEstatePortal.Domain.Enums
+@model IReadOnlyList<RealEstatePortal.Application.Appointments.Queries.AppointmentDto>
+@{
+    ViewData["Title"] = L["Viewing requests"].Value;
+    var culture = CultureInfo.CurrentCulture;
+    var offset = AppointmentPolicy.MarketOffset;
+    string When(DateTimeOffset t) =>
+        culture.TextInfo.ToTitleCase(t.ToOffset(offset).ToString("d MMMM, dddd HH:mm", culture));
+    var minProposable = DateTimeOffset.UtcNow.ToOffset(offset).ToString("yyyy-MM-ddTHH:mm");
+}
+
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell">
+            <span class="eyebrow">@L["Agent dashboard"]</span>
+            <h1 class="page-title" style="margin-bottom:.4rem;">@L["Viewing requests"]</h1>
+            <p class="lead" style="margin-bottom:1.5rem;">@L["Approve, decline, or offer a different time for each viewing request."]</p>
+
+            @if (TempData["AppointmentError"] is string err)
+            {
+                <div class="alert alert-danger">@L[err]</div>
+            }
+
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <span class="value">@L["No requests yet"]</span>
+                    @L["When a customer books a viewing, it will appear here."]
+                </div>
+            }
+            else
+            {
+                <div class="appt-list">
+                    @foreach (var a in Model)
+                    {
+                        <div class="appt-item @(a.IsActive ? "" : "is-closed")">
+                            <div class="appt-item-head">
+                                <a asp-controller="Listings" asp-action="Details" asp-route-id="@a.ListingId" asp-route-slug="@a.ListingSlug" class="appt-listing">@a.ListingTitle</a>
+                                <partial name="_StatusBadge" model="a.Status" />
+                            </div>
+
+                            <div class="appt-meta">
+                                <div>🕑 <strong>@When(a.Start)</strong></div>
+                                <div>👤 @a.OtherParty</div>
+                                @if (a.Status == AppointmentStatus.CounterProposed && a.ProposedStart is not null)
+                                {
+                                    <div>↪ @L["You proposed"]: <strong>@When(a.ProposedStart.Value)</strong> — @L["waiting for the customer"]</div>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(a.CustomerNote))
+                            {
+                                <p class="appt-note-text">“@a.CustomerNote”</p>
+                            }
+
+                            @if (a.Status == AppointmentStatus.Pending)
+                            {
+                                <div class="appt-actions">
+                                    <form asp-action="Respond" method="post" class="appt-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="appointmentId" value="@a.Id" />
+                                        <input type="hidden" name="action" value="approve" />
+                                        <button type="submit" class="btn btn-primary btn-sm">@L["Approve"]</button>
+                                    </form>
+                                    <form asp-action="Respond" method="post" class="appt-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="appointmentId" value="@a.Id" />
+                                        <input type="hidden" name="action" value="decline" />
+                                        <button type="submit" class="btn btn-ghost btn-sm">@L["Decline"]</button>
+                                    </form>
+
+                                    <form asp-action="Respond" method="post" class="appt-propose">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="appointmentId" value="@a.Id" />
+                                        <input type="hidden" name="action" value="propose" />
+                                        <input type="datetime-local" name="proposedStart" class="form-control"
+                                               step="3600" min="@minProposable" required />
+                                        <button type="submit" class="btn btn-ghost btn-sm">@L["Propose this time"]</button>
+                                    </form>
+                                </div>
+                            }
+                            else if (a.Status is AppointmentStatus.Approved or AppointmentStatus.CounterProposed)
+                            {
+                                <div class="appt-actions">
+                                    <form asp-action="Cancel" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="appointmentId" value="@a.Id" />
+                                        <input type="hidden" name="returnTo" value="agent" />
+                                        <button type="submit" class="btn btn-ghost btn-sm">@L["Cancel appointment"]</button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            <div style="margin-top:1.5rem;">
+                <a asp-controller="Dashboard" asp-action="Index" class="btn btn-ghost">@L["Back to dashboard"]</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,91 @@
+@using System.Globalization
+@using RealEstatePortal.Application.Appointments
+@using RealEstatePortal.Domain.Enums
+@model IReadOnlyList<RealEstatePortal.Application.Appointments.Queries.AppointmentDto>
+@{
+    ViewData["Title"] = L["My viewings"].Value;
+    var culture = CultureInfo.CurrentCulture;
+    var offset = AppointmentPolicy.MarketOffset;
+    string When(DateTimeOffset t) =>
+        culture.TextInfo.ToTitleCase(t.ToOffset(offset).ToString("d MMMM, dddd HH:mm", culture));
+}
+
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell">
+            <h1 class="page-title" style="margin-bottom:.4rem;">@L["My viewings"]</h1>
+            <p class="lead" style="margin-bottom:1.5rem;">@L["Your viewing requests and their status."]</p>
+
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <span class="value">@L["No viewings yet"]</span>
+                    @L["Book a viewing from any listing and it will show up here."]
+                </div>
+            }
+            else
+            {
+                <div class="appt-list">
+                    @foreach (var a in Model)
+                    {
+                        <div class="appt-item @(a.IsActive ? "" : "is-closed")">
+                            <div class="appt-item-head">
+                                <a asp-controller="Listings" asp-action="Details" asp-route-id="@a.ListingId" asp-route-slug="@a.ListingSlug" class="appt-listing">@a.ListingTitle</a>
+                                <partial name="_StatusBadge" model="a.Status" />
+                            </div>
+
+                            <div class="appt-meta">
+                                <div>🕑 <strong>@When(a.Start)</strong></div>
+                                <div>🏢 @a.OtherParty</div>
+                            </div>
+
+                            @if (a.Status == AppointmentStatus.CounterProposed && a.ProposedStart is not null)
+                            {
+                                <div class="appt-proposal">
+                                    <p>@L["The agent proposed a new time:"] <strong>@When(a.ProposedStart.Value)</strong></p>
+                                    @if (!string.IsNullOrWhiteSpace(a.AgentNote))
+                                    {
+                                        <p class="appt-note-text">“@a.AgentNote”</p>
+                                    }
+                                    <div class="appt-actions">
+                                        <form asp-action="RespondProposal" method="post" class="appt-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="appointmentId" value="@a.Id" />
+                                            <input type="hidden" name="accept" value="true" />
+                                            <button type="submit" class="btn btn-primary btn-sm">@L["Accept new time"]</button>
+                                        </form>
+                                        <form asp-action="RespondProposal" method="post" class="appt-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="appointmentId" value="@a.Id" />
+                                            <input type="hidden" name="accept" value="false" />
+                                            <button type="submit" class="btn btn-ghost btn-sm">@L["Decline"]</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                            else if (a.Status is AppointmentStatus.Pending or AppointmentStatus.Approved)
+                            {
+                                @if (a.Status == AppointmentStatus.Approved && !string.IsNullOrWhiteSpace(a.AgentNote))
+                                {
+                                    <p class="appt-note-text">“@a.AgentNote”</p>
+                                }
+                                <div class="appt-actions">
+                                    <form asp-action="Cancel" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="appointmentId" value="@a.Id" />
+                                        <input type="hidden" name="returnTo" value="customer" />
+                                        <button type="submit" class="btn btn-ghost btn-sm">@L["Cancel request"]</button>
+                                    </form>
+                                </div>
+                            }
+                            else if (a.Status == AppointmentStatus.Declined && !string.IsNullOrWhiteSpace(a.AgentNote))
+                            {
+                                <p class="appt-note-text">“@a.AgentNote”</p>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

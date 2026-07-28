@@ -1,0 +1,16 @@
+@using RealEstatePortal.Domain.Enums
+@model AppointmentStatus
+@{
+    var (label, css) = Model switch
+    {
+        AppointmentStatus.Pending => (L["Awaiting response"].Value, "is-pending"),
+        AppointmentStatus.Approved => (L["Confirmed"].Value, "is-approved"),
+        AppointmentStatus.Declined => (L["Declined"].Value, "is-declined"),
+        AppointmentStatus.CounterProposed => (L["New time proposed"].Value, "is-proposed"),
+        AppointmentStatus.CancelledByCustomer => (L["Cancelled by customer"].Value, "is-cancelled"),
+        AppointmentStatus.CancelledByAgent => (L["Cancelled by agent"].Value, "is-cancelled"),
+        AppointmentStatus.Completed => (L["Completed"].Value, "is-completed"),
+        _ => (Model.ToString(), "")
+    };
+}
+<span class="appt-badge @css">@label</span>

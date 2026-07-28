@@ -1746,6 +1746,98 @@ textarea.form-control {
     flex-wrap: wrap
 }
 
+/* ===== appointment lists ===== */
+.appt-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem
+}
+
+.appt-item {
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface)
+}
+
+    .appt-item.is-closed { opacity: .7 }
+
+.appt-item-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .6rem
+}
+
+.appt-listing {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--ink)
+}
+
+.appt-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem 1.4rem;
+    font-size: .92rem;
+    color: var(--muted)
+}
+
+    .appt-meta strong { color: var(--ink) }
+
+.appt-note-text {
+    margin: .6rem 0 0;
+    font-style: italic;
+    color: #33413C
+}
+
+.appt-proposal {
+    margin-top: .7rem;
+    padding: .8rem 1rem;
+    background: var(--brass-soft);
+    border-radius: 10px
+}
+
+    .appt-proposal p { margin: 0 0 .5rem }
+
+.appt-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+    margin-top: .8rem
+}
+
+.appt-inline { display: inline }
+
+.appt-propose {
+    display: flex;
+    gap: .4rem;
+    align-items: center;
+    flex-wrap: wrap
+}
+
+    .appt-propose .form-control { width: auto }
+
+.appt-badge {
+    font-size: .78rem;
+    font-weight: 600;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: var(--line);
+    color: var(--ink)
+}
+
+    .appt-badge.is-pending { background: #F4E7CC; color: #7A5B1E }
+    .appt-badge.is-approved { background: #D8EAD8; color: #1F5A2E }
+    .appt-badge.is-proposed { background: #E3DAF0; color: #4B2E83 }
+    .appt-badge.is-declined,
+    .appt-badge.is-cancelled { background: #F0DAD7; color: #8A2E22 }
+    .appt-badge.is-completed { background: var(--brass-soft); color: var(--brass-dk) }
+
 /* ===== book a viewing ===== */
 .appt-days {
     display: flex;

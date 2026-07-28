@@ -72,6 +72,7 @@
                                 <span class="menu-label">@L["Account"]</span>
                                 <a role="menuitem" asp-controller="Favorites" asp-action="Mine">@L["Saved"]</a>
                                 <a role="menuitem" asp-controller="SavedSearches" asp-action="Mine">@L["Alerts"]</a>
+                                <a role="menuitem" asp-controller="Appointments" asp-action="Mine">@L["My viewings"]</a>
                                 <a role="menuitem" asp-controller="Profile" asp-action="Index">@L["Profile"]</a>
                             </div>
                             @if (User.IsInRole("Agent"))
@@ -80,6 +81,7 @@
                                 <div class="menu-section">
                                     <span class="menu-label">@L["Workspace"]</span>
                                     <a role="menuitem" asp-controller="Dashboard" asp-action="Index">@L["Dashboard"]</a>
+                                    <a role="menuitem" asp-controller="Appointments" asp-action="Index">@L["Viewing requests"]</a>
                                     <a role="menuitem" asp-controller="Inquiries" asp-action="Index" class="menu-item-badge">
                                         @* "Inquiry inbox", not "Inquiries": resource names are
                                            matched without regard to case, so this would collide

@@ -2,10 +2,16 @@ using System.Globalization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RealEstatePortal.Application.Appointments;
+using RealEstatePortal.Application.Appointments.Commands.CancelAppointment;
 using RealEstatePortal.Application.Appointments.Commands.RequestAppointment;
+using RealEstatePortal.Application.Appointments.Commands.RespondToAppointment;
+using RealEstatePortal.Application.Appointments.Commands.RespondToProposal;
 using RealEstatePortal.Application.Appointments.Commands.SetAgentAvailability;
+using RealEstatePortal.Application.Appointments.Queries.GetAgentAppointments;
 using RealEstatePortal.Application.Appointments.Queries.GetAgentAvailability;
 using RealEstatePortal.Application.Appointments.Queries.GetAvailableSlots;
+using RealEstatePortal.Application.Appointments.Queries.GetCustomerAppointments;
 using RealEstatePortal.Application.Common.Exceptions;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Web.Models.Appointments;
@@ -91,5 +97,79 @@ public class AppointmentsController : Controller
         }
 
         return RedirectToAction("Details", "Listings", new { id = listingId });
+    }
+
+    // ----- Agent: manage requests --------------------------------------------------------------
+
+    [HttpGet]
+    [Authorize(Roles = Roles.Agent)]
+    public async Task<IActionResult> Index()
+    {
+        var appointments = await _sender.Send(new GetAgentAppointmentsQuery());
+        return View(appointments);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = Roles.Agent)]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Respond(int appointmentId, string action, string? proposedStart, string? note)
+    {
+        var act = action switch
+        {
+            "approve" => AppointmentAction.Approve,
+            "decline" => AppointmentAction.Decline,
+            "propose" => AppointmentAction.Propose,
+            _ => (AppointmentAction?)null
+        };
+
+        if (act is null)
+            return RedirectToAction(nameof(Index));
+
+        DateTimeOffset? proposed = null;
+        if (act == AppointmentAction.Propose)
+        {
+            // A datetime-local field carries wall-clock time with no zone; pin it to market time.
+            if (DateTime.TryParse(proposedStart, CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out var local))
+                proposed = new DateTimeOffset(local, AppointmentPolicy.MarketOffset);
+        }
+
+        try
+        {
+            await _sender.Send(new RespondToAppointmentCommand(appointmentId, act.Value, proposed, note));
+        }
+        catch (ValidationException ex)
+        {
+            TempData["AppointmentError"] = ex.Errors.SelectMany(e => e.Value).FirstOrDefault()
+                ?? "Something went wrong. Please try again.";
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    // ----- Customer: my viewings ---------------------------------------------------------------
+
+    [HttpGet]
+    public async Task<IActionResult> Mine()
+    {
+        var appointments = await _sender.Send(new GetCustomerAppointmentsQuery());
+        return View(appointments);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RespondProposal(int appointmentId, bool accept)
+    {
+        await _sender.Send(new RespondToProposalCommand(appointmentId, accept));
+        return RedirectToAction(nameof(Mine));
+    }
+
+    // Cancel works for either party; the redirect goes back to whichever list they came from.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Cancel(int appointmentId, string? returnTo)
+    {
+        await _sender.Send(new CancelAppointmentCommand(appointmentId));
+        return RedirectToAction(returnTo == "agent" ? nameof(Index) : nameof(Mine));
     }
 }
