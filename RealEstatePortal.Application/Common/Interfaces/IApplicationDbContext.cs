@@ -13,6 +13,8 @@ public interface IApplicationDbContext
     DbSet<ListingView> ListingViews { get; }
     DbSet<ListingViewDaily> ListingViewDailies { get; }
     DbSet<ListingPriceChange> ListingPriceChanges { get; }
+    DbSet<Appointment> Appointments { get; }
+    DbSet<AgentAvailability> AgentAvailabilities { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

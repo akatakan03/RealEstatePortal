@@ -24,6 +24,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<ListingView> ListingViews => Set<ListingView>();
     public DbSet<ListingViewDaily> ListingViewDailies => Set<ListingViewDaily>();
     public DbSet<ListingPriceChange> ListingPriceChanges => Set<ListingPriceChange>();
+    public DbSet<Appointment> Appointments => Set<Appointment>();
+    public DbSet<AgentAvailability> AgentAvailabilities => Set<AgentAvailability>();
 
     // Delivery plumbing, not part of the domain — and deliberately absent from
     // IApplicationDbContext so no handler can reach it.
