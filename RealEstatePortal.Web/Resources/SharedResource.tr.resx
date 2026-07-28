@@ -1132,6 +1132,21 @@
   <data name="Nearby amenities couldn’t be loaded right now. Refresh to try again." xml:space="preserve">
     <value>Çevredeki olanaklar şu anda yüklenemedi. Yenileyip tekrar deneyin.</value>
   </data>
+  <data name="You have an unsaved draft" xml:space="preserve">
+    <value>Kaydedilmemiş bir taslağın var</value>
+  </data>
+  <data name="Restore draft" xml:space="preserve">
+    <value>Geri yükle</value>
+  </data>
+  <data name="Discard" xml:space="preserve">
+    <value>Sil</value>
+  </data>
+  <data name="Draft saved" xml:space="preserve">
+    <value>Taslak kaydedildi</value>
+  </data>
+  <data name="Photos aren’t saved in the draft — you’ll need to add them again." xml:space="preserve">
+    <value>Fotoğraflar taslakta saklanmaz — bunları yeniden eklemen gerekir.</value>
+  </data>
   <data name="Bold" xml:space="preserve">
     <value>Kalın</value>
   </data>

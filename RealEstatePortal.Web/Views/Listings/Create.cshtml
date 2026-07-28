@@ -16,7 +16,7 @@
             <h1 class="page-title" style="margin-bottom:1.5rem;">@L["Create a listing"]</h1>
 
             <div class="form-card">
-                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <form asp-action="Create" method="post" enctype="multipart/form-data" id="createListingForm">
                     <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:1rem;"></div>
 
                     <div class="mb-field">
@@ -153,6 +153,7 @@
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">@L["Create listing"]</button>
                         <a asp-controller="Dashboard" asp-action="Index" class="btn btn-ghost">@L["Cancel"]</a>
+                        <span id="draftStatus" class="draft-status" aria-live="polite"></span>
                     </div>
                 </form>
             </div>
@@ -174,6 +175,21 @@
             bullets = L["Bullet list"].Value,
             numbers = L["Numbered list"].Value
         })));
+    </script>
+    <script src="~/js/form-autosave.js"></script>
+    <script>
+        // Runs after the rich editor so a restore can reach its editable area.
+        initFormAutosave('createListingForm', {
+            formKey: 'listing-create',
+            statusId: 'draftStatus',
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+                title = L["You have an unsaved draft"].Value,
+                restore = L["Restore draft"].Value,
+                discard = L["Discard"].Value,
+                saved = L["Draft saved"].Value,
+                photosNote = L["Photos aren’t saved in the draft — you’ll need to add them again."].Value
+            }))
+        });
     </script>
     <script src="~/js/photo-picker.js"></script>
     <script>

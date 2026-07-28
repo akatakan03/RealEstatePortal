@@ -1740,6 +1740,44 @@ textarea.form-control {
         border-top: none
     }
 
+/* ===== autosave / draft recovery ===== */
+.draft-status {
+    font-size: .82rem;
+    color: var(--muted);
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity .2s ease
+}
+
+    .draft-status.is-on { opacity: 1 }
+
+.draft-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.4rem;
+    padding: .75rem 1rem;
+    background: var(--brass-soft);
+    border: 1px solid var(--brass);
+    border-radius: 12px;
+    font-size: .92rem;
+    color: var(--ink)
+}
+
+    .draft-banner-note {
+        font-size: .8rem;
+        color: var(--muted);
+        margin-top: .2rem
+    }
+
+    .draft-banner-actions {
+        display: flex;
+        gap: .5rem;
+        flex-shrink: 0
+    }
+
 /* ===== small shared patterns =====
    Each of these was repeated inline across several views. They are here because they are
    patterns, not because inline styles are forbidden — one-off spacing is still fine inline,
