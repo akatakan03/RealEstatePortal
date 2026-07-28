@@ -15,6 +15,8 @@ using Xunit;
 
 namespace RealEstatePortal.Application.UnitTests.Listings;
 
+// The neighborhood card loads in two independent halves — a fast price comparison (database only)
+// and a slow amenity lookup (external POI service). Each has its own handler and its own tests.
 public class GetNeighborhoodInsightsQueryTests
 {
     private static Listing Make(
@@ -47,13 +49,14 @@ public class GetNeighborhoodInsightsQueryTests
         return listing;
     }
 
-    private static GetNeighborhoodInsightsQueryHandler Build(
-        List<Listing> listings,
-        IReadOnlyList<int>? nearbyIds = null,
-        IReadOnlyList<NeighborhoodPoi>? pois = null)
-    {
-        var listingsSet = listings.BuildMockDbSet();
+    // ----- Price half -------------------------------------------------------------------------
 
+    private static GetNeighborhoodPriceQueryHandler BuildPrice(
+        List<Listing> listings, IReadOnlyList<int>? nearbyIds = null)
+    {
+        // Build the mock DbSet into a local first: BuildMockDbSet configures its own substitute,
+        // and doing that inside a .Returns(...) argument clobbers NSubstitute's last-call context.
+        var listingsSet = listings.BuildMockDbSet();
         var ctx = Substitute.For<IApplicationDbContext>();
         ctx.Listings.Returns(listingsSet);
 
@@ -62,54 +65,47 @@ public class GetNeighborhoodInsightsQueryTests
                 Arg.Any<double>(), Arg.Any<double>(), Arg.Any<double>(), Arg.Any<CancellationToken>())
             .Returns(nearbyIds ?? listings.Select(l => l.Id).ToList());
 
-        var poi = Substitute.For<INeighborhoodPoiService>();
-        poi.GetNearbyAsync(
-                Arg.Any<double>(), Arg.Any<double>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
-            .Returns(pois ?? Array.Empty<NeighborhoodPoi>());
-
-        return new GetNeighborhoodInsightsQueryHandler(ctx, spatial, poi);
+        return new GetNeighborhoodPriceQueryHandler(ctx, spatial);
     }
 
     [Fact]
-    public async Task ReturnsNull_WhenListingHasNoLocation()
+    public async Task Price_ReturnsNull_WhenListingHasNoLocation()
     {
-        var handler = Build(new List<Listing> { Make(1, located: false) });
+        var handler = BuildPrice(new List<Listing> { Make(1, located: false) });
 
-        var result = await handler.Handle(new GetNeighborhoodInsightsQuery(1), CancellationToken.None);
+        var result = await handler.Handle(new GetNeighborhoodPriceQuery(1), CancellationToken.None);
 
         result.ShouldBeNull();
     }
 
     [Fact]
-    public async Task ReturnsNull_WhenListingNotActive()
+    public async Task Price_ReturnsNull_WhenListingNotActive()
     {
-        var handler = Build(new List<Listing> { Make(1, status: ListingStatus.Draft) });
+        var handler = BuildPrice(new List<Listing> { Make(1, status: ListingStatus.Draft) });
 
-        var result = await handler.Handle(new GetNeighborhoodInsightsQuery(1), CancellationToken.None);
+        var result = await handler.Handle(new GetNeighborhoodPriceQuery(1), CancellationToken.None);
 
         result.ShouldBeNull();
     }
 
     [Fact]
-    public async Task PriceComparison_IsNull_WhenTooFewComparables()
+    public async Task Price_ReturnsNull_WhenTooFewComparables()
     {
-        // Only two other listings nearby — below the minimum for a stable median.
         var listings = new List<Listing>
         {
             Make(1, price: 4_000_000m),
             Make(2, price: 1_000_000m),
             Make(3, price: 2_000_000m)
         };
-        var handler = Build(listings);
+        var handler = BuildPrice(listings);
 
-        var result = await handler.Handle(new GetNeighborhoodInsightsQuery(1), CancellationToken.None);
+        var result = await handler.Handle(new GetNeighborhoodPriceQuery(1), CancellationToken.None);
 
-        result.ShouldNotBeNull();
-        result!.PricePerSqm.ShouldBeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
-    public async Task PriceComparison_ComputesMedianAndPercentAboveArea()
+    public async Task Price_ComputesMedianAndPercentAboveArea()
     {
         // Subject: 4,000,000 / 100 m² = 40,000 ₺/m². Four comparables at 10k/20k/30k/40k per m²
         // → median 25,000. Subject is (40000-25000)/25000 = +60% versus the area median.
@@ -121,11 +117,11 @@ public class GetNeighborhoodInsightsQueryTests
             Make(4, price: 3_000_000m, area: 100m),
             Make(5, price: 4_000_000m, area: 100m)
         };
-        var handler = Build(listings);
+        var handler = BuildPrice(listings);
 
-        var result = await handler.Handle(new GetNeighborhoodInsightsQuery(1), CancellationToken.None);
+        var result = await handler.Handle(new GetNeighborhoodPriceQuery(1), CancellationToken.None);
 
-        var p = result!.PricePerSqm.ShouldNotBeNull();
+        var p = result.ShouldNotBeNull();
         p.ListingPerSqm.ShouldBe(40_000m);
         p.AreaMedianPerSqm.ShouldBe(25_000m);
         p.SampleSize.ShouldBe(4);
@@ -133,10 +129,10 @@ public class GetNeighborhoodInsightsQueryTests
     }
 
     [Fact]
-    public async Task PriceComparison_ExcludesOtherTypesAndCurrencies()
+    public async Task Price_ExcludesOtherTypesAndCurrencies()
     {
-        // Same four sale/TRY comparables, plus a Rent and a USD listing that must be ignored:
-        // the sample size stays 4, proving they were filtered out rather than mixed in.
+        // Four sale/TRY comparables, plus a Rent and a USD listing that must be ignored: the
+        // sample size stays 4, proving they were filtered out rather than mixed in.
         var listings = new List<Listing>
         {
             Make(1, price: 4_000_000m, area: 100m),
@@ -147,11 +143,38 @@ public class GetNeighborhoodInsightsQueryTests
             Make(6, type: ListingType.Rent, price: 20_000m, area: 100m),
             Make(7, currency: "USD", price: 100_000m, area: 100m)
         };
-        var handler = Build(listings);
+        var handler = BuildPrice(listings);
 
-        var result = await handler.Handle(new GetNeighborhoodInsightsQuery(1), CancellationToken.None);
+        var result = await handler.Handle(new GetNeighborhoodPriceQuery(1), CancellationToken.None);
 
-        result!.PricePerSqm!.SampleSize.ShouldBe(4);
+        result!.SampleSize.ShouldBe(4);
+    }
+
+    // ----- Amenity half -----------------------------------------------------------------------
+
+    private static GetNeighborhoodAmenitiesQueryHandler BuildAmenities(
+        List<Listing> listings, IReadOnlyList<NeighborhoodPoi>? pois = null)
+    {
+        var listingsSet = listings.BuildMockDbSet();
+        var ctx = Substitute.For<IApplicationDbContext>();
+        ctx.Listings.Returns(listingsSet);
+
+        var poi = Substitute.For<INeighborhoodPoiService>();
+        poi.GetNearbyAsync(
+                Arg.Any<double>(), Arg.Any<double>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+            .Returns(pois ?? Array.Empty<NeighborhoodPoi>());
+
+        return new GetNeighborhoodAmenitiesQueryHandler(ctx, poi);
+    }
+
+    [Fact]
+    public async Task Amenities_ReturnsNull_WhenListingHasNoLocation()
+    {
+        var handler = BuildAmenities(new List<Listing> { Make(1, located: false) });
+
+        var result = await handler.Handle(new GetNeighborhoodAmenitiesQuery(1), CancellationToken.None);
+
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -162,9 +185,9 @@ public class GetNeighborhoodInsightsQueryTests
             new("transit", 8, 120),  // saturates the transit weight → its full 30 points
             new("school", 2, 300)
         };
-        var handler = Build(new List<Listing> { Make(1) }, pois: pois);
+        var handler = BuildAmenities(new List<Listing> { Make(1) }, pois);
 
-        var result = await handler.Handle(new GetNeighborhoodInsightsQuery(1), CancellationToken.None);
+        var result = await handler.Handle(new GetNeighborhoodAmenitiesQuery(1), CancellationToken.None);
 
         result!.Amenities.Select(a => a.Category).ShouldBe(new[] { "transit", "school" });
         result.Amenities.Single(a => a.Category == "transit").NearestMeters.ShouldBe(120);
@@ -173,12 +196,14 @@ public class GetNeighborhoodInsightsQueryTests
     }
 
     [Fact]
-    public async Task Walkability_IsNull_WhenNoAmenitiesFound()
+    public async Task Amenities_WalkabilityIsNull_WhenNoAmenitiesFound()
     {
-        var handler = Build(new List<Listing> { Make(1) }, pois: Array.Empty<NeighborhoodPoi>());
+        // A located listing whose POI lookup came back empty (e.g. the provider was down).
+        var handler = BuildAmenities(new List<Listing> { Make(1) }, Array.Empty<NeighborhoodPoi>());
 
-        var result = await handler.Handle(new GetNeighborhoodInsightsQuery(1), CancellationToken.None);
+        var result = await handler.Handle(new GetNeighborhoodAmenitiesQuery(1), CancellationToken.None);
 
+        result.ShouldNotBeNull();
         result!.WalkabilityScore.ShouldBeNull();
         result.Amenities.ShouldBeEmpty();
     }

@@ -1,0 +1,28 @@
+@using RealEstatePortal.Application.Listings.Queries.GetNeighborhoodInsights
+@model PricePerSqmDto
+@{
+    var above = Model.PercentVsMedian > 1;
+    var below = Model.PercentVsMedian < -1;
+    var pct = Math.Abs(Model.PercentVsMedian).ToString("0.#");
+}
+<div class="ni-card">
+    <div class="ni-card-title">@L["Price per m²"]</div>
+    <div class="ni-price-value">@Model.ListingPerSqm.ToString("N0") @Model.Currency<span>/m²</span></div>
+    <div class="ni-price-cmp @(above ? "is-above" : below ? "is-below" : "is-par")">
+        @if (above)
+        {
+            <text>@L["{0}% above the area median", pct]</text>
+        }
+        else if (below)
+        {
+            <text>@L["{0}% below the area median", pct]</text>
+        }
+        else
+        {
+            <text>@L["In line with the area median"]</text>
+        }
+    </div>
+    <div class="ni-price-sub">
+        @L["Area median"]: @Model.AreaMedianPerSqm.ToString("N0") @Model.Currency/m² · @L["{0} nearby listings", Model.SampleSize]
+    </div>
+</div>

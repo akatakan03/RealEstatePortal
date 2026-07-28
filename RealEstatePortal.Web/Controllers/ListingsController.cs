@@ -106,20 +106,32 @@ public class ListingsController : Controller
         return Json(points);
     }
 
-    // Neighborhood decision-support card for a listing. Loaded lazily by the detail page (it makes
-    // an external POI call) and rendered as a partial so all labels stay in the resource file.
-    // Returns 204 when the listing has no location or isn't public, so the card just stays hidden.
-    [HttpGet]
-    public async Task<IActionResult> NeighborhoodInsights(int id)
-    {
-        var insights = await _sender.Send(new GetNeighborhoodInsightsQuery(id));
+    // The neighborhood card is loaded in two independent pieces so the fast, trustworthy price
+    // figure never waits on the slow external POI service. Each returns a partial (labels stay in
+    // the resource file) or 204 when there's nothing to show.
 
-        // No location (null), or nothing worth showing (no price comparison and no amenities) —
-        // either way the card stays hidden rather than rendering an empty header.
-        if (insights is null || (insights.PricePerSqm is null && insights.Amenities.Count == 0))
+    // Price comparison — pure database work, returns in milliseconds.
+    [HttpGet]
+    public async Task<IActionResult> NeighborhoodPrice(int id)
+    {
+        var price = await _sender.Send(new GetNeighborhoodPriceQuery(id));
+        if (price is null)
             return NoContent();
 
-        return PartialView("_NeighborhoodInsights", insights);
+        return PartialView("_NeighborhoodPrice", price);
+    }
+
+    // Nearby amenities + walkability — makes an external Overpass call, so it's fetched separately.
+    // 204 only when the listing has no location; a POI failure still returns 200 with an empty
+    // model, and the partial shows a soft "couldn't load" notice.
+    [HttpGet]
+    public async Task<IActionResult> NeighborhoodAmenities(int id)
+    {
+        var amenities = await _sender.Send(new GetNeighborhoodAmenitiesQuery(id));
+        if (amenities is null)
+            return NoContent();
+
+        return PartialView("_NeighborhoodAmenities", amenities);
     }
 
     // Side-by-side comparison of the listings the buyer selected. The ids come from the compare

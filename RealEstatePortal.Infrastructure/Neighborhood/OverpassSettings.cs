@@ -8,7 +8,7 @@ public class OverpassSettings
 {
     // Per-endpoint attempt budget. Kept short so a stalled instance is abandoned quickly and the
     // next one is tried, rather than blocking the whole request on one slow server.
-    public int PerEndpointTimeoutSeconds { get; set; } = 8;
+    public int PerEndpointTimeoutSeconds { get; set; } = 6;
 
     public List<string> Endpoints { get; set; } = new()
     {

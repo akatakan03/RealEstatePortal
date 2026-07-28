@@ -1,0 +1,59 @@
+@using RealEstatePortal.Application.Listings.Queries.GetNeighborhoodInsights
+@model NeighborhoodAmenitiesDto
+@{
+    // Stable category key -> (emoji, localized label). Unknown keys fall back to the raw key.
+    (string Icon, string Label) CategoryMeta(string key) => key switch
+    {
+        "transit" => ("🚌", L["Public transport"].Value),
+        "market" => ("🛒", L["Markets"].Value),
+        "health" => ("🏥", L["Healthcare"].Value),
+        "school" => ("🎓", L["Schools"].Value),
+        _ => ("📍", key)
+    };
+
+    string WalkLabel(int s) =>
+        s >= 90 ? L["Walking paradise"].Value :
+        s >= 70 ? L["Very walkable"].Value :
+        s >= 50 ? L["Somewhat walkable"].Value :
+        s >= 25 ? L["Car-dependent"].Value :
+                  L["Very car-dependent"].Value;
+
+    var poiKm = (Model.PoiRadiusMeters / 1000.0).ToString("0.#");
+}
+
+@* No amenities came back — almost always the busy public POI endpoint rather than a genuinely
+   empty area. Say so softly instead of silently dropping half the card. *@
+@if (!Model.Amenities.Any())
+{
+    <p class="ni-fail">@L["Nearby amenities couldn’t be loaded right now. Refresh to try again."]</p>
+    return;
+}
+
+@if (Model.WalkabilityScore is not null)
+{
+    var s = Model.WalkabilityScore.Value;
+    <div class="ni-card ni-walk @(s >= 70 ? "is-high" : s >= 50 ? "is-mid" : "is-low")">
+        <div class="ni-card-title">@L["Walkability"]</div>
+        <div class="ni-walk-score"><span class="ni-walk-num">@s</span><span class="ni-walk-max">/100</span></div>
+        <div class="ni-walk-label">@WalkLabel(s)</div>
+    </div>
+}
+
+<div class="ni-amenities">
+    <div class="ni-card-title">@L["Within {0} km", poiKm]</div>
+    <ul class="ni-poi-list">
+        @foreach (var a in Model.Amenities.OrderByDescending(a => a.Count))
+        {
+            var meta = CategoryMeta(a.Category);
+            <li>
+                <span class="ni-poi-icon">@meta.Icon</span>
+                <span class="ni-poi-count">@a.Count</span>
+                <span class="ni-poi-label">@meta.Label</span>
+                @if (a.NearestMeters is not null)
+                {
+                    <span class="ni-poi-nearest">@L["nearest {0} m", a.NearestMeters.Value]</span>
+                }
+            </li>
+        }
+    </ul>
+</div>

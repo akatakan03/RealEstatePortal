@@ -1413,6 +1413,24 @@ img {
     color: var(--muted)
 }
 
+.ni-loading {
+    font-size: .88rem;
+    color: var(--muted);
+    padding: .3rem 0;
+    animation: ni-pulse 1.2s ease-in-out infinite
+}
+
+@keyframes ni-pulse {
+    0%, 100% { opacity: .45 }
+    50% { opacity: 1 }
+}
+
+.ni-fail {
+    font-size: .86rem;
+    color: var(--muted);
+    margin: .2rem 0 0
+}
+
 .detail-desc {
     color: #33413C;
     line-height: 1.7

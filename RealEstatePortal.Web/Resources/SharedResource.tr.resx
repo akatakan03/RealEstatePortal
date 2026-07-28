@@ -1126,6 +1126,12 @@
   <data name="nearest {0} m" xml:space="preserve">
     <value>en yakın {0} m</value>
   </data>
+  <data name="Loading nearby amenities…" xml:space="preserve">
+    <value>Çevredeki olanaklar yükleniyor…</value>
+  </data>
+  <data name="Nearby amenities couldn’t be loaded right now. Refresh to try again." xml:space="preserve">
+    <value>Çevredeki olanaklar şu anda yüklenemedi. Yenileyip tekrar deneyin.</value>
+  </data>
   <data name="Bold" xml:space="preserve">
     <value>Kalın</value>
   </data>

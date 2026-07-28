@@ -259,10 +259,17 @@
                     }
                 </div>
 
-                @* Neighborhood decision-support, loaded lazily: the partial makes an external POI
-                   call, so it must not block this page. Stays hidden until (and unless) content
-                   arrives — a listing with no location returns 204 and the block never appears. *@
-                <div id="neighborhoodInsights" class="detail-section" data-listing-id="@listing.Id" hidden></div>
+                @* Neighborhood decision-support, loaded lazily in two independent pieces so the fast
+                   price figure never waits on the slow external POI service. Hidden until at least
+                   one piece arrives — a listing with no location returns 204 for both and the block
+                   never appears. *@
+                <div id="neighborhoodInsights" class="detail-section" data-listing-id="@listing.Id"
+                     data-error="@L["Nearby amenities couldn’t be loaded right now. Refresh to try again."]" hidden>
+                    <h3>@L["Neighborhood insights"]</h3>
+                    <p class="ni-note">@L["Automatic estimates from public map data and our own listings — a starting point, not a guarantee."]</p>
+                    <div class="ni-grid" id="niGrid"></div>
+                    <div id="niAmenities"><div class="ni-loading">@L["Loading nearby amenities…"]</div></div>
+                </div>
             </div>
 
             <aside>
@@ -347,22 +354,61 @@
             else if (e.key === 'ArrowRight') stepGallery(1);
         });
 
-        // Lazily load the neighborhood analysis (it makes an external POI call server-side). A
-        // 204 means there's nothing to show — leave the block hidden. Carries the page language so
-        // the partial's labels come back in the right culture.
+        // Lazily load the neighborhood analysis in two independent requests. The price half is
+        // pure database work (fast); the amenities half makes an external POI call (slow), so it
+        // gets its own request and a loading state rather than holding up the price. The card
+        // reveals as soon as either half has content; a listing with no location returns 204 for
+        // both and the block stays hidden.
         (function () {
             var box = document.getElementById('neighborhoodInsights');
             if (!box) return;
-            var id = box.getAttribute('data-listing-id');
+            var id = encodeURIComponent(box.getAttribute('data-listing-id'));
             var lang = document.documentElement.lang;
-            fetch('/' + lang + '/Listings/NeighborhoodInsights?id=' + encodeURIComponent(id))
+            var grid = document.getElementById('niGrid');
+            var amenitiesSlot = document.getElementById('niAmenities');
+
+            function reveal() { box.hidden = false; }
+
+            // Injects one partial's root nodes into a target, replacing whatever was there.
+            function inject(target, html) {
+                var tpl = document.createElement('template');
+                tpl.innerHTML = html.trim();
+                target.innerHTML = '';
+                target.appendChild(tpl.content);
+            }
+
+            // Price — fast. Prepend so it sits before the walkability card in the grid.
+            fetch('/' + lang + '/Listings/NeighborhoodPrice?id=' + id)
                 .then(function (r) { return r.status === 200 ? r.text() : null; })
                 .then(function (html) {
                     if (!html) return;
-                    box.innerHTML = html;
-                    box.hidden = false;
+                    var tpl = document.createElement('template');
+                    tpl.innerHTML = html.trim();
+                    grid.insertBefore(tpl.content, grid.firstChild);
+                    reveal();
                 })
-                .catch(function () { /* leave the block hidden on failure */ });
+                .catch(function () { /* price is optional too */ });
+
+            // Amenities — slow. Splits into the walkability card (into the grid, beside price) and
+            // the amenity list / notice (below). A network failure shows the soft error notice.
+            fetch('/' + lang + '/Listings/NeighborhoodAmenities?id=' + id)
+                .then(function (r) { return r.status === 200 ? r.text() : (r.status === 204 ? '' : null); })
+                .then(function (html) {
+                    if (html === '') { amenitiesSlot.innerHTML = ''; return; } // 204: no location
+                    if (html === null) throw new Error('amenities http error');
+                    var tpl = document.createElement('template');
+                    tpl.innerHTML = html.trim();
+                    var walk = tpl.content.querySelector('.ni-walk');
+                    if (walk) grid.appendChild(walk);
+                    var body = tpl.content.querySelector('.ni-amenities, .ni-fail');
+                    if (body) { amenitiesSlot.innerHTML = ''; amenitiesSlot.appendChild(body); }
+                    else { amenitiesSlot.innerHTML = ''; }
+                    reveal();
+                })
+                .catch(function () {
+                    // Show the soft "couldn't load" notice only if the card is (or becomes) visible.
+                    amenitiesSlot.innerHTML = '<p class="ni-fail">' + (box.getAttribute('data-error') || '') + '</p>';
+                });
         })();
     </script>
     @if (listing.Latitude is not null && listing.Longitude is not null)

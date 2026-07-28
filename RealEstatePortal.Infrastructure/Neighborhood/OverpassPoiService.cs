@@ -42,26 +42,48 @@ public class OverpassPoiService : INeighborhoodPoiService
 
         var query = BuildQuery(lat, lng, radiusMeters);
 
-        // Try each public instance in turn. The first one to answer wins; a busy or unreachable
-        // instance is abandoned after PerEndpointTimeoutSeconds and the next is tried.
-        foreach (var endpoint in _settings.Endpoints)
-        {
-            try
-            {
-                using var attempt = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                attempt.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, _settings.PerEndpointTimeoutSeconds)));
+        // Race all instances at once and take the first that answers, rather than trying them one
+        // after another — a single dead instance would otherwise add its whole timeout to the wait.
+        // One shared deadline bounds the total, and a win cancels the stragglers. Uncached lookups
+        // are rare (24 h cache per ~110 m cell), so briefly querying a few public mirrors is fine.
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, _settings.PerEndpointTimeoutSeconds)));
 
-                var result = await QueryAsync(endpoint, query, lat, lng, attempt.Token);
-                _cache.Set(key, result, CacheFor);
-                return result;
-            }
-            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        var pending = _settings.Endpoints
+            .Select(endpoint => (endpoint, task: QueryAsync(endpoint, query, lat, lng, deadline.Token)))
+            .ToList();
+
+        try
+        {
+            while (pending.Count > 0)
             {
-                // Timeouts, 429s and 504s from the shared public endpoints all land here. Not
-                // fatal — move on to the next instance, or degrade to no amenities if all fail.
-                _logger.LogWarning(ex, "Overpass endpoint {Endpoint} failed for {Lat},{Lng}",
-                    endpoint, lat, lng);
+                var finished = await Task.WhenAny(pending.Select(p => p.task));
+                var winner = pending.First(p => p.task == finished);
+                pending.Remove(winner);
+
+                try
+                {
+                    var result = await finished;
+                    deadline.Cancel(); // stop the other in-flight requests
+                    _cache.Set(key, result, CacheFor);
+                    return result;
+                }
+                catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+                {
+                    // Timeouts, 429s and 504s from the shared public endpoints all land here. Not
+                    // fatal — wait on the next one that finishes, or degrade if they all fail.
+                    _logger.LogWarning(ex, "Overpass endpoint {Endpoint} failed for {Lat},{Lng}",
+                        winner.endpoint, lat, lng);
+                }
             }
+        }
+        finally
+        {
+            // Cancel and observe any stragglers so their cancellation doesn't surface as an
+            // unobserved task exception.
+            deadline.Cancel();
+            _ = Task.WhenAll(pending.Select(p => p.task)).ContinueWith(
+                t => { _ = t.Exception; }, TaskScheduler.Default);
         }
 
         return Array.Empty<NeighborhoodPoi>();
