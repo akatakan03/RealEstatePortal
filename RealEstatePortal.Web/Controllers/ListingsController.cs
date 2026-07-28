@@ -21,6 +21,7 @@ using RealEstatePortal.Application.Listings.Queries.GetListingDetail;
 using RealEstatePortal.Application.Listings.Queries.GetListingForEdit;
 using RealEstatePortal.Application.Listings.Queries.GetListingImages;
 using RealEstatePortal.Application.Listings.Queries.GetListingMapPoints;
+using RealEstatePortal.Application.Listings.Queries.GetNeighborhoodInsights;
 using RealEstatePortal.Application.Listings.Queries.GetListings;
 using RealEstatePortal.Application.Listings.Queries.GetListingsForCompare;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
@@ -103,6 +104,22 @@ public class ListingsController : Controller
     {
         var points = await _sender.Send(query);
         return Json(points);
+    }
+
+    // Neighborhood decision-support card for a listing. Loaded lazily by the detail page (it makes
+    // an external POI call) and rendered as a partial so all labels stay in the resource file.
+    // Returns 204 when the listing has no location or isn't public, so the card just stays hidden.
+    [HttpGet]
+    public async Task<IActionResult> NeighborhoodInsights(int id)
+    {
+        var insights = await _sender.Send(new GetNeighborhoodInsightsQuery(id));
+
+        // No location (null), or nothing worth showing (no price comparison and no amenities) —
+        // either way the card stays hidden rather than rendering an empty header.
+        if (insights is null || (insights.PricePerSqm is null && insights.Amenities.Count == 0))
+            return NoContent();
+
+        return PartialView("_NeighborhoodInsights", insights);
     }
 
     // Side-by-side comparison of the listings the buyer selected. The ids come from the compare

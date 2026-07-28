@@ -13,6 +13,7 @@ using RealEstatePortal.Infrastructure.Html;
 using RealEstatePortal.Infrastructure.Identity;
 using RealEstatePortal.Infrastructure.Imaging;
 using RealEstatePortal.Infrastructure.Mortgage;
+using RealEstatePortal.Infrastructure.Neighborhood;
 using RealEstatePortal.Infrastructure.Search;
 using RealEstatePortal.Infrastructure.Storage;
 using RealEstatePortal.Infrastructure.Spatial;
@@ -128,6 +129,17 @@ public static class DependencyInjection
         {
             client.BaseAddress = new Uri(geminiSettings.BaseUrl.TrimEnd('/') + "/");
             client.Timeout = TimeSpan.FromSeconds(12);
+        });
+
+        // Neighborhood amenity lookup via the free OpenStreetMap Overpass API (no key). On failure
+        // it returns an empty list, so the neighborhood card degrades gracefully.
+        services.Configure<OverpassSettings>(configuration.GetSection("Overpass"));
+        services.AddHttpClient<INeighborhoodPoiService, OverpassPoiService>(client =>
+        {
+            // The service posts to absolute endpoint URLs (it falls back across several instances),
+            // so no BaseAddress. This overall ceiling sits above the sum of the per-endpoint budgets.
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("RealEstatePortal/1.0 (internship project)");
+            client.Timeout = TimeSpan.FromSeconds(30);
         });
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();

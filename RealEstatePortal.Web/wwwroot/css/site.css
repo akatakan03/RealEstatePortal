@@ -1300,6 +1300,119 @@ img {
         margin: 0 0 .8rem
     }
 
+/* ===== neighborhood insights ===== */
+.ni-note {
+    font-size: .82rem;
+    color: var(--muted);
+    margin: -.4rem 0 .9rem
+}
+
+.ni-grid {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem
+}
+
+.ni-card {
+    flex: 1 1 220px;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface)
+}
+
+.ni-card-title {
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--muted);
+    margin-bottom: .5rem
+}
+
+.ni-price-value {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--ink)
+}
+
+    .ni-price-value span {
+        font-family: var(--sans);
+        font-size: .9rem;
+        color: var(--muted)
+    }
+
+.ni-price-cmp {
+    margin-top: .3rem;
+    font-weight: 600;
+    font-size: .95rem
+}
+
+    .ni-price-cmp.is-above { color: var(--danger) }
+    .ni-price-cmp.is-below { color: #006300 }
+    .ni-price-cmp.is-par { color: var(--muted) }
+
+.ni-price-sub {
+    margin-top: .5rem;
+    font-size: .82rem;
+    color: var(--muted)
+}
+
+.ni-walk .ni-walk-score {
+    font-family: var(--serif);
+    font-weight: 600;
+    line-height: 1
+}
+
+.ni-walk-num {
+    font-size: 2.4rem
+}
+
+.ni-walk-max {
+    font-size: 1rem;
+    color: var(--muted)
+}
+
+.ni-walk-label {
+    margin-top: .3rem;
+    font-weight: 600;
+    font-size: .95rem
+}
+
+.ni-walk.is-high .ni-walk-num { color: #006300 }
+.ni-walk.is-mid .ni-walk-num { color: var(--brass-dk) }
+.ni-walk.is-low .ni-walk-num { color: var(--danger) }
+
+.ni-poi-list {
+    list-style: none;
+    margin: .5rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: .5rem .9rem
+}
+
+    .ni-poi-list li {
+        display: flex;
+        align-items: baseline;
+        gap: .4rem;
+        font-size: .92rem
+    }
+
+.ni-poi-icon { font-size: 1.05rem }
+
+.ni-poi-count {
+    font-weight: 700;
+    color: var(--ink)
+}
+
+.ni-poi-nearest {
+    margin-left: auto;
+    font-size: .78rem;
+    color: var(--muted)
+}
+
 .detail-desc {
     color: #33413C;
     line-height: 1.7

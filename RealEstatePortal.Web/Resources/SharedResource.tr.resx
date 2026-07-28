@@ -1066,6 +1066,66 @@
   <data name="{0}+ rooms" xml:space="preserve">
     <value>{0}+ oda</value>
   </data>
+  <data name="Neighborhood insights" xml:space="preserve">
+    <value>Bölge analizi</value>
+  </data>
+  <data name="Automatic estimates from public map data and our own listings — a starting point, not a guarantee." xml:space="preserve">
+    <value>Halka açık harita verileri ve kendi ilanlarımızdan otomatik tahminler — bağlayıcı değil, bir başlangıç noktasıdır.</value>
+  </data>
+  <data name="Price per m²" xml:space="preserve">
+    <value>m² başına fiyat</value>
+  </data>
+  <data name="{0}% above the area median" xml:space="preserve">
+    <value>bölge ortancasının %{0} üstünde</value>
+  </data>
+  <data name="{0}% below the area median" xml:space="preserve">
+    <value>bölge ortancasının %{0} altında</value>
+  </data>
+  <data name="In line with the area median" xml:space="preserve">
+    <value>bölge ortancasıyla uyumlu</value>
+  </data>
+  <data name="Area median" xml:space="preserve">
+    <value>Bölge ortancası</value>
+  </data>
+  <data name="{0} nearby listings" xml:space="preserve">
+    <value>{0} yakın ilan</value>
+  </data>
+  <data name="Walkability" xml:space="preserve">
+    <value>Yürünebilirlik</value>
+  </data>
+  <data name="Walking paradise" xml:space="preserve">
+    <value>Yürüyüş cenneti</value>
+  </data>
+  <data name="Very walkable" xml:space="preserve">
+    <value>Çok yürünebilir</value>
+  </data>
+  <data name="Somewhat walkable" xml:space="preserve">
+    <value>Orta düzeyde yürünebilir</value>
+  </data>
+  <data name="Car-dependent" xml:space="preserve">
+    <value>Araca bağımlı</value>
+  </data>
+  <data name="Very car-dependent" xml:space="preserve">
+    <value>Büyük ölçüde araca bağımlı</value>
+  </data>
+  <data name="Within {0} km" xml:space="preserve">
+    <value>{0} km içinde</value>
+  </data>
+  <data name="Public transport" xml:space="preserve">
+    <value>Toplu taşıma</value>
+  </data>
+  <data name="Markets" xml:space="preserve">
+    <value>Market</value>
+  </data>
+  <data name="Healthcare" xml:space="preserve">
+    <value>Sağlık</value>
+  </data>
+  <data name="Schools" xml:space="preserve">
+    <value>Okul</value>
+  </data>
+  <data name="nearest {0} m" xml:space="preserve">
+    <value>en yakın {0} m</value>
+  </data>
   <data name="Bold" xml:space="preserve">
     <value>Kalın</value>
   </data>
