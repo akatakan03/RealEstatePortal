@@ -1301,9 +1301,93 @@ img {
 
 .detail-desc {
     color: #33413C;
-    line-height: 1.7;
-    white-space: pre-wrap
+    line-height: 1.7
 }
+
+    /* The description is rich text now; give its blocks sensible rhythm. */
+    .detail-desc p {
+        margin: 0 0 .8rem
+    }
+
+        .detail-desc p:last-child {
+            margin-bottom: 0
+        }
+
+    .detail-desc ul,
+    .detail-desc ol {
+        margin: 0 0 .8rem;
+        padding-left: 1.4rem
+    }
+
+    .detail-desc li {
+        margin: .2rem 0
+    }
+
+/* ===== rich-text editor (listing description) ===== */
+.rte {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff
+}
+
+.rte-toolbar {
+    display: flex;
+    gap: .25rem;
+    padding: .35rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-soft, #FAF8F4)
+}
+
+.rte-btn {
+    min-width: 32px;
+    height: 30px;
+    padding: 0 .5rem;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text, #222);
+    font-size: .9rem;
+    line-height: 1;
+    cursor: pointer
+}
+
+    .rte-btn:hover {
+        background: rgba(0,0,0,.06)
+    }
+
+    .rte-btn.is-active {
+        background: var(--brass-soft, #efe6d4);
+        border-color: var(--brass, #9c7a3c)
+    }
+
+    .rte-btn.rte-bold {
+        font-weight: 700
+    }
+
+    .rte-btn.rte-italic {
+        font-style: italic
+    }
+
+/* The contenteditable surface reuses .form-control but must grow with content. */
+.rte-area {
+    min-height: 8rem;
+    max-height: 22rem;
+    overflow-y: auto;
+    border: none;
+    border-radius: 0;
+    outline: none
+}
+
+    .rte-area:focus {
+        box-shadow: none
+    }
+
+    .rte-area ul,
+    .rte-area ol {
+        padding-left: 1.4rem;
+        margin: .3rem 0
+    }
 
 .preview-banner {
     background: var(--brass-soft);

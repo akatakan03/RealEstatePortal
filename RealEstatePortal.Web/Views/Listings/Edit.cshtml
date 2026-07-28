@@ -32,6 +32,8 @@
                     </div>
                     <div class="mb-field">
                         <label asp-for="Description" class="form-label">@L["Description"]</label>
+                        @* A rich-text editor (rich-editor.js) wraps this textarea in the browser;
+                           it stays the bound field. Content is sanitized server-side on save. *@
                         <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
@@ -212,6 +214,15 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/rich-editor.js"></script>
+    <script>
+        initRichEditor('Description', @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+            bold = L["Bold"].Value,
+            italic = L["Italic"].Value,
+            bullets = L["Bullet list"].Value,
+            numbers = L["Numbered list"].Value
+        })));
+    </script>
     <script src="~/js/photo-picker.js"></script>
     <script>
         initPhotoPicker('newPhotos', 'previewArea', {

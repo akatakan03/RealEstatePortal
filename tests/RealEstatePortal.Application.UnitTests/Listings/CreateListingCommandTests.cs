@@ -16,6 +16,15 @@ namespace RealEstatePortal.Application.UnitTests.Listings;
 
 public class CreateListingCommandTests
 {
+    // These tests are about the handler's own logic, not sanitization — a pass-through keeps the
+    // description untouched. The real allowlist lives in HtmlSanitizerServiceTests.
+    private static IHtmlSanitizer PassThroughSanitizer()
+    {
+        var sanitizer = Substitute.For<IHtmlSanitizer>();
+        sanitizer.Sanitize(Arg.Any<string?>()).Returns(ci => ci.Arg<string?>() ?? string.Empty);
+        return sanitizer;
+    }
+
     private static CreateListingCommand SampleCommand(string title = "Nice flat") => new()
     {
         Title = title,
@@ -43,7 +52,7 @@ public class CreateListingCommandTests
         geocoding.GeocodeAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new GeoCoordinate(41.0082, 28.9784));
 
-        var handler = new CreateListingCommandHandler(context, user, geocoding, TimeProvider.System);
+        var handler = new CreateListingCommandHandler(context, user, geocoding, PassThroughSanitizer(), TimeProvider.System);
 
         await handler.Handle(SampleCommand(), CancellationToken.None);
 
@@ -76,7 +85,7 @@ public class CreateListingCommandTests
         geocoding.GeocodeAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((GeoCoordinate?)null);
 
-        var handler = new CreateListingCommandHandler(context, user, geocoding, TimeProvider.System);
+        var handler = new CreateListingCommandHandler(context, user, geocoding, PassThroughSanitizer(), TimeProvider.System);
 
         await handler.Handle(SampleCommand("Nice flat"), CancellationToken.None);
 

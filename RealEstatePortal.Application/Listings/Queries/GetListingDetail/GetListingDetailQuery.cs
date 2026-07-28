@@ -19,17 +19,20 @@ public class GetListingDetailQueryHandler
     private readonly IApplicationDbContext _context;
     private readonly IFileStorageService _storage;
     private readonly IIdentityService _identity;
+    private readonly IHtmlSanitizer _sanitizer;
     private readonly TimeProvider _clock;
 
     public GetListingDetailQueryHandler(
         IApplicationDbContext context,
         IFileStorageService storage,
         IIdentityService identity,
+        IHtmlSanitizer sanitizer,
         TimeProvider clock)
     {
         _context = context;
         _storage = storage;
         _identity = identity;
+        _sanitizer = sanitizer;
         _clock = clock;
     }
 
@@ -53,6 +56,11 @@ public class GetListingDetailQueryHandler
         if (entity is null) return null;
 
         var dto = ListingMapper.ToDetail(entity);
+
+        // The description is rendered as raw HTML on the detail page. New descriptions are already
+        // sanitized on save, but rows written before rich text existed never were — sanitize on the
+        // way out too so a legacy value can never reach the browser unfiltered.
+        dto.Description = _sanitizer.Sanitize(dto.Description);
 
         // Its own statement, projected to the three columns the chart actually plots — lighter
         // than materialising the entities, and it keeps the listing row out of the result.

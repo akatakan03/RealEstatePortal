@@ -3,9 +3,12 @@
     var listing = Model.Listing;
     ViewData["Title"] = listing.Title;
 
-    var metaDescription = listing.Description.Length > 160
-        ? listing.Description.Substring(0, 157).TrimEnd() + "…"
-        : listing.Description;
+    // The description is rich text now — strip it to plain text for the meta/OG tags, which
+    // must never carry markup, before truncating.
+    var descriptionText = RealEstatePortal.Web.Helpers.HtmlText.ToPlainText(listing.Description);
+    var metaDescription = descriptionText.Length > 160
+        ? descriptionText.Substring(0, 157).TrimEnd() + "…"
+        : descriptionText;
     var coverImage = listing.ImageUrls.FirstOrDefault();
 
     // The canonical points at this listing *in this language* — the alternates in the layout
@@ -220,7 +223,9 @@
 
                 <div class="detail-section">
                     <h3>@L["About this property"]</h3>
-                    <p class="detail-desc">@listing.Description</p>
+                    @* Sanitized to a small tag allowlist on the way in (and again on read), so
+                       rendering it raw here is safe and keeps the agent's formatting. *@
+                    <div class="detail-desc">@Html.Raw(listing.Description)</div>
                 </div>
 
                 @await Html.PartialAsync("_PriceHistory", listing.PriceHistory)

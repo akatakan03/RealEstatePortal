@@ -9,6 +9,7 @@ using RealEstatePortal.Infrastructure.Data;
 using RealEstatePortal.Infrastructure.Data.Interceptors;
 using RealEstatePortal.Infrastructure.Email;
 using RealEstatePortal.Infrastructure.Geocoding;
+using RealEstatePortal.Infrastructure.Html;
 using RealEstatePortal.Infrastructure.Identity;
 using RealEstatePortal.Infrastructure.Imaging;
 using RealEstatePortal.Infrastructure.Mortgage;
@@ -74,6 +75,9 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, R2FileStorageService>();
 
         services.AddScoped<IImageProcessor, ImageSharpProcessor>();
+
+        // Stateless and thread-safe once configured — one instance serves every request.
+        services.AddSingleton<IHtmlSanitizer, HtmlSanitizerService>();
 
         // Email is written to the outbox table, never sent inline. The application gets
         // QueuedEmailService (IEmailService); only the outbox processor gets the SMTP

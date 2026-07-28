@@ -1030,6 +1030,18 @@
   <data name="Add photos" xml:space="preserve">
     <value>Fotoğraf ekle</value>
   </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Kalın</value>
+  </data>
+  <data name="Italic" xml:space="preserve">
+    <value>İtalik</value>
+  </data>
+  <data name="Bullet list" xml:space="preserve">
+    <value>Madde işaretli liste</value>
+  </data>
+  <data name="Numbered list" xml:space="preserve">
+    <value>Numaralı liste</value>
+  </data>
   <data name="Apply" xml:space="preserve">
     <value>Uygula</value>
   </data>

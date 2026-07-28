@@ -10,7 +10,8 @@ public class UpdateListingCommandValidator : AbstractValidator<UpdateListingComm
     {
         RuleFor(v => v.Id).GreaterThan(0);
         RuleFor(v => v.Title).NotEmpty().MaximumLength(200);
-        RuleFor(v => v.Description).NotEmpty().MaximumLength(4000);
+        // Rich text now, so the limit has to leave room for the formatting tags around the prose.
+        RuleFor(v => v.Description).NotEmpty().MaximumLength(8000);
         RuleFor(v => v.Price).GreaterThan(0).WithMessage("Price must be greater than zero.");
         RuleFor(v => v.Currency).NotEmpty().MaximumLength(3);
         // Was enforced only by MVC's implicit required for non-nullable strings, which

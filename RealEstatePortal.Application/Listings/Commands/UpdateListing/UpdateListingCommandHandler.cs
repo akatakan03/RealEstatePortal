@@ -13,14 +13,17 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IGeocodingService _geocoding;
+    private readonly IHtmlSanitizer _sanitizer;
     private readonly TimeProvider _clock;
 
     public UpdateListingCommandHandler(
-        IApplicationDbContext context, IUser user, IGeocodingService geocoding, TimeProvider clock)
+        IApplicationDbContext context, IUser user, IGeocodingService geocoding,
+        IHtmlSanitizer sanitizer, TimeProvider clock)
     {
         _context = context;
         _user = user;
         _geocoding = geocoding;
+        _sanitizer = sanitizer;
         _clock = clock;
     }
 
@@ -34,7 +37,8 @@ public class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand>
         var addressChanged = !string.Equals(entity.Address, request.Address, StringComparison.Ordinal);
 
         entity.Title = request.Title;
-        entity.Description = request.Description;
+        // Rich text from a browser editor — reduce it to the safe allowlist before it is stored.
+        entity.Description = _sanitizer.Sanitize(request.Description);
         // Appends a timeline point only when the price actually changes.
         entity.SetPrice(new Money(request.Price, request.Currency), _clock.GetUtcNow());
         entity.ListingType = request.ListingType;

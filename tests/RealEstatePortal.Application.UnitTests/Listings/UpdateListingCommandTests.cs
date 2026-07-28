@@ -16,6 +16,15 @@ namespace RealEstatePortal.Application.UnitTests.Listings;
 
 public class UpdateListingCommandTests
 {
+    // These tests are about the handler's own logic, not sanitization — a pass-through keeps the
+    // description untouched. The real allowlist lives in HtmlSanitizerServiceTests.
+    private static IHtmlSanitizer PassThroughSanitizer()
+    {
+        var sanitizer = Substitute.For<IHtmlSanitizer>();
+        sanitizer.Sanitize(Arg.Any<string?>()).Returns(ci => ci.Arg<string?>() ?? string.Empty);
+        return sanitizer;
+    }
+
     private static UpdateListingCommand EditCommand(int id) => new()
     {
         Id = id,
@@ -49,7 +58,7 @@ public class UpdateListingCommandTests
     {
         var listing = new Listing { Id = 1, OwnerId = "agent-1", Address = "same address" };
         var (ctx, user, geo) = Deps(new List<Listing> { listing }, currentUserId: "agent-2");
-        var handler = new UpdateListingCommandHandler(ctx, user, geo, TimeProvider.System);
+        var handler = new UpdateListingCommandHandler(ctx, user, geo, PassThroughSanitizer(), TimeProvider.System);
 
         await Should.ThrowAsync<ForbiddenAccessException>(
             () => handler.Handle(EditCommand(1), CancellationToken.None));
@@ -61,7 +70,7 @@ public class UpdateListingCommandTests
     public async Task Handle_WhenListingMissing_ThrowsNotFound()
     {
         var (ctx, user, geo) = Deps(new List<Listing>(), currentUserId: "agent-1");
-        var handler = new UpdateListingCommandHandler(ctx, user, geo, TimeProvider.System);
+        var handler = new UpdateListingCommandHandler(ctx, user, geo, PassThroughSanitizer(), TimeProvider.System);
 
         await Should.ThrowAsync<NotFoundException>(
             () => handler.Handle(EditCommand(99), CancellationToken.None));
@@ -72,7 +81,7 @@ public class UpdateListingCommandTests
     {
         var listing = new Listing { Id = 1, OwnerId = "agent-1", Title = "Old", Address = "same address" };
         var (ctx, user, geo) = Deps(new List<Listing> { listing }, currentUserId: "agent-1");
-        var handler = new UpdateListingCommandHandler(ctx, user, geo, TimeProvider.System);
+        var handler = new UpdateListingCommandHandler(ctx, user, geo, PassThroughSanitizer(), TimeProvider.System);
 
         await handler.Handle(EditCommand(1), CancellationToken.None);
 

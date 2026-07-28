@@ -12,14 +12,17 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IGeocodingService _geocoding;
+    private readonly IHtmlSanitizer _sanitizer;
     private readonly TimeProvider _clock;
 
     public CreateListingCommandHandler(
-        IApplicationDbContext context, IUser user, IGeocodingService geocoding, TimeProvider clock)
+        IApplicationDbContext context, IUser user, IGeocodingService geocoding,
+        IHtmlSanitizer sanitizer, TimeProvider clock)
     {
         _context = context;
         _user = user;
         _geocoding = geocoding;
+        _sanitizer = sanitizer;
         _clock = clock;
     }
 
@@ -39,7 +42,8 @@ public class CreateListingCommandHandler : IRequestHandler<CreateListingCommand,
         {
             Title = request.Title,
             Slug = slug,
-            Description = request.Description,
+            // Rich text from a browser editor — reduce it to the safe allowlist before it is stored.
+            Description = _sanitizer.Sanitize(request.Description),
             ListingType = request.ListingType,
             PropertyType = request.PropertyType,
             Bedrooms = request.Bedrooms,
