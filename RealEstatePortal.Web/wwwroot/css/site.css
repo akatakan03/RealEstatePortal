@@ -709,7 +709,8 @@ img {
     border-radius: 16px;
     box-shadow: var(--shadow-lg);
     display: grid;
-    grid-template-columns: 1.6fr 1fr 1fr 1fr auto;
+    /* Just the natural-language field + the search button now — the field spans the whole bar. */
+    grid-template-columns: 1fr auto;
     align-items: end;
     gap: 0;
     overflow: hidden
@@ -1019,7 +1020,7 @@ img {
 
 @media (max-width:900px) {
     .console {
-        grid-template-columns: 1fr 1fr
+        grid-template-columns: 1fr
     }
 
         .console .search-cell {

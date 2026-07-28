@@ -9,6 +9,7 @@
 
     // Gelişmiş filtrelerden herhangi biri aktifse panelin açık kalmasını sağlayan yardımcı metot
     bool HasAdvancedFilter(GetPublicListingsQuery f) =>
+        f.ListingType.HasValue || f.PropertyType.HasValue || f.MinPrice.HasValue || f.MaxPrice.HasValue ||
         f.Heating.HasValue || f.Internet.HasValue || f.Furnished == true ||
         f.Parking == true || f.Balcony == true || f.MaxDues.HasValue || f.MinBedrooms.HasValue;
 }
@@ -54,30 +55,6 @@
                         <input name="q" value="@(Model.AiSearchQuery ?? Model.Filter.Keyword)"
                                placeholder="@L["Describe your ideal home — e.g. Kadıköy’de balkonlu 3+1"]" />
                     </div>
-                    <div class="field">
-                        <label>@L["Type"]</label>
-                        <select name="ListingType">
-                            <option value="">@L["Any type"]</option>
-                            @foreach (var t in Enum.GetValues<ListingType>())
-                            {
-                                <option value="@t" selected="@(Model.Filter.ListingType == t)">@L.Localize(t)</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>@L["Property"]</label>
-                        <select name="PropertyType">
-                            <option value="">@L["Any property"]</option>
-                            @foreach (var p in Enum.GetValues<PropertyType>())
-                            {
-                                <option value="@p" selected="@(Model.Filter.PropertyType == p)">@L.Localize(p)</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>@L["Max price"]</label>
-                        <input name="MaxPrice" value="@Model.Filter.MaxPrice" placeholder="@L["Any"]" />
-                    </div>
                     <div class="search-cell">
                         <button type="submit" class="btn btn-primary">@L["Search"]</button>
                     </div>
@@ -87,6 +64,30 @@
                 <details class="more-filters" @(HasAdvancedFilter(Model.Filter) ? "open" : "")>
                     <summary>@L["More filters"]</summary>
                     <div class="filter-grid">
+                        <div class="mb-field">
+                            <label class="form-label">@L["Type"]</label>
+                            <select name="ListingType" class="form-select">
+                                <option value="">@L["Any type"]</option>
+                                @foreach (var t in Enum.GetValues<ListingType>())
+                                {
+                                    <option value="@t" selected="@(Model.Filter.ListingType == t)">@L.Localize(t)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-field">
+                            <label class="form-label">@L["Property"]</label>
+                            <select name="PropertyType" class="form-select">
+                                <option value="">@L["Any property"]</option>
+                                @foreach (var p in Enum.GetValues<PropertyType>())
+                                {
+                                    <option value="@p" selected="@(Model.Filter.PropertyType == p)">@L.Localize(p)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-field">
+                            <label class="form-label">@L["Max price"]</label>
+                            <input name="MaxPrice" value="@Model.Filter.MaxPrice" class="form-control" placeholder="@L["Any"]" />
+                        </div>
                         <div class="mb-field">
                             <label class="form-label">@L["Heating"]</label>
                             <select name="Heating" class="form-select">
