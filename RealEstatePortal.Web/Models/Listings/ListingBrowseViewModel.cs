@@ -10,6 +10,12 @@ public class ListingBrowseViewModel
     public PaginatedList<ListingBriefDto> Listings { get; set; } = default!;
     public GetPublicListingsQuery Filter { get; set; } = new();
 
+    // Set only when the page was reached via natural-language search, so the view can echo the
+    // sentence back, note which criteria couldn't be applied, and say when AI parsing was off.
+    public string? AiSearchQuery { get; set; }
+    public IReadOnlyList<string> AiUnmatched { get; set; } = Array.Empty<string>();
+    public bool AiApplied { get; set; }
+
     // Current filters as route values, so pager links preserve them
     public Dictionary<string, string> CurrentFilter()
     {

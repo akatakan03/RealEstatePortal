@@ -13,6 +13,7 @@ using RealEstatePortal.Infrastructure.Html;
 using RealEstatePortal.Infrastructure.Identity;
 using RealEstatePortal.Infrastructure.Imaging;
 using RealEstatePortal.Infrastructure.Mortgage;
+using RealEstatePortal.Infrastructure.Search;
 using RealEstatePortal.Infrastructure.Storage;
 using RealEstatePortal.Infrastructure.Spatial;
 
@@ -118,6 +119,16 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(8);
         });
         services.AddScoped<IMortgageRateService>(sp => sp.GetRequiredService<EvdsMortgageRateService>());
+
+        // Natural-language search parsing via Google Gemini (free tier). Without an API key the
+        // parser returns null and search falls back to keyword matching, so this stays optional.
+        services.Configure<GeminiSettings>(configuration.GetSection("Gemini"));
+        var geminiSettings = configuration.GetSection("Gemini").Get<GeminiSettings>() ?? new GeminiSettings();
+        services.AddHttpClient<INaturalLanguageSearchParser, GeminiNaturalLanguageSearchParser>(client =>
+        {
+            client.BaseAddress = new Uri(geminiSettings.BaseUrl.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(12);
+        });
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 

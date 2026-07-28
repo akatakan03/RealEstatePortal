@@ -25,6 +25,7 @@ using RealEstatePortal.Application.Listings.Queries.GetListings;
 using RealEstatePortal.Application.Listings.Queries.GetListingsForCompare;
 using RealEstatePortal.Application.Listings.Queries.GetPublicListings;
 using RealEstatePortal.Application.Listings.Queries.GetSimilarListings;
+using RealEstatePortal.Application.Listings.Queries.ParseNaturalSearch;
 using RealEstatePortal.Application.Mortgage.Queries.GetDefaultMortgageRate;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Domain.Enums;
@@ -54,6 +55,27 @@ public class ListingsController : Controller
 
         // Map pins are loaded lazily by viewport via the MapPoints endpoint (see the view).
         return View(new ListingBrowseViewModel { Listings = listings, Filter = filter });
+    }
+
+    // Natural-language search: turn the sentence into a filter, then render the normal browse
+    // page with it. Filters land in the same form the user can then tweak by hand.
+    [HttpGet]
+    public async Task<IActionResult> Search(string? q)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return RedirectToAction(nameof(Index));
+
+        var result = await _sender.Send(new ParseNaturalSearchQuery(q));
+        var listings = await _sender.Send(result.Filter);
+
+        return View(nameof(Index), new ListingBrowseViewModel
+        {
+            Listings = listings,
+            Filter = result.Filter,
+            AiSearchQuery = q.Trim(),
+            AiUnmatched = result.UnmatchedCriteria,
+            AiApplied = result.AiApplied
+        });
     }
 
     // Returns map pins for the current viewport; called by the browse map as the user pans/zooms.

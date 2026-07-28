@@ -25,6 +25,33 @@
         <h1>@Html.Raw(L["Find the place that {0} like yours.", $"<em>{L["feels"].Value}</em>"])</h1>
         <p class="lead">@L["Verified listings from local agents — filter by area, type, and price to find your next home."]</p>
 
+        @* Natural-language search: one sentence instead of the filter grid. It resolves to the same
+           filters below, which the visitor can then fine-tune by hand. *@
+        <form asp-action="Search" method="get" class="ai-search rise d1">
+            <span class="ai-search-badge">@L["AI"]</span>
+            <input name="q" value="@Model.AiSearchQuery" class="ai-search-input"
+                   placeholder="@L["Describe your ideal home — e.g. Kadıköy’de balkonlu 3+1"]" />
+            <button type="submit" class="btn btn-primary btn-sm">@L["Search"]</button>
+        </form>
+
+        @if (!string.IsNullOrEmpty(Model.AiSearchQuery))
+        {
+            <div class="ai-search-note">
+                @if (Model.AiApplied)
+                {
+                    <span>@L["Searching for"] <strong>“@Model.AiSearchQuery”</strong>. @L["Adjust the filters below to refine."]</span>
+                    @if (Model.AiUnmatched.Any())
+                    {
+                        <span class="ai-search-unmatched">@L["Couldn't apply as filters:"] @string.Join(", ", Model.AiUnmatched)</span>
+                    }
+                }
+                else
+                {
+                    <span>@L["AI search is off right now — searched by keyword instead."]</span>
+                }
+            </div>
+        }
+
         <div class="console-wrap rise d1">
             <form asp-action="Index" method="get">
                 <div class="console">

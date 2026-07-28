@@ -1030,6 +1030,24 @@
   <data name="Add photos" xml:space="preserve">
     <value>Fotoğraf ekle</value>
   </data>
+  <data name="AI" xml:space="preserve">
+    <value>Yapay zekâ</value>
+  </data>
+  <data name="Describe your ideal home — e.g. Kadıköy’de balkonlu 3+1" xml:space="preserve">
+    <value>Aradığınız evi anlatın — örn. Kadıköy’de balkonlu 3+1</value>
+  </data>
+  <data name="Searching for" xml:space="preserve">
+    <value>Şunu arıyoruz:</value>
+  </data>
+  <data name="Adjust the filters below to refine." xml:space="preserve">
+    <value>Sonucu daraltmak için aşağıdaki filtreleri düzenleyin.</value>
+  </data>
+  <data name="Couldn't apply as filters:" xml:space="preserve">
+    <value>Filtre olarak uygulanamayanlar:</value>
+  </data>
+  <data name="AI search is off right now — searched by keyword instead." xml:space="preserve">
+    <value>Yapay zekâ araması şu an kapalı — anahtar kelimeyle arandı.</value>
+  </data>
   <data name="Bold" xml:space="preserve">
     <value>Kalın</value>
   </data>
