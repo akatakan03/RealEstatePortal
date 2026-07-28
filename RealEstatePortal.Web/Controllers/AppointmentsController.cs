@@ -1,8 +1,12 @@
+using System.Globalization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RealEstatePortal.Application.Appointments.Commands.RequestAppointment;
 using RealEstatePortal.Application.Appointments.Commands.SetAgentAvailability;
 using RealEstatePortal.Application.Appointments.Queries.GetAgentAvailability;
+using RealEstatePortal.Application.Appointments.Queries.GetAvailableSlots;
+using RealEstatePortal.Application.Common.Exceptions;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Web.Models.Appointments;
 
@@ -38,5 +42,54 @@ public class AppointmentsController : Controller
 
         TempData["Success"] = "Your availability has been saved.";
         return RedirectToAction(nameof(Availability));
+    }
+
+    // ----- Customer: book a viewing ------------------------------------------------------------
+
+    // The booking panel for a listing, loaded on demand by the detail page. Anonymous visitors may
+    // see the slots (with a prompt to sign in); only signed-in users can actually book.
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> Slots(int listingId)
+    {
+        var result = await _sender.Send(new GetAvailableSlotsQuery(listingId));
+        if (result is null)
+            return NoContent(); // not a bookable listing
+
+        return PartialView("_AppointmentBooking", new AppointmentBookingViewModel
+        {
+            ListingId = listingId,
+            AgentHasAvailability = result.AgentHasAvailability,
+            IsAuthenticated = User.Identity?.IsAuthenticated == true,
+            Days = result.Days
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Book(int listingId, string start, string? note)
+    {
+        // The slot is posted as a round-trip timestamp; parse it invariantly so the request culture
+        // can't turn "2026-08-01T10:00:00+03:00" into something the binder mangles.
+        if (!DateTimeOffset.TryParse(start, CultureInfo.InvariantCulture,
+                DateTimeStyles.RoundtripKind, out var slotStart))
+        {
+            TempData["AppointmentError"] = "That time is no longer available. Please pick another slot.";
+            return RedirectToAction("Details", "Listings", new { id = listingId });
+        }
+
+        try
+        {
+            await _sender.Send(new RequestAppointmentCommand(listingId, slotStart, note));
+            TempData["AppointmentSuccess"] =
+                "Your viewing request has been sent. You'll hear back once the agent responds.";
+        }
+        catch (ValidationException ex)
+        {
+            TempData["AppointmentError"] = ex.Errors.SelectMany(e => e.Value).FirstOrDefault()
+                ?? "That time is no longer available. Please pick another slot.";
+        }
+
+        return RedirectToAction("Details", "Listings", new { id = listingId });
     }
 }

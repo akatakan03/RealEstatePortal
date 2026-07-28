@@ -1746,6 +1746,51 @@ textarea.form-control {
     flex-wrap: wrap
 }
 
+/* ===== book a viewing ===== */
+.appt-days {
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+    margin-bottom: 1rem
+}
+
+.appt-day-label {
+    font-weight: 600;
+    font-size: .9rem;
+    margin-bottom: .4rem
+}
+
+.appt-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem
+}
+
+.appt-slot {
+    padding: .4rem .7rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    font: inherit;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: border-color .12s ease, background .12s ease
+}
+
+    .appt-slot:hover { border-color: var(--brass) }
+
+    .appt-slot.is-selected {
+        background: var(--brass);
+        border-color: var(--brass);
+        color: #fff
+    }
+
+.appt-note {
+    margin-bottom: .8rem
+}
+
+.appt-login { margin: 0 }
+
 /* ===== availability editor ===== */
 .availability-grid {
     display: flex;

@@ -250,6 +250,19 @@
                     </a>
                 }
 
+                @if (TempData["AppointmentSuccess"] is string apptOk)
+                {
+                    <div class="alert alert-success">@L[apptOk]</div>
+                }
+                @if (TempData["AppointmentError"] is string apptErr)
+                {
+                    <div class="alert alert-danger">@L[apptErr]</div>
+                }
+
+                @* Book a viewing. Loaded lazily as a partial (open slots come from our own DB, so
+                   it's quick) — kept off the initial render to keep this busy page lean. *@
+                <div class="detail-section" id="appointmentBooking" data-listing-id="@listing.Id" hidden></div>
+
                 <div class="detail-section">
                     <h3>@L["Location"]</h3>
                     <p class="addr-line">@listing.Address</p>
@@ -409,6 +422,39 @@
                     // Show the soft "couldn't load" notice only if the card is (or becomes) visible.
                     amenitiesSlot.innerHTML = '<p class="ni-fail">' + (box.getAttribute('data-error') || '') + '</p>';
                 });
+        })();
+
+        // Lazily load the "book a viewing" panel (open slots come from our DB). Wire up slot
+        // selection after injecting, since the partial's markup arrives after this script runs.
+        (function () {
+            var box = document.getElementById('appointmentBooking');
+            if (!box) return;
+            var id = encodeURIComponent(box.getAttribute('data-listing-id'));
+            var lang = document.documentElement.lang;
+            fetch('/' + lang + '/Appointments/Slots?listingId=' + id)
+                .then(function (r) { return r.status === 200 ? r.text() : null; })
+                .then(function (html) {
+                    if (!html) return;
+                    box.innerHTML = html;
+                    box.hidden = false;
+                    wireSlots(box);
+                })
+                .catch(function () { /* leave the panel hidden on failure */ });
+
+            function wireSlots(root) {
+                var form = root.querySelector('#apptForm');
+                if (!form) return;
+                var hidden = form.querySelector('#apptStart');
+                var submit = form.querySelector('#apptSubmit');
+                form.querySelectorAll('.appt-slot').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        form.querySelectorAll('.appt-slot').forEach(function (b) { b.classList.remove('is-selected'); });
+                        btn.classList.add('is-selected');
+                        hidden.value = btn.getAttribute('data-start');
+                        if (submit) submit.disabled = false;
+                    });
+                });
+            }
         })();
     </script>
     @if (listing.Latitude is not null && listing.Longitude is not null)

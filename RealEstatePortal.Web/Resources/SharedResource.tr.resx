@@ -1165,6 +1165,36 @@
   <data name="Back to dashboard" xml:space="preserve">
     <value>Panele dön</value>
   </data>
+  <data name="Book a viewing" xml:space="preserve">
+    <value>Randevu al</value>
+  </data>
+  <data name="The agent hasn’t published viewing hours yet — use the message form to get in touch." xml:space="preserve">
+    <value>Danışman henüz görüşme saati yayımlamadı — iletişim için mesaj formunu kullanın.</value>
+  </data>
+  <data name="No open viewing times in the next two weeks. Try the message form instead." xml:space="preserve">
+    <value>Önümüzdeki iki hafta içinde uygun görüşme zamanı yok. Bunun yerine mesaj formunu deneyin.</value>
+  </data>
+  <data name="Add a note for the agent (optional)" xml:space="preserve">
+    <value>Danışman için not ekleyin (isteğe bağlı)</value>
+  </data>
+  <data name="Request viewing" xml:space="preserve">
+    <value>Randevu iste</value>
+  </data>
+  <data name="Sign in to book a viewing" xml:space="preserve">
+    <value>Randevu almak için giriş yap</value>
+  </data>
+  <data name="Your viewing request has been sent. You'll hear back once the agent responds." xml:space="preserve">
+    <value>Randevu talebin gönderildi. Danışman yanıtladığında haber alacaksın.</value>
+  </data>
+  <data name="That time is no longer available. Please pick another slot." xml:space="preserve">
+    <value>Bu zaman artık uygun değil. Lütfen başka bir slot seçin.</value>
+  </data>
+  <data name="This listing has no agent to meet with." xml:space="preserve">
+    <value>Bu ilanın görüşülecek bir danışmanı yok.</value>
+  </data>
+  <data name="You can't book a viewing on your own listing." xml:space="preserve">
+    <value>Kendi ilanına randevu alamazsın.</value>
+  </data>
   <data name="Bold" xml:space="preserve">
     <value>Kalın</value>
   </data>

@@ -1,0 +1,58 @@
+@using System.Globalization
+@using RealEstatePortal.Application.Appointments
+@model RealEstatePortal.Web.Models.Appointments.AppointmentBookingViewModel
+@{
+    var culture = CultureInfo.CurrentCulture;
+    var offset = AppointmentPolicy.MarketOffset;
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+}
+
+<h3>@L["Book a viewing"]</h3>
+
+@if (!Model.AgentHasAvailability)
+{
+    <p class="ni-fail">@L["The agent hasn’t published viewing hours yet — use the message form to get in touch."]</p>
+}
+else if (!Model.Days.Any())
+{
+    <p class="ni-fail">@L["No open viewing times in the next two weeks. Try the message form instead."]</p>
+}
+else
+{
+    <form asp-controller="Appointments" asp-action="Book" method="post" class="appt-book" id="apptForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="listingId" value="@Model.ListingId" />
+        <input type="hidden" name="start" id="apptStart" />
+
+        <div class="appt-days">
+            @foreach (var day in Model.Days)
+            {
+                var label = day.Date.ToDateTime(TimeOnly.MinValue).ToString("d MMMM, dddd", culture);
+                <div class="appt-day">
+                    <div class="appt-day-label">@culture.TextInfo.ToTitleCase(label)</div>
+                    <div class="appt-slots">
+                        @foreach (var slot in day.Slots)
+                        {
+                            <button type="button" class="appt-slot" data-start="@slot.ToString("o")">
+                                @slot.ToOffset(offset).ToString("HH:mm")
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (Model.IsAuthenticated)
+        {
+            <textarea name="note" class="form-control appt-note" rows="2"
+                      maxlength="1000" placeholder="@L["Add a note for the agent (optional)"]"></textarea>
+            <button type="submit" class="btn btn-primary" id="apptSubmit" disabled>@L["Request viewing"]</button>
+        }
+        else
+        {
+            <p class="appt-login">
+                <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl" class="btn btn-primary">@L["Sign in to book a viewing"]</a>
+            </p>
+        }
+    </form>
+}
