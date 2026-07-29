@@ -1153,6 +1153,30 @@
   <data name="Viewing availability" xml:space="preserve">
     <value>Görüşme müsaitliği</value>
   </data>
+  <data name="Set the weekly hours when you can show properties. Add more than one range in a day to leave a gap (e.g. a lunch break), and block specific dates below." xml:space="preserve">
+    <value>Mülk gösterebileceğin haftalık saatleri belirle. Bir güne birden fazla aralık ekleyerek ara bırakabilirsin (ör. öğle molası); aşağıdan belirli tarihleri de kapatabilirsin.</value>
+  </data>
+  <data name="Weekly hours" xml:space="preserve">
+    <value>Haftalık saatler</value>
+  </data>
+  <data name="Add hours" xml:space="preserve">
+    <value>Saat ekle</value>
+  </data>
+  <data name="Block specific dates" xml:space="preserve">
+    <value>Belirli tarihleri kapat</value>
+  </data>
+  <data name="Leave both times empty to block the whole day. Set only a start to block after it, or only an end to block before it." xml:space="preserve">
+    <value>Tüm günü kapatmak için iki saati de boş bırak. Yalnız başlangıç girersen o saatten sonrası, yalnız bitiş girersen o saatten öncesi kapanır.</value>
+  </data>
+  <data name="Block a date" xml:space="preserve">
+    <value>Tarih kapat</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Başlangıç</value>
+  </data>
+  <data name="End" xml:space="preserve">
+    <value>Bitiş</value>
+  </data>
   <data name="Set the weekly hours when you can show properties. Customers book viewings in these hours, and you confirm each one." xml:space="preserve">
     <value>Mülk gösterebileceğin haftalık saatleri belirle. Müşteriler bu saatlerde randevu alır, sen her birini onaylarsın.</value>
   </data>

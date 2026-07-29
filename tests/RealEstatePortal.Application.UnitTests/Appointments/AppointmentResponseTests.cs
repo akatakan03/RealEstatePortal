@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MockQueryable.NSubstitute;
 using NSubstitute;
+using RealEstatePortal.Application.Appointments;
 using RealEstatePortal.Application.Appointments.Commands.CancelAppointment;
 using RealEstatePortal.Application.Appointments.Commands.RespondToAppointment;
 using RealEstatePortal.Application.Appointments.Commands.RespondToProposal;
@@ -35,17 +36,21 @@ public class AppointmentResponseTests
         return a;
     }
 
-    private static (T handler, Appointment appt) BuildRespond<T>(
-        Appointment appt, string userId, Func<IApplicationDbContext, IUser, TimeProvider, T> make)
+    private static (RespondToAppointmentCommandHandler handler, Appointment appt) BuildRespond(
+        Appointment appt, string userId)
     {
         var apptSet = new List<Appointment> { appt }.BuildMockDbSet();
         var availSet = new List<AgentAvailability>().BuildMockDbSet();
+        var timeOffSet = new List<AgentTimeOff>().BuildMockDbSet();
         var ctx = Substitute.For<IApplicationDbContext>();
         ctx.Appointments.Returns(apptSet);
         ctx.AgentAvailabilities.Returns(availSet);
+        ctx.AgentTimeOffs.Returns(timeOffSet);
         var user = Substitute.For<IUser>();
         user.Id.Returns(userId);
-        return (make(ctx, user, new FixedClock(new DateTimeOffset(2026, 8, 3, 6, 0, 0, TimeSpan.FromHours(3)))), appt);
+        var schedule = new AgentScheduleService(
+            ctx, new FixedClock(new DateTimeOffset(2026, 8, 3, 6, 0, 0, TimeSpan.FromHours(3))));
+        return (new RespondToAppointmentCommandHandler(ctx, user, schedule), appt);
     }
 
     // ----- Agent responses --------------------------------------------------------------------
@@ -53,8 +58,7 @@ public class AppointmentResponseTests
     [Fact]
     public async Task Approve_MovesToApproved()
     {
-        var (handler, appt) = BuildRespond(Pending(), "agent-1",
-            (c, u, t) => new RespondToAppointmentCommandHandler(c, u, t));
+        var (handler, appt) = BuildRespond(Pending(), "agent-1");
 
         await handler.Handle(
             new RespondToAppointmentCommand(5, AppointmentAction.Approve, null, "See you"),
@@ -66,8 +70,7 @@ public class AppointmentResponseTests
     [Fact]
     public async Task Respond_ByWrongAgent_IsForbidden()
     {
-        var (handler, _) = BuildRespond(Pending(agent: "agent-1"), "someone-else",
-            (c, u, t) => new RespondToAppointmentCommandHandler(c, u, t));
+        var (handler, _) = BuildRespond(Pending(agent: "agent-1"), "someone-else");
 
         await Should.ThrowAsync<ForbiddenAccessException>(() => handler.Handle(
             new RespondToAppointmentCommand(5, AppointmentAction.Approve, null, null),
@@ -78,8 +81,7 @@ public class AppointmentResponseTests
     public async Task Propose_ATimeOutsideAvailability_IsRejected()
     {
         // No availability rows, so no time can be a valid slot.
-        var (handler, appt) = BuildRespond(Pending(), "agent-1",
-            (c, u, t) => new RespondToAppointmentCommandHandler(c, u, t));
+        var (handler, appt) = BuildRespond(Pending(), "agent-1");
 
         await Should.ThrowAsync<ValidationException>(() => handler.Handle(
             new RespondToAppointmentCommand(5, AppointmentAction.Propose, Slot.AddDays(1), null),

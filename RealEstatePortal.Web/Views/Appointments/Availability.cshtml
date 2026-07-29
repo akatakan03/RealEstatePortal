@@ -1,8 +1,18 @@
 @using System.Globalization
-@model RealEstatePortal.Web.Models.Appointments.AvailabilityFormModel
+@using RealEstatePortal.Application.Appointments.Queries.GetAgentSchedule
+@model AgentScheduleDto
 @{
     ViewData["Title"] = L["Viewing availability"].Value;
     var culture = CultureInfo.CurrentCulture;
+
+    // Monday-first weekday order.
+    var week = new[]
+    {
+        DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+        DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
+    };
+    var windowsByDay = Model.Windows.ToLookup(w => w.Day);
+    var minDate = DateTime.Now.ToString("yyyy-MM-dd");
 }
 
 <div class="form-page">
@@ -10,36 +20,60 @@
         <div class="form-shell">
             <span class="eyebrow">@L["Agent dashboard"]</span>
             <h1 class="page-title" style="margin-bottom:.4rem;">@L["Viewing availability"]</h1>
-            <p class="lead" style="margin-bottom:1.5rem;">@L["Set the weekly hours when you can show properties. Customers book viewings in these hours, and you confirm each one."]</p>
+            <p class="lead" style="margin-bottom:1.5rem;">@L["Set the weekly hours when you can show properties. Add more than one range in a day to leave a gap (e.g. a lunch break), and block specific dates below."]</p>
 
             @if (TempData["Success"] is string ok)
             {
                 <div class="alert alert-success">@L[ok]</div>
             }
+            @if (TempData["AvailabilityError"] is string err)
+            {
+                <div class="alert alert-danger">@L[err]</div>
+            }
 
             <div class="form-card">
-                <form asp-action="Availability" method="post">
-                    <div asp-validation-summary="All" class="text-danger" style="margin-bottom:1rem;"></div>
+                <form asp-action="Availability" method="post" id="availabilityForm">
+                    @Html.AntiForgeryToken()
 
-                    <div class="availability-grid">
-                        @for (var i = 0; i < Model.Days.Count; i++)
+                    <h3 class="form-section-title" style="margin-top:0;">@L["Weekly hours"]</h3>
+                    <div class="avail-week">
+                        @foreach (var day in week)
                         {
-                            var day = Model.Days[i];
-                            var name = culture.DateTimeFormat.GetDayName(day.Day);
-                            <input type="hidden" asp-for="Days[i].Day" />
-                            <div class="availability-row">
-                                <label class="availability-day">
-                                    <input type="checkbox" asp-for="Days[i].Enabled" />
-                                    <span>@culture.TextInfo.ToTitleCase(name)</span>
-                                </label>
-                                <div class="availability-times">
-                                    <input type="time" asp-for="Days[i].Start" class="form-control" />
-                                    <span class="availability-dash">–</span>
-                                    <input type="time" asp-for="Days[i].End" class="form-control" />
+                            var name = culture.TextInfo.ToTitleCase(culture.DateTimeFormat.GetDayName(day));
+                            <div class="avail-day" data-day="@day">
+                                <div class="avail-day-name">@name</div>
+                                <div class="avail-windows">
+                                    @foreach (var w in windowsByDay[day])
+                                    {
+                                        <div class="avail-window">
+                                            <input type="hidden" name="winDay" value="@day" />
+                                            <input type="time" name="winStart" value="@w.Start.ToString("HH:mm")" step="3600" class="form-control" />
+                                            <span class="availability-dash">–</span>
+                                            <input type="time" name="winEnd" value="@w.End.ToString("HH:mm")" step="3600" class="form-control" />
+                                            <button type="button" class="avail-remove" title="@L["Remove"]">✕</button>
+                                        </div>
+                                    }
                                 </div>
+                                <button type="button" class="btn btn-ghost btn-sm avail-add-window">+ @L["Add hours"]</button>
                             </div>
                         }
                     </div>
+
+                    <h3 class="form-section-title">@L["Block specific dates"]</h3>
+                    <p class="form-hint" style="margin-top:-.4rem;">@L["Leave both times empty to block the whole day. Set only a start to block after it, or only an end to block before it."]</p>
+                    <div class="avail-exceptions" id="exceptionList">
+                        @foreach (var t in Model.TimeOff)
+                        {
+                            <div class="avail-exception">
+                                <input type="date" name="offDate" value="@t.Date.ToString("yyyy-MM-dd")" min="@minDate" class="form-control" />
+                                <input type="time" name="offStart" value="@(t.Start?.ToString("HH:mm"))" step="3600" class="form-control" placeholder="@L["Start"]" />
+                                <span class="availability-dash">–</span>
+                                <input type="time" name="offEnd" value="@(t.End?.ToString("HH:mm"))" step="3600" class="form-control" placeholder="@L["End"]" />
+                                <button type="button" class="avail-remove" title="@L["Remove"]">✕</button>
+                            </div>
+                        }
+                    </div>
+                    <button type="button" class="btn btn-ghost btn-sm" id="addException">+ @L["Block a date"]</button>
 
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">@L["Save availability"]</button>
@@ -51,16 +85,26 @@
     </div>
 </div>
 
+@* Row templates cloned by the editor JS. *@
+<template id="windowTemplate">
+    <div class="avail-window">
+        <input type="hidden" name="winDay" value="" />
+        <input type="time" name="winStart" value="09:00" step="3600" class="form-control" />
+        <span class="availability-dash">–</span>
+        <input type="time" name="winEnd" value="18:00" step="3600" class="form-control" />
+        <button type="button" class="avail-remove" title="@L["Remove"]">✕</button>
+    </div>
+</template>
+<template id="exceptionTemplate">
+    <div class="avail-exception">
+        <input type="date" name="offDate" value="" min="@minDate" class="form-control" />
+        <input type="time" name="offStart" value="" step="3600" class="form-control" placeholder="@L["Start"]" />
+        <span class="availability-dash">–</span>
+        <input type="time" name="offEnd" value="" step="3600" class="form-control" placeholder="@L["End"]" />
+        <button type="button" class="avail-remove" title="@L["Remove"]">✕</button>
+    </div>
+</template>
+
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        // Dim a day's time inputs until it's checked, so the row reads as on/off at a glance.
-        document.querySelectorAll('.availability-row').forEach(function (row) {
-            var check = row.querySelector('input[type=checkbox]');
-            var times = row.querySelector('.availability-times');
-            function sync() { times.style.opacity = check.checked ? '1' : '.4'; }
-            check.addEventListener('change', sync);
-            sync();
-        });
-    </script>
+    <script src="~/js/availability-editor.js"></script>
 }

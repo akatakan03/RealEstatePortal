@@ -41,16 +41,20 @@ public class RequestAppointmentCommandTests
                     StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(12, 0) }
         }.BuildMockDbSet();
         var appointmentsSet = new List<Appointment>().BuildMockDbSet();
+        var timeOffSet = new List<AgentTimeOff>().BuildMockDbSet();
 
         var ctx = Substitute.For<IApplicationDbContext>();
         ctx.Listings.Returns(listingsSet);
         ctx.AgentAvailabilities.Returns(availabilitySet);
         ctx.Appointments.Returns(appointmentsSet);
+        ctx.AgentTimeOffs.Returns(timeOffSet);
 
         var user = Substitute.For<IUser>();
         user.Id.Returns(customerId);
 
-        return (new RequestAppointmentCommandHandler(ctx, user, new FixedClock(Now)), ctx);
+        // The real schedule service so the slot gate is exercised end to end.
+        var schedule = new AgentScheduleService(ctx, new FixedClock(Now));
+        return (new RequestAppointmentCommandHandler(ctx, user, schedule), ctx);
     }
 
     [Fact]

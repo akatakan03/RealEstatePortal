@@ -19,12 +19,12 @@ public class GetAvailableSlotsQueryHandler
     : IRequestHandler<GetAvailableSlotsQuery, AvailableSlotsResult?>
 {
     private readonly IApplicationDbContext _context;
-    private readonly TimeProvider _clock;
+    private readonly IAgentScheduleService _schedule;
 
-    public GetAvailableSlotsQueryHandler(IApplicationDbContext context, TimeProvider clock)
+    public GetAvailableSlotsQueryHandler(IApplicationDbContext context, IAgentScheduleService schedule)
     {
         _context = context;
-        _clock = clock;
+        _schedule = schedule;
     }
 
     public async Task<AvailableSlotsResult?> Handle(
@@ -38,39 +38,13 @@ public class GetAvailableSlotsQueryHandler
         if (listing is null || listing.OwnerId is null)
             return listing is null ? null : new AvailableSlotsResult(false, Array.Empty<SlotDay>());
 
-        var agentId = listing.OwnerId;
-
-        var windows = await _context.AgentAvailabilities
-            .Where(a => a.AgentId == agentId)
-            .ToListAsync(cancellationToken);
-
-        if (windows.Count == 0)
+        // Whether the agent has published any hours at all — drives the "no availability" message.
+        var hasWindows = await _context.AgentAvailabilities
+            .AnyAsync(a => a.AgentId == listing.OwnerId, cancellationToken);
+        if (!hasWindows)
             return new AvailableSlotsResult(false, Array.Empty<SlotDay>());
 
-        var now = _clock.GetUtcNow();
-        var horizonEnd = now.AddDays(AppointmentPolicy.HorizonDays + 1);
-
-        // The agent's live commitments across ALL their listings — they can't be in two places, so
-        // a slot taken for one listing is unavailable for another. A counter-proposed appointment
-        // holds the agent's proposed time; a plain pending/approved one holds its own start.
-        var live = await _context.Appointments
-            .Where(a => a.AgentId == agentId
-                && (a.Status == AppointmentStatus.Pending
-                    || a.Status == AppointmentStatus.Approved
-                    || a.Status == AppointmentStatus.CounterProposed)
-                && a.Start < horizonEnd)
-            .Select(a => new { a.Start, a.ProposedStart, a.DurationMinutes, a.Status })
-            .ToListAsync(cancellationToken);
-
-        var busy = live.Select(a =>
-        {
-            var start = a.Status == AppointmentStatus.CounterProposed && a.ProposedStart is not null
-                ? a.ProposedStart.Value
-                : a.Start;
-            return new BusyInterval(start, start.AddMinutes(a.DurationMinutes));
-        });
-
-        var slots = SlotPlanner.Generate(windows, busy, now);
+        var slots = await _schedule.GetOpenSlotsAsync(listing.OwnerId, null, cancellationToken);
 
         var days = slots
             .GroupBy(s => DateOnly.FromDateTime(s.ToOffset(AppointmentPolicy.MarketOffset).DateTime))

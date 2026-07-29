@@ -16,14 +16,14 @@ public class RequestAppointmentCommandHandler : IRequestHandler<RequestAppointme
 {
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
-    private readonly TimeProvider _clock;
+    private readonly IAgentScheduleService _schedule;
 
     public RequestAppointmentCommandHandler(
-        IApplicationDbContext context, IUser user, TimeProvider clock)
+        IApplicationDbContext context, IUser user, IAgentScheduleService schedule)
     {
         _context = context;
         _user = user;
-        _clock = clock;
+        _schedule = schedule;
     }
 
     public async Task<int> Handle(RequestAppointmentCommand request, CancellationToken cancellationToken)
@@ -47,33 +47,10 @@ public class RequestAppointmentCommandHandler : IRequestHandler<RequestAppointme
         if (agentId == customerId)
             throw Invalid("You can't book a viewing on your own listing.");
 
-        var now = _clock.GetUtcNow();
-        var horizonEnd = now.AddDays(AppointmentPolicy.HorizonDays + 1);
-
-        var windows = await _context.AgentAvailabilities
-            .Where(a => a.AgentId == agentId)
-            .ToListAsync(cancellationToken);
-
-        var live = await _context.Appointments
-            .Where(a => a.AgentId == agentId
-                && (a.Status == AppointmentStatus.Pending
-                    || a.Status == AppointmentStatus.Approved
-                    || a.Status == AppointmentStatus.CounterProposed)
-                && a.Start < horizonEnd)
-            .Select(a => new { a.Start, a.ProposedStart, a.DurationMinutes, a.Status })
-            .ToListAsync(cancellationToken);
-
-        var busy = live.Select(a =>
-        {
-            var start = a.Status == AppointmentStatus.CounterProposed && a.ProposedStart is not null
-                ? a.ProposedStart.Value
-                : a.Start;
-            return new BusyInterval(start, start.AddMinutes(a.DurationMinutes));
-        });
-
         // Re-derive the open slots on the server and require the requested time to be one of them.
-        // This is the real gate: it rejects past, taken, or hand-crafted times regardless of the UI.
-        var openSlots = SlotPlanner.Generate(windows, busy, now);
+        // This is the real gate: it rejects past, taken, blocked, or hand-crafted times regardless
+        // of the UI.
+        var openSlots = await _schedule.GetOpenSlotsAsync(agentId, null, cancellationToken);
         if (!openSlots.Contains(request.Start))
             throw Invalid("That time is no longer available. Please pick another slot.");
 

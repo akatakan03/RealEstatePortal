@@ -2,6 +2,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using RealEstatePortal.Application.Appointments;
 using RealEstatePortal.Application.Appointments.EventHandlers;
 using RealEstatePortal.Application.Common.Behaviours;
 
@@ -17,6 +18,10 @@ public static class DependencyInjection
 
         // Shared composer for the appointment event handlers.
         services.AddScoped<AppointmentNotifier>();
+
+        // Shared open-slot computation used by the slot picker, the booking command, and the
+        // counter-proposal command.
+        services.AddScoped<IAgentScheduleService, AgentScheduleService>();
 
         services.AddMediatR(cfg =>
         {

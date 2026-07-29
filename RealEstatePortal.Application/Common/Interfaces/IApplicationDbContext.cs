@@ -15,6 +15,7 @@ public interface IApplicationDbContext
     DbSet<ListingPriceChange> ListingPriceChanges { get; }
     DbSet<Appointment> Appointments { get; }
     DbSet<AgentAvailability> AgentAvailabilities { get; }
+    DbSet<AgentTimeOff> AgentTimeOffs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

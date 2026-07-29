@@ -5,13 +5,19 @@ using RealEstatePortal.Domain.Entities;
 
 namespace RealEstatePortal.Application.Appointments.Commands.SetAgentAvailability;
 
-// One weekly window the agent is open for viewings. The editor sends one per day the agent marks
-// as available; a day with no window simply isn't in the list.
+// One weekly window the agent is open for viewings. A day can have several — e.g. 09:00–12:00 and
+// 15:00–18:00 leaves a midday gap.
 public record AvailabilityWindow(DayOfWeek Day, TimeOnly Start, TimeOnly End);
 
-// Replaces the signed-in agent's whole weekly availability template in one shot — simpler and less
-// error-prone than diffing individual rows, and the set is tiny.
-public record SetAgentAvailabilityCommand(IReadOnlyList<AvailabilityWindow> Windows) : IRequest;
+// A one-off exception on a specific date. Start/End are optional and read as a blocked range
+// (see AgentTimeOff): both null = whole day off; Start only = "after X"; End only = "before X".
+public record TimeOffEntry(DateOnly Date, TimeOnly? Start, TimeOnly? End);
+
+// Replaces the signed-in agent's whole schedule — weekly windows and date exceptions — in one shot.
+// Simpler and less error-prone than diffing individual rows, and the set is small.
+public record SetAgentAvailabilityCommand(
+    IReadOnlyList<AvailabilityWindow> Windows,
+    IReadOnlyList<TimeOffEntry> TimeOff) : IRequest;
 
 public class SetAgentAvailabilityCommandHandler : IRequestHandler<SetAgentAvailabilityCommand>
 {
@@ -29,11 +35,10 @@ public class SetAgentAvailabilityCommandHandler : IRequestHandler<SetAgentAvaila
         var agentId = _user.Id
             ?? throw new InvalidOperationException("Only a signed-in agent can set availability.");
 
-        var existing = await _context.AgentAvailabilities
+        var existingWindows = await _context.AgentAvailabilities
             .Where(a => a.AgentId == agentId)
             .ToListAsync(cancellationToken);
-
-        _context.AgentAvailabilities.RemoveRange(existing);
+        _context.AgentAvailabilities.RemoveRange(existingWindows);
 
         foreach (var w in request.Windows)
         {
@@ -43,6 +48,22 @@ public class SetAgentAvailabilityCommandHandler : IRequestHandler<SetAgentAvaila
                 DayOfWeek = w.Day,
                 StartTime = w.Start,
                 EndTime = w.End
+            });
+        }
+
+        var existingTimeOff = await _context.AgentTimeOffs
+            .Where(t => t.AgentId == agentId)
+            .ToListAsync(cancellationToken);
+        _context.AgentTimeOffs.RemoveRange(existingTimeOff);
+
+        foreach (var t in request.TimeOff)
+        {
+            _context.AgentTimeOffs.Add(new AgentTimeOff
+            {
+                AgentId = agentId,
+                Date = t.Date,
+                Start = t.Start,
+                End = t.End
             });
         }
 

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using RealEstatePortal.Application.Common.Exceptions;
 using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Domain.Entities;
-using RealEstatePortal.Domain.Enums;
 
 namespace RealEstatePortal.Application.Appointments.Commands.RespondToAppointment;
 
@@ -19,14 +18,14 @@ public class RespondToAppointmentCommandHandler : IRequestHandler<RespondToAppoi
 {
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
-    private readonly TimeProvider _clock;
+    private readonly IAgentScheduleService _schedule;
 
     public RespondToAppointmentCommandHandler(
-        IApplicationDbContext context, IUser user, TimeProvider clock)
+        IApplicationDbContext context, IUser user, IAgentScheduleService schedule)
     {
         _context = context;
         _user = user;
-        _clock = clock;
+        _schedule = schedule;
     }
 
     public async Task Handle(RespondToAppointmentCommand request, CancellationToken cancellationToken)
@@ -57,46 +56,20 @@ public class RespondToAppointmentCommandHandler : IRequestHandler<RespondToAppoi
             case AppointmentAction.Propose:
                 var proposed = request.ProposedStart
                     ?? throw Invalid("Pick a time to propose.");
-                await EnsureProposableAsync(agentId, appointment.Id, proposed, cancellationToken);
+
+                // The proposed time must be a real open slot — in the agent's hours, not blocked,
+                // and not clashing with another live appointment. This appointment's own current
+                // hold is excluded so it doesn't block its own new time.
+                var openSlots = await _schedule.GetOpenSlotsAsync(
+                    agentId, appointment.Id, cancellationToken);
+                if (!openSlots.Contains(proposed))
+                    throw Invalid("That time isn't in your availability, or it's already taken.");
+
                 appointment.ProposeNewTime(proposed, request.Note);
                 break;
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    // The proposed time must be a real open slot for the agent — in their hours and not clashing
-    // with any OTHER live appointment (this one's own current hold is naturally excluded).
-    private async Task EnsureProposableAsync(
-        string agentId, int appointmentId, DateTimeOffset proposed, CancellationToken cancellationToken)
-    {
-        var now = _clock.GetUtcNow();
-        var horizonEnd = now.AddDays(AppointmentPolicy.HorizonDays + 1);
-
-        var windows = await _context.AgentAvailabilities
-            .Where(a => a.AgentId == agentId)
-            .ToListAsync(cancellationToken);
-
-        var live = await _context.Appointments
-            .Where(a => a.AgentId == agentId
-                && a.Id != appointmentId
-                && (a.Status == AppointmentStatus.Pending
-                    || a.Status == AppointmentStatus.Approved
-                    || a.Status == AppointmentStatus.CounterProposed)
-                && a.Start < horizonEnd)
-            .Select(a => new { a.Start, a.ProposedStart, a.DurationMinutes, a.Status })
-            .ToListAsync(cancellationToken);
-
-        var busy = live.Select(a =>
-        {
-            var start = a.Status == AppointmentStatus.CounterProposed && a.ProposedStart is not null
-                ? a.ProposedStart.Value
-                : a.Start;
-            return new BusyInterval(start, start.AddMinutes(a.DurationMinutes));
-        });
-
-        if (!SlotPlanner.Generate(windows, busy, now).Contains(proposed))
-            throw Invalid("That time isn't in your availability, or it's already taken.");
     }
 
     private static ValidationException Invalid(string message) =>

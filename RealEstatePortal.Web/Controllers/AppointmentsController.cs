@@ -9,7 +9,7 @@ using RealEstatePortal.Application.Appointments.Commands.RespondToAppointment;
 using RealEstatePortal.Application.Appointments.Commands.RespondToProposal;
 using RealEstatePortal.Application.Appointments.Commands.SetAgentAvailability;
 using RealEstatePortal.Application.Appointments.Queries.GetAgentAppointments;
-using RealEstatePortal.Application.Appointments.Queries.GetAgentAvailability;
+using RealEstatePortal.Application.Appointments.Queries.GetAgentSchedule;
 using RealEstatePortal.Application.Appointments.Queries.GetAvailableSlots;
 using RealEstatePortal.Application.Appointments.Queries.GetCustomerAppointments;
 using RealEstatePortal.Application.Common.Exceptions;
@@ -34,21 +34,80 @@ public class AppointmentsController : Controller
     [Authorize(Roles = Roles.Agent)]
     public async Task<IActionResult> Availability()
     {
-        var saved = await _sender.Send(new GetAgentAvailabilityQuery());
-        return View(AvailabilityFormModel.FromSaved(saved));
+        var schedule = await _sender.Send(new GetAgentScheduleQuery());
+        return View(schedule);
     }
 
+    // The editor posts dynamic rows, so the fields arrive as parallel arrays rather than an indexed
+    // model — winDay[i]/winStart[i]/winEnd[i] make one weekly window, offDate[i]/offStart[i]/offEnd[i]
+    // one date exception. Rows that don't carry the minimum (a day + both window times, or a date)
+    // are dropped rather than sent as invalid entries.
     [HttpPost]
     [Authorize(Roles = Roles.Agent)]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Availability(AvailabilityFormModel model)
+    public async Task<IActionResult> Availability(
+        string[]? winDay, string[]? winStart, string[]? winEnd,
+        string[]? offDate, string[]? offStart, string[]? offEnd)
     {
-        var windows = model.ToWindows();
-        await _sender.Send(new SetAgentAvailabilityCommand(windows));
+        var windows = BuildWindows(winDay, winStart, winEnd);
+        var timeOff = BuildTimeOff(offDate, offStart, offEnd);
 
-        TempData["Success"] = "Your availability has been saved.";
+        try
+        {
+            await _sender.Send(new SetAgentAvailabilityCommand(windows, timeOff));
+            TempData["Success"] = "Your availability has been saved.";
+        }
+        catch (ValidationException ex)
+        {
+            TempData["AvailabilityError"] = ex.Errors.SelectMany(e => e.Value).FirstOrDefault()
+                ?? "Please check your availability and try again.";
+        }
+
         return RedirectToAction(nameof(Availability));
     }
+
+    private static List<AvailabilityWindow> BuildWindows(string[]? days, string[]? starts, string[]? ends)
+    {
+        var result = new List<AvailabilityWindow>();
+        if (days is null) return result;
+
+        for (var i = 0; i < days.Length; i++)
+        {
+            if (!Enum.TryParse<DayOfWeek>(days[i], out var day)) continue;
+            var start = At(starts, i);
+            var end = At(ends, i);
+            if (start is null || end is null) continue; // a window needs both ends
+            result.Add(new AvailabilityWindow(day, start.Value, end.Value));
+        }
+        return result;
+    }
+
+    private static List<TimeOffEntry> BuildTimeOff(string[]? dates, string[]? starts, string[]? ends)
+    {
+        var result = new List<TimeOffEntry>();
+        if (dates is null) return result;
+
+        for (var i = 0; i < dates.Length; i++)
+        {
+            if (!DateOnly.TryParse(At(dates, i, raw: true), CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out var date))
+                continue; // a row with no date is an empty template row
+            result.Add(new TimeOffEntry(date, At(starts, i), At(ends, i)));
+        }
+        return result;
+    }
+
+    private static TimeOnly? At(string[]? values, int i)
+    {
+        var raw = At(values, i, raw: true);
+        return TimeOnly.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.None, out var t)
+            ? t : null;
+    }
+
+    private static string? At(string[]? values, int i, bool raw) =>
+        values is not null && i < values.Length && !string.IsNullOrWhiteSpace(values[i])
+            ? values[i]
+            : null;
 
     // ----- Customer: book a viewing ------------------------------------------------------------
 
