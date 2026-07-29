@@ -94,4 +94,15 @@ public class SlotPlannerTests
 
         slots.ShouldBeEmpty();
     }
+
+    [Fact]
+    public void OverlappingWindowsOnTheSameDay_DoNotDuplicateSlots()
+    {
+        // 09:00–12:00 and 10:00–13:00 overlap on 10:00 and 11:00 — those must appear once each.
+        var windows = new[] { Window(Now.DayOfWeek, 9, 12), Window(Now.DayOfWeek, 10, 13) };
+
+        var slots = SlotPlanner.Generate(windows, Array.Empty<BusyInterval>(), Now);
+
+        Today(slots).Select(s => s.ToOffset(Offset).Hour).ShouldBe(new[] { 9, 10, 11, 12 });
+    }
 }

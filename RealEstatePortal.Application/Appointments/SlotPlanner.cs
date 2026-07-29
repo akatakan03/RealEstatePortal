@@ -47,7 +47,9 @@ public static class SlotPlanner
             }
         }
 
-        return slots.OrderBy(s => s).ToList();
+        // Distinct guards against overlapping windows on the same day producing the same slot twice
+        // (equality on DateTimeOffset is by instant, so different offsets for the same moment fold).
+        return slots.Distinct().OrderBy(s => s).ToList();
     }
 
     private static DateTimeOffset ToInstant(DateOnly date, TimeOnly time, TimeSpan offset) =>

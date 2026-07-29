@@ -116,15 +116,6 @@ public class Appointment : BaseAuditableEntity
         AddDomainEvent(new AppointmentCancelledEvent(this, byAgent: true));
     }
 
-    // Marks an approved appointment whose time has passed as completed. Idempotent-friendly: only
-    // an approved appointment can complete, so calling it twice is a no-op after the first.
-    public void MarkCompleted()
-    {
-        if (Status != AppointmentStatus.Approved)
-            throw new DomainException("Only an approved appointment can be completed.");
-        Status = AppointmentStatus.Completed;
-    }
-
     private void RequirePending(string action)
     {
         if (Status != AppointmentStatus.Pending)

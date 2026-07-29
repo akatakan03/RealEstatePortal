@@ -16,6 +16,12 @@ public class SetAgentAvailabilityCommandValidator : AbstractValidator<SetAgentAv
                 .WithMessage("The end time must be after the start time.");
         });
 
+        // Two ranges on the same day must not overlap — otherwise the same hour would be offered as
+        // a slot twice. Adjacent ranges (one ends where the next begins) are fine.
+        RuleFor(x => x.Windows)
+            .Must(NoOverlappingWindows)
+            .WithMessage("Two time ranges on the same day overlap.");
+
         RuleForEach(x => x.TimeOff).ChildRules(t =>
         {
             // A partial-day exception must be a real range; a whole-day one leaves both blank.
@@ -23,5 +29,17 @@ public class SetAgentAvailabilityCommandValidator : AbstractValidator<SetAgentAv
                 .Must(entry => entry.Start is null || entry.End is null || entry.End > entry.Start)
                 .WithMessage("The exception's end time must be after its start time.");
         });
+    }
+
+    private static bool NoOverlappingWindows(IReadOnlyList<AvailabilityWindow> windows)
+    {
+        foreach (var day in windows.GroupBy(w => w.Day))
+        {
+            var ordered = day.OrderBy(w => w.Start).ToList();
+            for (var i = 1; i < ordered.Count; i++)
+                if (ordered[i].Start < ordered[i - 1].End) // starts before the previous one ends
+                    return false;
+        }
+        return true;
     }
 }

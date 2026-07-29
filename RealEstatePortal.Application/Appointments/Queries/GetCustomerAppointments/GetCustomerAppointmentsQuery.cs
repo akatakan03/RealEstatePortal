@@ -15,13 +15,15 @@ public class GetCustomerAppointmentsQueryHandler
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IIdentityService _identity;
+    private readonly TimeProvider _clock;
 
     public GetCustomerAppointmentsQueryHandler(
-        IApplicationDbContext context, IUser user, IIdentityService identity)
+        IApplicationDbContext context, IUser user, IIdentityService identity, TimeProvider clock)
     {
         _context = context;
         _user = user;
         _identity = identity;
+        _clock = clock;
     }
 
     public async Task<IReadOnlyList<AppointmentDto>> Handle(
@@ -47,17 +49,31 @@ public class GetCustomerAppointmentsQueryHandler
         var names = await ResolveAgentNamesAsync(
             rows.Select(r => r.AgentId).Distinct(), cancellationToken);
 
+        var now = _clock.GetUtcNow();
+
         return rows
-            .Select(r => new AppointmentDto(
-                r.Id, r.ListingId, r.ListingTitle, r.ListingSlug,
-                names.GetValueOrDefault(r.AgentId, ""),
-                r.Start, r.ProposedStart, r.DurationMinutes, r.Status,
-                r.CustomerNote, r.AgentNote,
-                IsActive(r.Status)))
+            .Select(r =>
+            {
+                var status = Effective(r.Status, r.Start, r.DurationMinutes, now);
+                return new AppointmentDto(
+                    r.Id, r.ListingId, r.ListingTitle, r.ListingSlug,
+                    names.GetValueOrDefault(r.AgentId, ""),
+                    r.Start, r.ProposedStart, r.DurationMinutes, status,
+                    r.CustomerNote, r.AgentNote,
+                    IsActive(status));
+            })
             .OrderByDescending(a => NeedsResponse(a.Status))
             .ThenByDescending(a => a.Start)
             .ToList();
     }
+
+    // An approved appointment whose time has passed reads as Completed, without a background job
+    // ever having to write that status to the row.
+    private static AppointmentStatus Effective(
+        AppointmentStatus status, DateTimeOffset start, int durationMinutes, DateTimeOffset now) =>
+        status == AppointmentStatus.Approved && start.AddMinutes(durationMinutes) <= now
+            ? AppointmentStatus.Completed
+            : status;
 
     private async Task<Dictionary<string, string>> ResolveAgentNamesAsync(
         IEnumerable<string> agentIds, CancellationToken cancellationToken)
