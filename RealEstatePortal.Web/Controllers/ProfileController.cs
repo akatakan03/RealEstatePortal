@@ -57,7 +57,8 @@ public class ProfileController : Controller
             DisplayName = user.DisplayName,
             Phone = user.PhoneNumber,
             Bio = user.Bio,
-            PreferredCulture = user.PreferredCulture
+            PreferredCulture = user.PreferredCulture,
+            EmailNotifications = user.EmailNotificationsEnabled
         });
     }
 
@@ -78,6 +79,8 @@ public class ProfileController : Controller
         user.PreferredCulture = SupportedCultures.IsSupported(model.PreferredCulture)
             ? model.PreferredCulture
             : null;
+
+        user.EmailNotificationsEnabled = model.EmailNotifications;
 
         await _userManager.UpdateAsync(user);
 

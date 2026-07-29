@@ -1,0 +1,26 @@
+@using Microsoft.AspNetCore.Authentication
+@{
+    var schemes = ViewData["ExternalLogins"] as IList<AuthenticationScheme> ?? new List<AuthenticationScheme>();
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+@if (schemes.Any())
+{
+    <div class="auth-divider"><span>@L["or"]</span></div>
+    <div class="external-logins">
+        @foreach (var scheme in schemes)
+        {
+            <form asp-action="ExternalLogin" method="post">
+                <input type="hidden" name="provider" value="@scheme.Name" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <button type="submit" class="btn btn-external" title="@scheme.DisplayName">
+                    @if (scheme.Name == "Google")
+                    {
+                        <span class="external-g" aria-hidden="true">G</span>
+                    }
+                    @L["Continue with {0}", scheme.DisplayName ?? scheme.Name]
+                </button>
+            </form>
+        }
+    </div>
+}

@@ -23,6 +23,12 @@ namespace RealEstatePortal.Web.Controllers
             return View();
         }
 
+        // Terms of use, linked from the registration consent checkbox.
+        public IActionResult Terms()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

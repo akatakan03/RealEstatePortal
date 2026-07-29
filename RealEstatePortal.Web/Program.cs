@@ -91,7 +91,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // and the last registration for a service type is the one resolved. Registering earlier would
 // silently lose to it and leave Identity's rejections in English.
 builder.Services.AddScoped<IdentityErrorDescriber, LocalizedIdentityErrorDescriber>();
-builder.Services
+var authBuilder = builder.Services
     .AddAuthentication()   // no argument -> keeps Identity's cookie as the DEFAULT scheme
     .AddJwtBearer(options =>
     {
@@ -108,6 +108,22 @@ builder.Services
                 Encoding.UTF8.GetBytes(jwt["Key"] ?? throw new InvalidOperationException("Jwt:Key missing")))
         };
     });
+
+// Google sign-in is optional and gated on configuration: the button only appears when a client id
+// and secret are present (set them in user-secrets in dev, real config in prod). Without them the
+// scheme isn't registered at all, so nothing breaks when the keys are absent.
+var googleId = builder.Configuration["Authentication:Google:ClientId"];
+var googleSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(googleId) && !string.IsNullOrWhiteSpace(googleSecret))
+{
+    authBuilder.AddGoogle(options =>
+    {
+        options.ClientId = googleId;
+        options.ClientSecret = googleSecret;
+        // Default callback is /signin-google; register that (with the https dev port) in the
+        // Google Cloud console's Authorized redirect URIs.
+    });
+}
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";

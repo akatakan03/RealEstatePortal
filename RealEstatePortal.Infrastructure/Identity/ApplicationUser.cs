@@ -20,4 +20,12 @@ public class ApplicationUser : IdentityUser
     /// thing that survives that, so it is stored against the account.
     [MaxLength(8)]   // a language tag, not free text
     public string? PreferredCulture { get; set; }
+
+    /// When this person accepted the terms of use. Recorded rather than a mere bool so there is a
+    /// timestamped consent on file; null only for accounts created before the checkbox existed.
+    public DateTimeOffset? AcceptedTermsAt { get; set; }
+
+    /// Whether they want the optional email alerts (saved-search matches, price drops). Defaults to
+    /// on; transactional mail (appointment and inquiry updates) ignores this and always sends.
+    public bool EmailNotificationsEnabled { get; set; } = true;
 }

@@ -1,6 +1,7 @@
 ﻿@model RealEstatePortal.Web.Models.Account.LoginViewModel
 @{
     ViewData["Title"] = L["Sign in"].Value;
+    ViewData["ReturnUrl"] = Model.ReturnUrl; // passed to the external-login buttons
 }
 
 <div class="form-page">
@@ -11,6 +12,10 @@
                 <p>@L["Sign in to manage your listings and inquiries."]</p>
             </div>
             <div class="form-card">
+                @if (TempData["AuthError"] is string authErr)
+                {
+                    <div class="alert alert-danger">@L[authErr]</div>
+                }
                 <form asp-action="Login" method="post">
                     <input type="hidden" asp-for="ReturnUrl" />
                     <div asp-validation-summary="All" class="text-danger" style="margin-bottom:1rem;"></div>
@@ -30,6 +35,8 @@
                     </label>
                     <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1.2rem;">@L["Sign in"]</button>
                 </form>
+
+                <partial name="_ExternalLogins" />
             </div>
             <p class="auth-alt">@L["New here?"] <a asp-action="Register">@L["Create an account"]</a></p>
         </div>

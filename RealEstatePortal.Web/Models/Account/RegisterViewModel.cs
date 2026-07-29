@@ -24,5 +24,16 @@ public class RegisterViewModel
     [Display(Name = "Confirm password")]
     [Compare(nameof(Password), ErrorMessage = "The passwords do not match.")]
     public string ConfirmPassword { get; set; } = string.Empty;
+
+    // Range(true,true) is the standard way to require a checkbox be ticked: an unchecked box posts
+    // false, which falls outside the allowed range and fails validation.
+    [Range(typeof(bool), "true", "true", ErrorMessage = "Please accept the terms to continue.")]
+    [Display(Name = "Terms")]
+    public bool AcceptTerms { get; set; }
+
+    // Opt-in to the optional email alerts. Defaults to on so the common case is one less click.
+    [Display(Name = "Email notifications")]
+    public bool EmailNotifications { get; set; } = true;
+
     public string Role { get; set; } = "Member";
 }

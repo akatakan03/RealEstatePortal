@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,13 +29,19 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Register(string? role = null) => View(new RegisterViewModel { Role = role == "agent" ? "Agent" : "Member" });
+    public async Task<IActionResult> Register(string? role = null)
+    {
+        await PopulateExternalLoginsAsync();
+        return View(new RegisterViewModel { Role = role == "agent" ? "Agent" : "Member" });
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("auth")]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
+        await PopulateExternalLoginsAsync();
+
         if (!ModelState.IsValid)
             return View(model);
 
@@ -45,7 +52,10 @@ public class AccountController : Controller
         {
             UserName = model.Email,
             Email = model.Email,
-            PreferredCulture = SupportedCultures.CodeOf(CultureInfo.CurrentUICulture)
+            PreferredCulture = SupportedCultures.CodeOf(CultureInfo.CurrentUICulture),
+            // The checkbox is validated required-true above, so reaching here means they accepted.
+            AcceptedTermsAt = DateTimeOffset.UtcNow,
+            EmailNotificationsEnabled = model.EmailNotifications
         };
         var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -65,14 +75,19 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Login(string? returnUrl = null)
-        => View(new LoginViewModel { ReturnUrl = returnUrl });
+    public async Task<IActionResult> Login(string? returnUrl = null)
+    {
+        await PopulateExternalLoginsAsync();
+        return View(new LoginViewModel { ReturnUrl = returnUrl });
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("auth")]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
+        await PopulateExternalLoginsAsync();
+
         if (!ModelState.IsValid)
             return View(model);
 
@@ -102,6 +117,86 @@ public class AccountController : Controller
         return RedirectToAction("Index", "Home");
     }
 
+    // ----- External (Google) sign-in -----------------------------------------------------------
+
+    // Kicks off the OAuth handshake. The provider name ("Google") matches the registered scheme.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult ExternalLogin(string provider, string? returnUrl = null)
+    {
+        var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        return Challenge(properties, provider);
+    }
+
+    // Where the provider sends the user back. Signs them in if the login is already linked;
+    // otherwise links it to a matching account by email, creating one on first use.
+    [HttpGet]
+    public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
+    {
+        if (remoteError is not null)
+        {
+            TempData["AuthError"] = "Google sign-in didn't complete. Please try again.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var info = await _signInManager.GetExternalLoginInfoAsync();
+        if (info is null)
+            return RedirectToAction(nameof(Login));
+
+        // Already linked → straight in.
+        var signIn = await _signInManager.ExternalLoginSignInAsync(
+            info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+        if (signIn.Succeeded)
+            return RedirectToLocalOrHome(returnUrl);
+
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+        {
+            TempData["AuthError"] = "Google didn't share an email address, so an account can't be created.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true, // the provider vouches for the address
+                DisplayName = info.Principal.FindFirstValue(ClaimTypes.Name),
+                PreferredCulture = SupportedCultures.CodeOf(CultureInfo.CurrentUICulture),
+                // The sign-in button notes that continuing accepts the terms.
+                AcceptedTermsAt = DateTimeOffset.UtcNow,
+                EmailNotificationsEnabled = true
+            };
+
+            var created = await _userManager.CreateAsync(user);
+            if (!created.Succeeded)
+            {
+                TempData["AuthError"] = "We couldn't create your account. Please try again.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            await _userManager.AddToRoleAsync(user, Roles.Member);
+        }
+
+        // Link the external login to the account and sign in.
+        await _userManager.AddLoginAsync(user, info);
+        await _signInManager.SignInAsync(user, isPersistent: false);
+        return RedirectToLocalOrHome(returnUrl);
+    }
+
     [HttpGet]
     public IActionResult AccessDenied() => View();
+
+    private async Task PopulateExternalLoginsAsync() =>
+        ViewData["ExternalLogins"] =
+            (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+    private IActionResult RedirectToLocalOrHome(string? returnUrl) =>
+        !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
+            ? Redirect(returnUrl)
+            : RedirectToAction("Index", "Home");
 }

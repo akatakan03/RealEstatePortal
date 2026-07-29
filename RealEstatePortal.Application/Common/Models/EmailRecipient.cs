@@ -9,4 +9,9 @@ namespace RealEstatePortal.Application.Common.Models;
 /// Null when the account has expressed no preference, which the text lookup reads as "the site
 /// default" rather than as an error.
 /// </param>
-public record EmailRecipient(string Email, string? Culture);
+/// <param name="NotificationsEnabled">
+/// Whether this person opted into the optional email alerts (saved-search matches, price drops).
+/// Transactional mail ignores it; the optional handlers skip a recipient who turned it off.
+/// Defaults to true so existing call sites and transactional mail are unaffected.
+/// </param>
+public record EmailRecipient(string Email, string? Culture, bool NotificationsEnabled = true);

@@ -2630,6 +2630,94 @@ textarea.form-control {
         font-weight: 600
     }
 
+/* checkbox rows in the register / profile forms */
+.check-field {
+    margin: .2rem 0 0
+}
+
+    .check-field .check-row {
+        display: flex;
+        align-items: flex-start;
+        gap: .55rem;
+        font-size: .92rem;
+        line-height: 1.4;
+        cursor: pointer
+    }
+
+    .check-field .check-row input {
+        margin-top: .15rem;
+        flex-shrink: 0
+    }
+
+    .check-field a {
+        color: var(--brass-dk);
+        font-weight: 600
+    }
+
+/* "or" divider between password and external sign-in */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    margin: 1.2rem 0;
+    color: var(--muted);
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .05em
+}
+
+    .auth-divider::before,
+    .auth-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--line)
+    }
+
+.external-logins {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem
+}
+
+.btn-external {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    width: 100%;
+    padding: .7rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    font: inherit;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color .12s ease, background .12s ease
+}
+
+    .btn-external:hover {
+        border-color: var(--brass);
+        background: var(--paper)
+    }
+
+.external-g {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid var(--line);
+    font-family: var(--serif);
+    font-weight: 700;
+    color: #4285F4;
+    font-size: .9rem;
+    line-height: 1
+}
+
 @media (max-width:640px) {
     .form-row, .form-row-3 {
         grid-template-columns: 1fr

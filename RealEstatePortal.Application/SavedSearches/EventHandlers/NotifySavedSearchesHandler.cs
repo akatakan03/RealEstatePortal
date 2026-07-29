@@ -58,6 +58,7 @@ public class NotifySavedSearchesHandler
             {
                 var recipient = await _identity.GetEmailRecipientAsync(userId, cancellationToken);
                 if (recipient is null) continue;
+                if (!recipient.NotificationsEnabled) continue; // opted out of optional alerts
 
                 // Formatted for the reader, not the server: a price is read, so it follows the
                 // language the rest of the message is written in.

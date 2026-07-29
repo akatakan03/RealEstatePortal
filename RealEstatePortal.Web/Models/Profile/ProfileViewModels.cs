@@ -40,4 +40,8 @@ public class EditProfileViewModel
     /// are reading the site in right now is the URL's business, and the header switcher's.
     [Display(Name = "Notification language")]
     public string? PreferredCulture { get; set; }
+
+    // The optional email alerts (saved-search matches, price drops). Transactional mail ignores it.
+    [Display(Name = "Email notifications")]
+    public bool EmailNotifications { get; set; } = true;
 }

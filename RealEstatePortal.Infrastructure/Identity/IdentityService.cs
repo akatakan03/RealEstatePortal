@@ -27,7 +27,7 @@ public class IdentityService : IIdentityService
 
         return string.IsNullOrEmpty(user?.Email)
             ? null   // nowhere to write to; the caller skips the message rather than failing
-            : new EmailRecipient(user.Email, user.PreferredCulture);
+            : new EmailRecipient(user.Email, user.PreferredCulture, user.EmailNotificationsEnabled);
     }
 
     public async Task<AgentProfileDto?> GetAgentProfileAsync(

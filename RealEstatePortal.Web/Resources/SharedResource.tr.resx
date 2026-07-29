@@ -1171,6 +1171,54 @@
   <data name="Block a date" xml:space="preserve">
     <value>Tarih kapat</value>
   </data>
+  <data name="or" xml:space="preserve">
+    <value>veya</value>
+  </data>
+  <data name="Continue with {0}" xml:space="preserve">
+    <value>{0} ile devam et</value>
+  </data>
+  <data name="Email me about new matches and price drops" xml:space="preserve">
+    <value>Yeni eşleşmeler ve fiyat düşüşleri için bana e-posta gönder</value>
+  </data>
+  <data name="Appointment and inquiry updates are always sent." xml:space="preserve">
+    <value>Randevu ve mesaj güncellemeleri her zaman gönderilir.</value>
+  </data>
+  <data name="I accept {0}." xml:space="preserve">
+    <value>{0} kabul ediyorum.</value>
+  </data>
+  <data name="the terms of use" xml:space="preserve">
+    <value>kullanım şartlarını</value>
+  </data>
+  <data name="Please accept the terms to continue." xml:space="preserve">
+    <value>Devam etmek için şartları kabul edin.</value>
+  </data>
+  <data name="Terms of use" xml:space="preserve">
+    <value>Kullanım Şartları</value>
+  </data>
+  <data name="A short summary of the rules for using this site." xml:space="preserve">
+    <value>Bu siteyi kullanma kurallarının kısa bir özeti.</value>
+  </data>
+  <data name="By creating an account you agree to use the site lawfully and to keep your login details secure." xml:space="preserve">
+    <value>Bir hesap oluşturarak siteyi yasalara uygun kullanmayı ve giriş bilgilerinizi güvende tutmayı kabul edersiniz.</value>
+  </data>
+  <data name="Listings must describe real properties accurately. Misleading or fraudulent content may be removed." xml:space="preserve">
+    <value>İlanlar gerçek mülkleri doğru şekilde tanımlamalıdır. Yanıltıcı veya sahte içerik kaldırılabilir.</value>
+  </data>
+  <data name="We store the data you provide to run the service, including your appointments and messages with agents." xml:space="preserve">
+    <value>Hizmeti sunmak için verdiğiniz verileri (randevularınız ve danışmanlarla mesajlarınız dâhil) saklarız.</value>
+  </data>
+  <data name="This is placeholder text — replace it with your final terms before launch." xml:space="preserve">
+    <value>Bu yer tutucu metindir — yayına almadan önce nihai şartlarınızla değiştirin.</value>
+  </data>
+  <data name="Google sign-in didn't complete. Please try again." xml:space="preserve">
+    <value>Google ile giriş tamamlanmadı. Lütfen tekrar deneyin.</value>
+  </data>
+  <data name="Google didn't share an email address, so an account can't be created." xml:space="preserve">
+    <value>Google bir e-posta adresi paylaşmadı, bu yüzden hesap oluşturulamıyor.</value>
+  </data>
+  <data name="We couldn't create your account. Please try again." xml:space="preserve">
+    <value>Hesabın oluşturulamadı. Lütfen tekrar deneyin.</value>
+  </data>
   <data name="Start" xml:space="preserve">
     <value>Başlangıç</value>
   </data>

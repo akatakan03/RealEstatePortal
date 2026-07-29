@@ -53,6 +53,7 @@ public class NotifyFavoritesOnPriceDropHandler
             {
                 var recipient = await _identity.GetEmailRecipientAsync(userId, cancellationToken);
                 if (recipient is null) continue;
+                if (!recipient.NotificationsEnabled) continue; // opted out of optional alerts
 
                 // Numbers are read, so they follow the language the message is written in.
                 var culture = _text.CultureFor(recipient.Culture);

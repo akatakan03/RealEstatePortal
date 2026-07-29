@@ -62,6 +62,14 @@
                         <p class="form-hint">@L["The language we email you in. To change the language you are reading, use the switcher at the top of the page."]</p>
                     </div>
 
+                    <div class="mb-field check-field">
+                        <label class="check-row">
+                            <input asp-for="EmailNotifications" />
+                            <span>@L["Email me about new matches and price drops"]</span>
+                        </label>
+                        <p class="form-hint">@L["Appointment and inquiry updates are always sent."]</p>
+                    </div>
+
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">@L["Save changes"]</button>
                         <a asp-action="Index" class="btn btn-ghost">@L["Cancel"]</a>
