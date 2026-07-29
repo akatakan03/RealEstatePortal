@@ -15,10 +15,13 @@ public class CultureRedirectMiddleware
     private static readonly TimeSpan CookieLifetime = TimeSpan.FromDays(365);
 
     // Paths that have no business carrying a language: machine-facing endpoints, and the two
-    // files crawlers expect at a fixed address.
+    // files crawlers expect at a fixed address. "/signin-google" is the OAuth callback the Google
+    // handler listens for at that exact path — adding a culture prefix would redirect it away from
+    // the handler and break the sign-in.
     private static readonly string[] Ignored =
     {
-        "/api", "/swagger", "/hubs", "/health", "/sitemap.xml", "/robots.txt", "/favicon.ico"
+        "/api", "/swagger", "/hubs", "/health", "/sitemap.xml", "/robots.txt", "/favicon.ico",
+        "/signin-google"
     };
 
     private readonly RequestDelegate _next;
