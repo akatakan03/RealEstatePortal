@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Localization;
+using RealEstatePortal.Application.Common.Interfaces;
 using RealEstatePortal.Domain.Constants;
 using RealEstatePortal.Infrastructure.Identity;
 using RealEstatePortal.Web.Localization;
@@ -17,15 +18,27 @@ public class AccountController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IStringLocalizer<SharedResource> _localizer;
+    private readonly IFileStorageService _storage;
+    private readonly IImageProcessor _imageProcessor;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<AccountController> _logger;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IStringLocalizer<SharedResource> localizer)
+        IStringLocalizer<SharedResource> localizer,
+        IFileStorageService storage,
+        IImageProcessor imageProcessor,
+        IHttpClientFactory httpClientFactory,
+        ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _localizer = localizer;
+        _storage = storage;
+        _imageProcessor = imageProcessor;
+        _httpClientFactory = httpClientFactory;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -180,6 +193,12 @@ public class AccountController : Controller
             }
 
             await _userManager.AddToRoleAsync(user, Roles.Member);
+
+            // Bring the Google profile photo over so the new account isn't a blank silhouette.
+            // Best-effort: a failure here must never block the sign-in the user just completed.
+            var pictureUrl = info.Principal.FindFirstValue("picture");
+            if (!string.IsNullOrEmpty(pictureUrl))
+                await TryImportAvatarAsync(user, pictureUrl);
         }
 
         // Link the external login to the account and sign in.
@@ -190,6 +209,34 @@ public class AccountController : Controller
 
     [HttpGet]
     public IActionResult AccessDenied() => View();
+
+    // Downloads a provider's profile photo, runs it through the same image pipeline as a manual
+    // avatar upload, and stores it in R2 under the account's AvatarKey — so every existing reader
+    // (profile, listing detail, agent card) renders it with no change. Entirely best-effort: any
+    // failure is logged and swallowed, leaving the account with the default silhouette.
+    private async Task TryImportAvatarAsync(ApplicationUser user, string pictureUrl)
+    {
+        try
+        {
+            var http = _httpClientFactory.CreateClient();
+            http.Timeout = TimeSpan.FromSeconds(10);
+
+            byte[] source = await http.GetByteArrayAsync(pictureUrl, HttpContext.RequestAborted);
+
+            var processed = await _imageProcessor.ProcessAsync(source, HttpContext.RequestAborted);
+            var key = $"avatars/{user.Id}/{Guid.NewGuid():N}.webp";
+
+            using (var upload = new MemoryStream(processed.Thumbnail))
+                await _storage.UploadAsync(upload, key, "image/webp", HttpContext.RequestAborted);
+
+            user.AvatarKey = key;
+            await _userManager.UpdateAsync(user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not import the Google profile photo for {UserId}.", user.Id);
+        }
+    }
 
     private async Task PopulateExternalLoginsAsync() =>
         ViewData["ExternalLogins"] =

@@ -122,6 +122,9 @@ if (!string.IsNullOrWhiteSpace(googleId) && !string.IsNullOrWhiteSpace(googleSec
         options.ClientSecret = googleSecret;
         // Default callback is /signin-google; register that (with the https dev port) in the
         // Google Cloud console's Authorized redirect URIs.
+        // Google returns the profile photo in a "picture" JSON field; the handler doesn't map it
+        // by default, so surface it as a claim the callback can read to seed the avatar.
+        options.ClaimActions.MapJsonKey("picture", "picture", "url");
     });
 }
 builder.Services.ConfigureApplicationCookie(options =>
