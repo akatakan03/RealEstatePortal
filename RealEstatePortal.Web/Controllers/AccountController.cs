@@ -195,11 +195,14 @@ public class AccountController : Controller
         if (info is null)
             return RedirectToAction(nameof(Login));
 
-        // Already linked → straight in.
+        // Already linked → sign in, but honour two-step verification when the account has it on.
+        // (bypassTwoFactor:false, so a 2FA account is sent to the code page just like a password login.)
         var signIn = await _signInManager.ExternalLoginSignInAsync(
-            info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: false);
         if (signIn.Succeeded)
             return RedirectToLocalOrHome(returnUrl);
+        if (signIn.RequiresTwoFactor)
+            return RedirectToAction(nameof(LoginWith2fa), new { returnUrl });
 
         var email = info.Principal.FindFirstValue(ClaimTypes.Email);
         if (string.IsNullOrEmpty(email))
