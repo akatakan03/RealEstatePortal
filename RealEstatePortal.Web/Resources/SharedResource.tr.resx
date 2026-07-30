@@ -1772,4 +1772,181 @@
   <data name="Site default" xml:space="preserve">
     <value>Site varsayılanı</value>
   </data>
+  <data name="Authenticator QR code" xml:space="preserve">
+    <value>Kimlik doğrulayıcı QR kodu</value>
+  </data>
+  <data name="Back to account" xml:space="preserve">
+    <value>Hesabıma dön</value>
+  </data>
+  <data name="Change password" xml:space="preserve">
+    <value>Şifre değiştir</value>
+  </data>
+  <data name="Don't ask again on this device" xml:space="preserve">
+    <value>Bu cihazda tekrar sorma</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Tamam</value>
+  </data>
+  <data name="Email confirmation" xml:space="preserve">
+    <value>E-posta onayı</value>
+  </data>
+  <data name="Enter the 6-digit code the app shows to finish." xml:space="preserve">
+    <value>Bitirmek için uygulamanın gösterdiği 6 haneli kodu girin.</value>
+  </data>
+  <data name="Enter the code from your authenticator app to finish signing in." xml:space="preserve">
+    <value>Girişi tamamlamak için kimlik doğrulayıcı uygulamanızdaki kodu girin.</value>
+  </data>
+  <data name="Generate new recovery codes" xml:space="preserve">
+    <value>Yeni kurtarma kodları oluştur</value>
+  </data>
+  <data name="Go to my account" xml:space="preserve">
+    <value>Hesabıma git</value>
+  </data>
+  <data name="Install an authenticator app such as Google Authenticator or Microsoft Authenticator." xml:space="preserve">
+    <value>Google Authenticator veya Microsoft Authenticator gibi bir kimlik doğrulayıcı uygulama yükleyin.</value>
+  </data>
+  <data name="Protect your account with a code from an authenticator app (Google Authenticator, Microsoft Authenticator, and others) each time you sign in." xml:space="preserve">
+    <value>Her girişte bir kimlik doğrulayıcı uygulamadan (Google Authenticator, Microsoft Authenticator ve diğerleri) gelen kodla hesabınızı koruyun.</value>
+  </data>
+  <data name="Recovery codes" xml:space="preserve">
+    <value>Kurtarma kodları</value>
+  </data>
+  <data name="Save these codes somewhere safe. Each one lets you sign in once if you lose access to your authenticator app. They won't be shown again." xml:space="preserve">
+    <value>Bu kodları güvenli bir yerde saklayın. Kimlik doğrulayıcı uygulamanıza erişiminizi kaybederseniz her biri bir kez giriş yapmanızı sağlar. Bir daha gösterilmeyecekler.</value>
+  </data>
+  <data name="Scan this QR code with the app, or enter the key by hand:" xml:space="preserve">
+    <value>Bu QR kodunu uygulamayla tarayın veya anahtarı elle girin:</value>
+  </data>
+  <data name="Security" xml:space="preserve">
+    <value>Güvenlik</value>
+  </data>
+  <data name="Set a password" xml:space="preserve">
+    <value>Şifre belirleyin</value>
+  </data>
+  <data name="Set up authenticator app" xml:space="preserve">
+    <value>Kimlik doğrulayıcı uygulamayı kur</value>
+  </data>
+  <data name="Setup key" xml:space="preserve">
+    <value>Kurulum anahtarı</value>
+  </data>
+  <data name="Thanks — your email address is now verified." xml:space="preserve">
+    <value>Teşekkürler — e-posta adresiniz artık doğrulandı.</value>
+  </data>
+  <data name="The link may have expired or already been used. Sign in and send yourself a new one." xml:space="preserve">
+    <value>Bağlantının süresi dolmuş ya da daha önce kullanılmış olabilir. Giriş yapıp kendinize yenisini gönderin.</value>
+  </data>
+  <data name="Turn off" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Turn off two-step verification?" xml:space="preserve">
+    <value>İki adımlı doğrulama kapatılsın mı?</value>
+  </data>
+  <data name="Two-step verification" xml:space="preserve">
+    <value>İki adımlı doğrulama</value>
+  </data>
+  <data name="Two-step verification is on for your account." xml:space="preserve">
+    <value>Hesabınızda iki adımlı doğrulama açık.</value>
+  </data>
+  <data name="Verify and turn on" xml:space="preserve">
+    <value>Doğrula ve aç</value>
+  </data>
+  <data name="You have no recovery codes left. Generate a new set so you don't get locked out." xml:space="preserve">
+    <value>Hiç kurtarma kodunuz kalmadı. Dışarıda kalmamak için yeni bir set oluşturun.</value>
+  </data>
+  <data name="You have {0} recovery codes left." xml:space="preserve">
+    <value>{0} kurtarma kodunuz kaldı.</value>
+  </data>
+  <data name="You signed up with Google. Set a password to also sign in with your email address." xml:space="preserve">
+    <value>Google ile kaydoldunuz. E-posta adresinizle de giriş yapabilmek için bir şifre belirleyin.</value>
+  </data>
+  <data name="Your email is confirmed" xml:space="preserve">
+    <value>E-postanız onaylandı</value>
+  </data>
+  <data name="A password is set." xml:space="preserve">
+    <value>Bir şifre belirlenmiş.</value>
+  </data>
+  <data name="Add a code from an authenticator app at sign-in." xml:space="preserve">
+    <value>Girişte kimlik doğrulayıcı uygulamadan bir kod ekleyin.</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Değiştir</value>
+  </data>
+  <data name="Development only — no email is actually sent. Confirm using this link:" xml:space="preserve">
+    <value>Yalnızca geliştirme — gerçekte e-posta gönderilmez. Şu bağlantıyla onaylayın:</value>
+  </data>
+  <data name="Email address" xml:space="preserve">
+    <value>E-posta adresi</value>
+  </data>
+  <data name="Manage" xml:space="preserve">
+    <value>Yönet</value>
+  </data>
+  <data name="No password yet — you sign in with Google." xml:space="preserve">
+    <value>Henüz şifre yok — Google ile giriş yapıyorsunuz.</value>
+  </data>
+  <data name="Not verified" xml:space="preserve">
+    <value>Doğrulanmadı</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>Açık</value>
+  </data>
+  <data name="Set password" xml:space="preserve">
+    <value>Şifre belirle</value>
+  </data>
+  <data name="Verified" xml:space="preserve">
+    <value>Doğrulandı</value>
+  </data>
+  <data name="Verify" xml:space="preserve">
+    <value>Doğrula</value>
+  </data>
+  <data name="Here are your new recovery codes." xml:space="preserve">
+    <value>Yeni kurtarma kodlarınız aşağıda.</value>
+  </data>
+  <data name="Two-step verification is off." xml:space="preserve">
+    <value>İki adımlı doğrulama kapatıldı.</value>
+  </data>
+  <data name="Two-step verification is on." xml:space="preserve">
+    <value>İki adımlı doğrulama açıldı.</value>
+  </data>
+  <data name="We've sent a verification link to your email address." xml:space="preserve">
+    <value>E-posta adresinize bir doğrulama bağlantısı gönderdik.</value>
+  </data>
+  <data name="Your email address is already verified." xml:space="preserve">
+    <value>E-posta adresiniz zaten doğrulanmış.</value>
+  </data>
+  <data name="Your password has been changed." xml:space="preserve">
+    <value>Şifreniz değiştirildi.</value>
+  </data>
+  <data name="Your password has been set." xml:space="preserve">
+    <value>Şifreniz belirlendi.</value>
+  </data>
+  <data name="Confirm my email" xml:space="preserve">
+    <value>E-postamı onayla</value>
+  </data>
+  <data name="Confirm your email address" xml:space="preserve">
+    <value>E-posta adresinizi onaylayın</value>
+  </data>
+  <data name="Current password is required." xml:space="preserve">
+    <value>Mevcut şifre gereklidir.</value>
+  </data>
+  <data name="Please confirm your account by clicking the link below:" xml:space="preserve">
+    <value>Lütfen aşağıdaki bağlantıya tıklayarak hesabınızı onaylayın:</value>
+  </data>
+  <data name="That code isn't right. Try the current one from your app." xml:space="preserve">
+    <value>Bu kod doğru değil. Uygulamanızdaki güncel kodu deneyin.</value>
+  </data>
+  <data name="Current password" xml:space="preserve">
+    <value>Mevcut şifre</value>
+  </data>
+  <data name="New password" xml:space="preserve">
+    <value>Yeni şifre</value>
+  </data>
+  <data name="Confirm new password" xml:space="preserve">
+    <value>Yeni şifreyi onayla</value>
+  </data>
+  <data name="Verification code" xml:space="preserve">
+    <value>Doğrulama kodu</value>
+  </data>
+  <data name="Authenticator code" xml:space="preserve">
+    <value>Kimlik doğrulayıcı kodu</value>
+  </data>
 </root>

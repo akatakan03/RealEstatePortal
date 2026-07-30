@@ -42,7 +42,10 @@ public class ProfileController : Controller
             PreferredCulture = user.PreferredCulture,
             Roles = roles,
             IsAgent = roles.Contains(Roles.Agent),
-            IsAdmin = roles.Contains(Roles.Admin)
+            IsAdmin = roles.Contains(Roles.Admin),
+            EmailConfirmed = user.EmailConfirmed,
+            TwoFactorEnabled = user.TwoFactorEnabled,
+            HasPassword = await _userManager.HasPasswordAsync(user)
         });
     }
 

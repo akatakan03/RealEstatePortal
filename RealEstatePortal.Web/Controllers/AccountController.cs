@@ -108,16 +108,54 @@ public class AccountController : Controller
             model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
         if (result.Succeeded)
-        {
-            if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                return Redirect(model.ReturnUrl);
+            return RedirectToLocalOrHome(model.ReturnUrl);
 
-            return RedirectToAction("Index", "Home");
-        }
+        // Password checked out but the account has two-step on: finish at the code page. The
+        // primary cookie isn't issued yet — SignInManager holds a short-lived two-factor state.
+        if (result.RequiresTwoFactor)
+            return RedirectToAction(nameof(LoginWith2fa),
+                new { returnUrl = model.ReturnUrl, rememberMe = model.RememberMe });
 
         // Deliberately vague: saying which half was wrong tells someone probing the site
         // whether an address has an account here.
         ModelState.AddModelError(string.Empty, _localizer["That email address or password is not correct."]);
+        return View(model);
+    }
+
+    // Second step of a password sign-in when two-step verification is on.
+    [HttpGet]
+    public async Task<IActionResult> LoginWith2fa(bool rememberMe, string? returnUrl = null)
+    {
+        // Must have a pending two-factor sign-in from the password step; otherwise start over.
+        var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+        if (user is null)
+            return RedirectToAction(nameof(Login));
+
+        return View(new LoginWith2faViewModel { RememberMe = rememberMe, ReturnUrl = returnUrl });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("auth")]
+    public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model)
+    {
+        var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+        if (user is null)
+            return RedirectToAction(nameof(Login));
+
+        if (!ModelState.IsValid)
+            return View(model);
+
+        // People paste the code with spaces or dashes; the token itself has neither.
+        var code = model.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+        var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(
+            code, model.RememberMe, model.RememberMachine);
+
+        if (result.Succeeded)
+            return RedirectToLocalOrHome(model.ReturnUrl);
+
+        ModelState.AddModelError(nameof(model.Code), _localizer["That code isn't right. Try the current one from your app."]);
         return View(model);
     }
 

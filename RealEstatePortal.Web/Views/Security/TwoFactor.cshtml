@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = L["Two-step verification"].Value;
+    var enabled = (bool)(ViewData["TwoFactorEnabled"] ?? false);
+    var recoveryLeft = (int)(ViewData["RecoveryCodesLeft"] ?? 0);
+}
+
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell narrow">
+            <span class="eyebrow">@L["Security"]</span>
+            <h1 class="page-title" style="margin-bottom:1.5rem;">@L["Two-step verification"]</h1>
+
+            @if (TempData["ProfileSaved"] is string ok)
+            {
+                <div class="alert alert-success">@L[ok]</div>
+            }
+
+            <div class="form-card">
+                @if (enabled)
+                {
+                    <p class="sec-sub sec-ok" style="margin-bottom:1rem;">✓ @L["Two-step verification is on for your account."]</p>
+
+                    @if (recoveryLeft == 0)
+                    {
+                        <div class="alert alert-danger">@L["You have no recovery codes left. Generate a new set so you don't get locked out."]</div>
+                    }
+                    else if (recoveryLeft <= 3)
+                    {
+                        <div class="alert alert-info">@L["You have {0} recovery codes left.", recoveryLeft]</div>
+                    }
+
+                    <div class="profile-links" style="margin-top:1rem;">
+                        <form asp-action="GenerateRecoveryCodes" method="post">
+                            <button type="submit" class="btn btn-ghost">@L["Generate new recovery codes"]</button>
+                        </form>
+                        <form asp-action="Disable2fa" method="post"
+                              onsubmit="return confirm('@L["Turn off two-step verification?"]');">
+                            <button type="submit" class="btn btn-ghost">@L["Turn off"]</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <p class="form-hint" style="margin-bottom:1rem;">@L["Protect your account with a code from an authenticator app (Google Authenticator, Microsoft Authenticator, and others) each time you sign in."]</p>
+                    <a class="btn btn-primary" asp-action="EnableAuthenticator">@L["Set up authenticator app"]</a>
+                }
+
+                <div style="margin-top:1.25rem;">
+                    <a asp-controller="Profile" asp-action="Index" class="btn btn-ghost btn-sm">@L["Back to account"]</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

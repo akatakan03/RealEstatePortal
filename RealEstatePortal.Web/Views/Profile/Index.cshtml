@@ -21,6 +21,16 @@
             <div class="alert alert-success">@L[ok]</div>
         }
 
+        @* In development there is no SMTP host, so a freshly sent confirmation link is shown here
+           to make the flow walkable. In production the link only ever arrives by email. *@
+        @if (TempData["DevConfirmLink"] is string devLink)
+        {
+            <div class="alert alert-info">
+                @L["Development only — no email is actually sent. Confirm using this link:"]
+                <br><a href="@devLink">@devLink</a>
+            </div>
+        }
+
         <div class="profile-grid">
             <div class="form-card profile-card">
                 <div class="avatar-lg">
@@ -57,6 +67,54 @@
                         <dt>@L["Notification language"]</dt>
                         <dd>@SupportedCultures.NameOf(Model.PreferredCulture ?? SupportedCultures.Default)</dd>
                     </dl>
+                </div>
+
+                <div class="form-card" style="margin-bottom:1.5rem;">
+                    <h3 class="profile-h3">@L["Security"]</h3>
+                    <ul class="sec-list">
+                        <li class="sec-row">
+                            <div>
+                                <span class="sec-title">@L["Password"]</span>
+                                <span class="sec-sub">@(Model.HasPassword ? L["A password is set."] : L["No password yet — you sign in with Google."])</span>
+                            </div>
+                            <a class="btn btn-ghost btn-sm" asp-controller="Security" asp-action="ChangePassword">
+                                @(Model.HasPassword ? L["Change"] : L["Set password"])
+                            </a>
+                        </li>
+                        <li class="sec-row">
+                            <div>
+                                <span class="sec-title">@L["Email address"]</span>
+                                @if (Model.EmailConfirmed)
+                                {
+                                    <span class="sec-sub sec-ok">✓ @L["Verified"]</span>
+                                }
+                                else
+                                {
+                                    <span class="sec-sub sec-warn">@L["Not verified"]</span>
+                                }
+                            </div>
+                            @if (!Model.EmailConfirmed)
+                            {
+                                <form asp-controller="Security" asp-action="SendVerificationEmail" method="post">
+                                    <button type="submit" class="btn btn-ghost btn-sm">@L["Verify"]</button>
+                                </form>
+                            }
+                        </li>
+                        <li class="sec-row">
+                            <div>
+                                <span class="sec-title">@L["Two-step verification"]</span>
+                                @if (Model.TwoFactorEnabled)
+                                {
+                                    <span class="sec-sub sec-ok">✓ @L["On"]</span>
+                                }
+                                else
+                                {
+                                    <span class="sec-sub">@L["Add a code from an authenticator app at sign-in."]</span>
+                                }
+                            </div>
+                            <a class="btn btn-ghost btn-sm" asp-controller="Security" asp-action="TwoFactor">@L["Manage"]</a>
+                        </li>
+                    </ul>
                 </div>
 
                 <div class="form-card">

@@ -1,0 +1,27 @@
+@model string[]
+@{
+    ViewData["Title"] = L["Recovery codes"].Value;
+}
+
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell narrow">
+            <span class="eyebrow">@L["Security"]</span>
+            <h1 class="page-title" style="margin-bottom:1rem;">@L["Recovery codes"]</h1>
+
+            <div class="alert alert-info">@L["Save these codes somewhere safe. Each one lets you sign in once if you lose access to your authenticator app. They won't be shown again."]</div>
+
+            <div class="form-card">
+                <ul class="recovery-codes">
+                    @foreach (var code in Model)
+                    {
+                        <li><code>@code</code></li>
+                    }
+                </ul>
+                <div style="margin-top:1.25rem;">
+                    <a asp-action="TwoFactor" class="btn btn-primary">@L["Done"]</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

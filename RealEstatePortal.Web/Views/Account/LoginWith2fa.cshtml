@@ -1,0 +1,40 @@
+@model RealEstatePortal.Web.Models.Account.LoginWith2faViewModel
+@{
+    ViewData["Title"] = L["Two-step verification"].Value;
+}
+
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell narrow">
+            <div class="auth-lead">
+                <h1>@L["Two-step verification"]</h1>
+                <p>@L["Enter the code from your authenticator app to finish signing in."]</p>
+            </div>
+            <div class="form-card">
+                <form asp-action="LoginWith2fa" method="post">
+                    <input type="hidden" asp-for="RememberMe" />
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:1rem;"></div>
+
+                    <div class="mb-field">
+                        <label asp-for="Code" class="form-label"></label>
+                        <input asp-for="Code" class="form-control" autocomplete="off" inputmode="numeric" placeholder="123456" autofocus />
+                        <span asp-validation-for="Code" class="text-danger"></span>
+                    </div>
+                    <div class="mb-field check-field">
+                        <label class="check-row">
+                            <input asp-for="RememberMachine" />
+                            <span>@L["Don't ask again on this device"]</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%;">@L["Sign in"]</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

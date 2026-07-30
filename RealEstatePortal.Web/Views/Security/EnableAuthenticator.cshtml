@@ -1,0 +1,47 @@
+@model RealEstatePortal.Web.Models.Account.EnableAuthenticatorViewModel
+@{
+    ViewData["Title"] = L["Set up authenticator app"].Value;
+}
+
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell narrow">
+            <span class="eyebrow">@L["Security"]</span>
+            <h1 class="page-title" style="margin-bottom:1.5rem;">@L["Set up authenticator app"]</h1>
+
+            <div class="form-card">
+                <ol class="setup-steps">
+                    <li>@L["Install an authenticator app such as Google Authenticator or Microsoft Authenticator."]</li>
+                    <li>
+                        @L["Scan this QR code with the app, or enter the key by hand:"]
+                        <div class="qr-wrap">
+                            <img src="@Model.QrCodeDataUri" alt="@L["Authenticator QR code"]" width="180" height="180" />
+                            <div class="qr-key">
+                                <span class="sec-sub">@L["Setup key"]</span>
+                                <code>@Model.SharedKey</code>
+                            </div>
+                        </div>
+                    </li>
+                    <li>@L["Enter the 6-digit code the app shows to finish."]</li>
+                </ol>
+
+                <form asp-action="EnableAuthenticator" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:1rem;"></div>
+                    <div class="mb-field">
+                        <label asp-for="Code" class="form-label"></label>
+                        <input asp-for="Code" class="form-control" autocomplete="off" inputmode="numeric" placeholder="123456" />
+                        <span asp-validation-for="Code" class="text-danger"></span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">@L["Verify and turn on"]</button>
+                        <a asp-action="TwoFactor" class="btn btn-ghost">@L["Cancel"]</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

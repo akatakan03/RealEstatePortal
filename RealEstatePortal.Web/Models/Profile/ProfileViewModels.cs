@@ -17,6 +17,11 @@ public class ProfileHubViewModel
     public string? PreferredCulture { get; set; }
     public bool IsAgent { get; set; }
     public bool IsAdmin { get; set; }
+
+    // Security summary shown on the account hub.
+    public bool EmailConfirmed { get; set; }
+    public bool TwoFactorEnabled { get; set; }
+    public bool HasPassword { get; set; }
 }
 
 public class EditProfileViewModel

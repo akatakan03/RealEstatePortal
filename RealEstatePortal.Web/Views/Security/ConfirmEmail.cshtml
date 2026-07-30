@@ -1,0 +1,28 @@
+@model bool
+@{
+    ViewData["Title"] = L["Email confirmation"].Value;
+}
+
+<div class="form-page">
+    <div class="container">
+        <div class="form-shell narrow">
+            <div class="form-card" style="text-align:center;">
+                @if (Model)
+                {
+                    <div class="confirm-icon sec-ok">✓</div>
+                    <h1 class="page-title">@L["Your email is confirmed"]</h1>
+                    <p class="form-hint">@L["Thanks — your email address is now verified."]</p>
+                }
+                else
+                {
+                    <div class="confirm-icon sec-warn">!</div>
+                    <h1 class="page-title">@L["We couldn't confirm your email"]</h1>
+                    <p class="form-hint">@L["The link may have expired or already been used. Sign in and send yourself a new one."]</p>
+                }
+                <div style="margin-top:1.25rem;">
+                    <a asp-controller="Profile" asp-action="Index" class="btn btn-primary">@L["Go to my account"]</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

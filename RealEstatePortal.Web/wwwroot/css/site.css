@@ -4273,3 +4273,96 @@ textarea.form-control {
         display: none
     }
 }
+
+/* ----- Account security ----- */
+.sec-list {
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+
+.sec-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .85rem 0;
+    border-bottom: 1px solid var(--line)
+}
+
+    .sec-row:last-child {
+        border-bottom: none
+    }
+
+.sec-title {
+    display: block;
+    font-weight: 600
+}
+
+.sec-sub {
+    display: block;
+    font-size: .85rem;
+    color: var(--muted)
+}
+
+.sec-ok {
+    color: #1a7f4b
+}
+
+.sec-warn {
+    color: #b45309
+}
+
+.qr-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin: .75rem 0
+}
+
+    .qr-wrap img {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff
+    }
+
+.qr-key code {
+    font-size: 1.05rem;
+    letter-spacing: .05em
+}
+
+.setup-steps {
+    padding-left: 1.2rem;
+    margin: 0 0 1.25rem;
+    line-height: 1.7
+}
+
+    .setup-steps li {
+        margin-bottom: .4rem
+    }
+
+.recovery-codes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: .5rem
+}
+
+    .recovery-codes code {
+        display: block;
+        padding: .5rem .7rem;
+        background: var(--surface-2, #f5f3ee);
+        border-radius: 6px;
+        text-align: center;
+        letter-spacing: .08em
+    }
+
+.confirm-icon {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: .5rem
+}
