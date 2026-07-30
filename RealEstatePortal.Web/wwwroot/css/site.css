@@ -321,7 +321,8 @@ img {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: none
+    flex: none;
+    object-fit: cover
 }
 
 .user-name {

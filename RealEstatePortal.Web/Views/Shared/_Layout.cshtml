@@ -60,10 +60,9 @@
                 @if (User.Identity is not null && User.Identity.IsAuthenticated)
                 {
                     var displayName = User.Identity.Name ?? L["Account"].Value;
-                    var initial = string.IsNullOrWhiteSpace(displayName) ? "?" : displayName.Trim()[..1].ToUpperInvariant();
                     <div class="user-menu" data-user-menu>
                         <button type="button" class="user-trigger" data-user-menu-trigger aria-haspopup="true" aria-expanded="false">
-                            <span class="user-avatar" aria-hidden="true">@initial</span>
+                            @await Component.InvokeAsync("UserAvatar")
                             <span class="user-name">@displayName</span>
                             <span class="user-caret" aria-hidden="true">▾</span>
                         </button>

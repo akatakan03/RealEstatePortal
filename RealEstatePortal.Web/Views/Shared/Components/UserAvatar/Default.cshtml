@@ -1,0 +1,12 @@
+@model RealEstatePortal.Web.ViewComponents.UserAvatarModel
+@{
+    var initial = string.IsNullOrWhiteSpace(Model.Name) ? "?" : Model.Name.Trim()[..1].ToUpperInvariant();
+}
+@if (Model.AvatarUrl is not null)
+{
+    <img class="user-avatar" src="@Model.AvatarUrl" alt="" aria-hidden="true" />
+}
+else
+{
+    <span class="user-avatar" aria-hidden="true">@initial</span>
+}
